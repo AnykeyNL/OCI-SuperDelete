@@ -22,29 +22,33 @@ for compartment in compartments:
         processCompartments.append(compartment)
         print (compartment.name)
 
+
 confirm = input ("\ntype yes to delete all contents from these compartments: ")
 
 if confirm == "yes":
 
-    print ("\n--[ Deleting Edge Services ]--")
-    DeleteWAFs(config,processCompartments)
-    DeleteHTTPHealthchecks(config, processCompartments)
-    DeletePINGHealthchecks(config, processCompartments)
-    DeleteTrafficSteerings(config, processCompartments)
-    DeleteZones(config, processCompartments)
+    # print ("\n--[ Deleting Edge Services ]--")
+    # DeleteWAFs(config,processCompartments)
+    # DeleteHTTPHealthchecks(config, processCompartments)
+    # DeletePINGHealthchecks(config, processCompartments)
+    # DeleteTrafficSteerings(config, processCompartments)
+    # DeleteZones(config, processCompartments)
+    #
+    # print ("\n--[ Deleting Object Storage ]--")
+    # DeleteBuckets(config, processCompartments)
+    #
+    # print ("\n--[ Deleting Compute Instances ]--")
+    # DeleteInstancePools(config,processCompartments)
+    # DeleteInstanceConfigs(config, processCompartments)
+    # DeleteInstances(config,processCompartments)
+    # DeleteImages(config, processCompartments)
+    #
+    # print ("\n--[ Deleting Database Instances ]--")
+    # DeleteDBCS(config,processCompartments)
+    # DeleteAutonomousDB(config,processCompartments)
 
-    print ("\n--[ Deleting Object Storage ]--")
-    DeleteBuckets(config, processCompartments)
-
-    print ("\n--[ Deleting Compute Instances ]--")
-    DeleteInstancePools(config,processCompartments)
-    DeleteInstanceConfigs(config, processCompartments)
-    DeleteInstances(config,processCompartments)
-    DeleteImages(config, processCompartments)
-
-    print ("\n--[ Deleting Database Instances ]--")
-    DeleteDBCS(config,processCompartments)
-    DeleteAutonomousDB(config,processCompartments)
+    print ("\n--[ Deleting Block Volumes ]--")
+    DeleteVolumes(config, processCompartments)
 
 
 

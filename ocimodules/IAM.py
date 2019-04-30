@@ -5,7 +5,14 @@ def Login(config, startcomp):
     user = identity.get_user(config["user"]).data
     RootCompartmentID = user.compartment_id
     print("Logged in as: {} @ {}".format(user.description, config["region"]))
+
+    # Add first level subcompartments
     compartments = identity.list_compartments(compartment_id=startcomp).data
+
+    # Add start compartment to list
+    compartment = identity.get_compartment(compartment_id=startcomp).data
+    compartments.append(compartment)
+
     return compartments
 
 

@@ -129,3 +129,41 @@ def DeleteImages(config, Compartments):
     print("All Objects deleted!")
 
 
+def DeleteVolumes(config, Compartments):
+    AllItems = []
+    object = oci.core.BlockstorageClient(config)
+
+    print ("Getting all Compute objects")
+    for Compartment in Compartments:
+        items = oci.pagination.list_call_get_all_results(object.list_volumes, compartment_id=Compartment.id).data
+        for item in items:
+            if (item.lifecycle_state != "TERMINATED"):
+                AllItems.append(item)
+                print("- {} - {}".format(item.display_name, item.lifecycle_state))
+
+    itemsPresent = True
+
+    while itemsPresent:
+        count = 0
+        for item in AllItems:
+            try:
+                itemstatus = object.get_volume(volume_id=item.id).data
+                if itemstatus.lifecycle_state != "TERMINATED":
+                    if itemstatus.lifecycle_state != "TERMINATING":
+                        try:
+                            print ("Deleting: {}".format(itemstatus.display_name))
+                            object.delete_volume(volume_id=itemstatus.id)
+                        except:
+                            print ("error trying to delete: {}".format(itemstatus.display_name))
+                    else:
+                        print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
+                    count = count + 1
+            except:
+                print ("error deleting {}, probably already deleted".format(item.display_name))
+        if count > 0 :
+            print ("Waiting for all Objects to be deleted...")
+            time.sleep(WaitRefresh)
+        else:
+            itemsPresent = False
+    print ("All Objects deleted!")
+
