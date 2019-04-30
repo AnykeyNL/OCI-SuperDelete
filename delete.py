@@ -4,7 +4,8 @@ from ocimodules.EdgeServices import *
 from ocimodules.ObjectStorage import *
 from ocimodules.Instances import *
 from ocimodules.Database import *
-from ocimodules.IAM import *  
+from ocimodules.IAM import *
+from ocimodules.VCN import *
 
 configfile = "~/.oci/config"
 DeleteCompartmentOCID = "ocid1.compartment.oc1..aaaaaaaa456vlgfybg2obpz7hrwjrqcyzme5mtgtqcetgt4tl2bs3kubmmea"
@@ -46,10 +47,15 @@ if confirm == "yes":
     # print ("\n--[ Deleting Database Instances ]--")
     # DeleteDBCS(config,processCompartments)
     # DeleteAutonomousDB(config,processCompartments)
+    #
+    # print ("\n--[ Deleting Block Volumes ]--")
+    # DeleteVolumes(config, processCompartments)
 
-    print ("\n--[ Deleting Block Volumes ]--")
-    DeleteVolumes(config, processCompartments)
+    print ("\n--[ Deleting VCNs ]--")
+    DeleteVCN(config, processCompartments)
 
+    # print ("\n--[ Hopefully deleting compartments, if empty ]--")
+    #DeleteCompartments(config,processCompartments, DeleteCompartmentOCID)
 
 
 

@@ -1,4 +1,5 @@
 import oci
+import time
 
 def Login(config, startcomp):
     identity = oci.identity.IdentityClient(config)
@@ -51,4 +52,25 @@ def DeleteTagNameSpaces(config, compartments):
         else:
             itemsPresent = False
     print ("All Objects deleted!")
+
+def DeleteCompartments(config, compartments, startcomp):
+
+    object = oci.identity.IdentityClient(config)
+    for Compartment in compartments:
+        if Compartment.id != startcomp:
+            retry = True
+            while retry:
+                retry = False
+                try:
+                    object.delete_compartment(compartment_id=Compartment.id)
+                    print ("Deleted compartment: {}".format(Compartment.name))
+                except Exception as e:
+                    if e.status == 429:
+                        print ("Delaying.. api calls")
+                        time.sleep(10)
+                        retry = True
+
+
+
+
 
