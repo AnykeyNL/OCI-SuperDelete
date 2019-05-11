@@ -31,6 +31,22 @@ def DeleteObjects(config, bucket):
     np = ""
 
     while more:
+        result = object.list_preauthenticated_requests(namespace_name=bucket.namespace, bucket_name=bucket.name, limit=objectlimit)
+        items = result.data
+        for item in items:
+            print ("Deleting {}:{}".format(bucket.name, item.name))
+            object.delete_preauthenticated_request(namespace_name=bucket.namespace, bucket_name=bucket.name, par_id=item.id)
+
+        if len(items) == objectlimit:
+            more = True
+        else:
+            more = False
+
+
+
+    more = True
+
+    while more:
         result = object.list_objects(namespace_name=bucket.namespace, bucket_name=bucket.name, limit=objectlimit)
         items = result.data.objects
 

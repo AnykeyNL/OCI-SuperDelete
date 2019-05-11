@@ -8,7 +8,7 @@ def Login(config, startcomp):
     print("Logged in as: {} @ {}".format(user.description, config["region"]))
 
     # Add first level subcompartments
-    compartments = identity.list_compartments(compartment_id=startcomp).data
+    compartments = oci.pagination.list_call_get_all_results(identity.list_compartments, compartment_id=startcomp).data
 
     # Add start compartment to list
     compartment = identity.get_compartment(compartment_id=startcomp).data

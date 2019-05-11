@@ -84,7 +84,8 @@ def DeleteInstances(config, Compartments):
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
             except:
-                print ("error deleting {}, probably already deleted".format(item.display_name))
+
+                print ("-----------------> error deleting {}, probably already deleted: {}".format(item.display_name, item.lifecycle_state))
         if count > 0 :
             print ("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
@@ -100,7 +101,7 @@ def DeleteImages(config, Compartments):
     for Compartment in Compartments:
         items = oci.pagination.list_call_get_all_results(object.list_images, compartment_id=Compartment.id).data
         for item in items:
-            if item.operating_system_version == "Custom":
+            if item.operating_system_version == "Custom" or item.base_image_id:
                 AllItems.append(item)
 
     itemsPresent = True

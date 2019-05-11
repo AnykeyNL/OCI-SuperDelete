@@ -9,21 +9,43 @@ def DeleteVCN(config,compartments):
 
     print ("Getting all VCN objects")
     for Compartment in compartments:
+        DeleteLoadBalancers(config, Compartment)
+        DeleteReservedIPs(config, Compartment)
+
         items = oci.pagination.list_call_get_all_results(object.list_vcns, compartment_id=Compartment.id).data
         for item in items:
-            if (item.lifecycle_state != "TERMINATED"):
+              if (item.lifecycle_state != "TERMINATED"):
                 AllItems.append(item)
                 print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
         for item in AllItems:
             print ("----[ Deleting components of VCN: {} ]---".format(item.display_name))
-            DeleteLoadBalancers(config, Compartment)
-            DeleteReservedIPs(config, Compartment)
-
             DeleteSubnets(config,Compartment, item)
             DeleteDHCPoptions(config,Compartment, item)
             DeleteSecurityLists(config, Compartment, item)
             DeleteRouteTables(config, Compartment, item)
+            DeleteInternetGateways(config, Compartment, item)
+
+        DeleteDRGs(config, Compartment)
+
+    print ("Getting all VCNs")
+    deleting = True
+    while deleting:
+        deleting = False
+        for Compartment in compartments:
+            items = oci.pagination.list_call_get_all_results(object.list_vcns, compartment_id=Compartment.id).data
+            for item in items:
+                if (item.lifecycle_state != "TERMINATED"):
+                    deleting = True
+                    AllItems.append(item)
+                    print("- {} - {}".format(item.display_name, item.lifecycle_state))
+                    if (item.lifecycle_state != "TERMINATING"):
+                        object.delete_vcn(vcn_id=item.id)
+
+
+
+
+
 
 
 
@@ -151,6 +173,12 @@ def DeleteRouteTables(config, compartment, vcn):
     for item in items:
         if (item.lifecycle_state != "TERMINATED"):
             AllItems.append(item)
+            details = oci.core.models.UpdateRouteTableDetails()
+            details.route_rules = []
+
+            print ("Emptying route table for {}".format(item.display_name))
+            result = object.update_route_table(rt_id=item.id, update_route_table_details=details)
+
         print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
@@ -319,3 +347,80 @@ def DeleteReservedIPs(config, compartment):
 
     print("All Objects deleted!")
 
+def DeleteInternetGateways(config, compartment, vcn):
+    AllItems = []
+    object = oci.core.VirtualNetworkClient(config)
+
+    print("Getting all Reserved IP objects")
+    items = oci.pagination.list_call_get_all_results(object.list_internet_gateways,compartment_id=compartment.id, vcn_id=vcn.id).data
+
+    for item in items:
+        if (item.lifecycle_state != "TERMINATED"):
+            AllItems.append(item)
+        print("- {} - {}".format(item.display_name, item.lifecycle_state))
+
+    itemsPresent = True
+
+    if itemsPresent:
+        count = 0
+        for item in AllItems:
+            try:
+                itemstatus = object.get_internet_gateway(ig_id=item.id).data
+                if itemstatus.lifecycle_state != "TERMINATED":
+                    if itemstatus.lifecycle_state != "TERMINATING":
+                        try:
+                            print("Deleting: {}".format(itemstatus.display_name))
+                            object.delete_internet_gateway(ig_id=itemstatus.id)
+                        except:
+                            print("error trying to delete: {}".format(itemstatus.display_name))
+                    else:
+                        print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
+                    count = count + 1
+            except:
+                print("error deleting {}, probably already deleted".format(item.display_name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
+            time.sleep(WaitRefresh)
+        else:
+            itemsPresent = False
+
+    print("All Objects deleted!")
+
+def DeleteDRGs(config, compartment):
+    AllItems = []
+    object = oci.core.VirtualNetworkClient(config)
+
+    print("Getting all DRG objects")
+    items = oci.pagination.list_call_get_all_results(object.list_drgs,compartment_id=compartment.id).data
+
+    for item in items:
+        if (item.lifecycle_state != "TERMINATED"):
+            AllItems.append(item)
+        print("- {} - {}".format(item.display_name, item.lifecycle_state))
+
+    itemsPresent = True
+
+    if itemsPresent:
+        count = 0
+        for item in AllItems:
+            try:
+                itemstatus = object.get_drg(drg_id=item.id).data
+                if itemstatus.lifecycle_state != "TERMINATED":
+                    if itemstatus.lifecycle_state != "TERMINATING":
+                        try:
+                            print("Deleting: {}".format(itemstatus.display_name))
+                            object.delete_drg(drg_id=itemstatus.id)
+                        except:
+                            print("error trying to delete: {}".format(itemstatus.display_name))
+                    else:
+                        print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
+                    count = count + 1
+            except:
+                print("error deleting {}, probably already deleted".format(item.display_name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
+            time.sleep(WaitRefresh)
+        else:
+            itemsPresent = False
+
+    print("All Objects deleted!")
