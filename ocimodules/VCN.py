@@ -25,6 +25,8 @@ def DeleteVCN(config,compartments):
             DeleteSecurityLists(config, Compartment, item)
             DeleteRouteTables(config, Compartment, item)
             DeleteInternetGateways(config, Compartment, item)
+            DeleteServiceGateways(config, Compartment, item)
+            DeleteNATGateways(config, Compartment, item)
 
         DeleteDRGs(config, Compartment)
 
@@ -351,7 +353,7 @@ def DeleteInternetGateways(config, compartment, vcn):
     AllItems = []
     object = oci.core.VirtualNetworkClient(config)
 
-    print("Getting all Reserved IP objects")
+    print("Getting all Internet Gateway objects")
     items = oci.pagination.list_call_get_all_results(object.list_internet_gateways,compartment_id=compartment.id, vcn_id=vcn.id).data
 
     for item in items:
@@ -371,6 +373,84 @@ def DeleteInternetGateways(config, compartment, vcn):
                         try:
                             print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_internet_gateway(ig_id=itemstatus.id)
+                        except:
+                            print("error trying to delete: {}".format(itemstatus.display_name))
+                    else:
+                        print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
+                    count = count + 1
+            except:
+                print("error deleting {}, probably already deleted".format(item.display_name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
+            time.sleep(WaitRefresh)
+        else:
+            itemsPresent = False
+
+    print("All Objects deleted!")
+
+def DeleteServiceGateways(config, compartment, vcn):
+    AllItems = []
+    object = oci.core.VirtualNetworkClient(config)
+
+    print("Getting all Service Gateway objects")
+    items = oci.pagination.list_call_get_all_results(object.list_service_gateways,compartment_id=compartment.id, vcn_id=vcn.id).data
+
+    for item in items:
+        if (item.lifecycle_state != "TERMINATED"):
+            AllItems.append(item)
+        print("- {} - {}".format(item.display_name, item.lifecycle_state))
+
+    itemsPresent = True
+
+    if itemsPresent:
+        count = 0
+        for item in AllItems:
+            try:
+                itemstatus = object.get_service_gateway(service_gateway_id=item.id).data
+                if itemstatus.lifecycle_state != "TERMINATED":
+                    if itemstatus.lifecycle_state != "TERMINATING":
+                        try:
+                            print("Deleting: {}".format(itemstatus.display_name))
+                            object.delete_service_gateway(service_gateway_id=itemstatus.id)
+                        except:
+                            print("error trying to delete: {}".format(itemstatus.display_name))
+                    else:
+                        print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
+                    count = count + 1
+            except:
+                print("error deleting {}, probably already deleted".format(item.display_name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
+            time.sleep(WaitRefresh)
+        else:
+            itemsPresent = False
+
+    print("All Objects deleted!")
+
+def DeleteNATGateways(config, compartment, vcn):
+    AllItems = []
+    object = oci.core.VirtualNetworkClient(config)
+
+    print("Getting all NAT Gateway objects")
+    items = oci.pagination.list_call_get_all_results(object.list_nat_gateways,compartment_id=compartment.id, vcn_id=vcn.id).data
+
+    for item in items:
+        if (item.lifecycle_state != "TERMINATED"):
+            AllItems.append(item)
+        print("- {} - {}".format(item.display_name, item.lifecycle_state))
+
+    itemsPresent = True
+
+    if itemsPresent:
+        count = 0
+        for item in AllItems:
+            try:
+                itemstatus = object.get_nat_gateway(nat_gateway_id=item.id).data
+                if itemstatus.lifecycle_state != "TERMINATED":
+                    if itemstatus.lifecycle_state != "TERMINATING":
+                        try:
+                            print("Deleting: {}".format(itemstatus.display_name))
+                            object.delete_nat_gateway(nat_gateway_id=itemstatus.id)
                         except:
                             print("error trying to delete: {}".format(itemstatus.display_name))
                     else:

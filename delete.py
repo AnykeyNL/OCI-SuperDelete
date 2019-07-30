@@ -7,8 +7,9 @@ from ocimodules.Database import *
 from ocimodules.IAM import *
 from ocimodules.VCN import *
 from ocimodules.BlockStorage import *
+from ocimodules.ResourceManager import *
 
-configfile = "~/.oci/config"
+configfile = "~/.oci/config_oractdemeaoci"
 DeleteCompartmentOCID = "ocid1.compartment.oc1..aaaaaaaa456vlgfybg2obpz7hrwjrqcyzme5mtgtqcetgt4tl2bs3kubmmea"
 config = oci.config.from_file(configfile)
 
@@ -56,6 +57,9 @@ if confirm == "yes":
         print ("\n--[ Deleting Database Instances ]--")
         DeleteDBCS(config,processCompartments)
         DeleteAutonomousDB(config,processCompartments)
+
+        print ("\n--[ Deleting Resource Manager Stacks ]--")
+        DeleteStacks(config, processCompartments)
 
         print ("\n--[ Deleting Block Volumes ]--")
         DeleteVolumes(config, processCompartments)
