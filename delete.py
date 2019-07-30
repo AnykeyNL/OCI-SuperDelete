@@ -8,6 +8,7 @@ from ocimodules.IAM import *
 from ocimodules.VCN import *
 from ocimodules.BlockStorage import *
 from ocimodules.ResourceManager import *
+from ocimodules.FileStorage import *
 
 configfile = "~/.oci/config_oractdemeaoci"
 DeleteCompartmentOCID = "ocid1.compartment.oc1..aaaaaaaa456vlgfybg2obpz7hrwjrqcyzme5mtgtqcetgt4tl2bs3kubmmea"
@@ -63,6 +64,11 @@ if confirm == "yes":
 
         print ("\n--[ Deleting Block Volumes ]--")
         DeleteVolumes(config, processCompartments)
+        DeleteBlockVolumesBackups(config, processCompartments)
+
+        print ("\n--[ Deleting FileSystem and Mount Targets ]--")
+        DeleteMountTargets(config, processCompartments)
+        DeleteFileStorage(config, processCompartments)
 
         print ("\n--[ Deleting VCNs ]--")
         DeleteVCN(config, processCompartments)
