@@ -10,8 +10,19 @@ from ocimodules.BlockStorage import *
 from ocimodules.ResourceManager import *
 from ocimodules.FileStorage import *
 
+########## Configuration ####################
+# Specify your config file
 configfile = "~/.oci/config_oractdemeaoci"
+
+# Specify the compartment OCID that you want to delete
 DeleteCompartmentOCID = "ocid1.compartment.oc1..aaaaaaaa456vlgfybg2obpz7hrwjrqcyzme5mtgtqcetgt4tl2bs3kubmmea"
+
+
+# Search for resources in regions:
+regions = ["eu-frankfurt-1", "uk-london-1", "us-ashburn-1"]
+#############################################
+
+
 config = oci.config.from_file(configfile)
 
 print ("\n--[ Login check and getting all compartments from starting compartment ]--")
@@ -28,8 +39,6 @@ for compartment in compartments:
 
 
 confirm = input ("\ntype yes to delete all contents from these compartments: ")
-
-regions = ["eu-frankfurt-1", "uk-london-1"]
 
 if confirm == "yes":
 
@@ -75,7 +84,7 @@ if confirm == "yes":
 
 
     print ("\n--[ Hopefully deleting compartments, if empty ]--")
-    config["region"] = "eu-frankfurt-1"
+    config["region"] = region
     DeleteCompartments(config,processCompartments, DeleteCompartmentOCID)
 
 
