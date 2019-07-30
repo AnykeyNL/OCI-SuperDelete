@@ -17,9 +17,11 @@ configfile = "~/.oci/config_oractdemeaoci"
 # Specify the compartment OCID that you want to delete
 DeleteCompartmentOCID = "ocid1.compartment.oc1..aaaaaaaa456vlgfybg2obpz7hrwjrqcyzme5mtgtqcetgt4tl2bs3kubmmea"
 
-
 # Search for resources in regions:
-regions = ["eu-frankfurt-1", "uk-london-1", "us-ashburn-1"]
+regions = ["eu-frankfurt-1", "us-ashburn-1"]
+
+# Specify your home region
+homeregion = "eu-frankfurt-1"
 #############################################
 
 
@@ -67,6 +69,7 @@ if confirm == "yes":
         print ("\n--[ Deleting Database Instances ]--")
         DeleteDBCS(config,processCompartments)
         DeleteAutonomousDB(config,processCompartments)
+        DeleteDBBackups(config, processCompartments)
 
         print ("\n--[ Deleting Resource Manager Stacks ]--")
         DeleteStacks(config, processCompartments)
@@ -84,7 +87,7 @@ if confirm == "yes":
 
 
     print ("\n--[ Hopefully deleting compartments, if empty ]--")
-    config["region"] = region
+    config["region"] = homeregion
     DeleteCompartments(config,processCompartments, DeleteCompartmentOCID)
 
 
