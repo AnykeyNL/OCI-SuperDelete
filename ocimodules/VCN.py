@@ -27,6 +27,7 @@ def DeleteVCN(config,compartments):
             DeleteInternetGateways(config, Compartment, item)
             DeleteServiceGateways(config, Compartment, item)
             DeleteNATGateways(config, Compartment, item)
+            DeleteLocalPeeringGateways(config, Compartment, item)
 
         DeleteDRGs(config, Compartment)
 
@@ -465,6 +466,45 @@ def DeleteNATGateways(config, compartment, vcn):
             itemsPresent = False
 
     print("All Objects deleted!")
+
+def DeleteLocalPeeringGateways(config, compartment, vcn):
+    AllItems = []
+    object = oci.core.VirtualNetworkClient(config)
+
+    print("Getting all Local Peering Gateways objects")
+    items = oci.pagination.list_call_get_all_results(object.list_local_peering_gateways,compartment_id=compartment.id, vcn_id=vcn.id).data
+
+    for item in items:
+        if (item.lifecycle_state != "TERMINATED"):
+            AllItems.append(item)
+        print("- {} - {}".format(item.display_name, item.lifecycle_state))
+
+    itemsPresent = True
+
+    if itemsPresent:
+        count = 0
+        for item in AllItems:
+            try:
+                itemstatus = object.get_local_peering_gateway(local_peering_gateway_id=item.id).data
+                if itemstatus.lifecycle_state != "TERMINATED":
+                    if itemstatus.lifecycle_state != "TERMINATING":
+                        try:
+                            print("Deleting: {}".format(itemstatus.display_name))
+                            object.delete_local_peering_gateway(local_peering_gateway_id=itemstatus.id)
+                        except:
+                            print("error trying to delete: {}".format(itemstatus.display_name))
+                    else:
+                        print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
+                    count = count + 1
+            except:
+                print("error deleting {}, probably already deleted".format(item.display_name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
+            time.sleep(WaitRefresh)
+        else:
+            itemsPresent = False
+
+    print("All Objects deleted!")   
 
 def DeleteDRGs(config, compartment):
     AllItems = []
