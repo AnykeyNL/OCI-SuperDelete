@@ -12,10 +12,10 @@ from ocimodules.FileStorage import *
 
 ########## Configuration ####################
 # Specify your config file
-configfile = "~/.oci/config_oractdemeaoci"
+configfile = "~/oci/config"
 
 # Specify the compartment OCID that you want to delete
-DeleteCompartmentOCID = "ocid1.compartment.oc1..aaaaaaaa456vlgfybg2obpz7hrwjrqcyzme5mtgtqcetgt4tl2bs3kubmmea"
+DeleteCompartmentOCID = "ocid1.compartment.oc1........................"
 
 # Search for resources in regions:
 regions = ["eu-frankfurt-1", "us-ashburn-1"]
@@ -65,6 +65,7 @@ if confirm == "yes":
         DeleteInstances(config,processCompartments)
         DeleteImages(config, processCompartments)
         DeleteBootVolumes(config, processCompartments)
+        DeleteDedicatedVMHosts(config, processCompartments)
 
         print ("\n--[ Deleting Database Instances ]--")
         DeleteDBCS(config,processCompartments)
