@@ -9,16 +9,19 @@ from ocimodules.VCN import *
 from ocimodules.BlockStorage import *
 from ocimodules.ResourceManager import *
 from ocimodules.FileStorage import *
+from ocimodules.Monitoring import *
+from ocimodules.Notifications import *
+from ocimodules.Autoscaling import *
 
 ########## Configuration ####################
 # Specify your config file
-configfile = "~/oci/config"
+configfile = "~/.oci/config"
 
 # Specify the compartment OCID that you want to delete
-DeleteCompartmentOCID = "ocid1.compartment.oc1........................"
+DeleteCompartmentOCID = "ocid1.xxxxx"
 
 # Search for resources in regions:
-regions = ["eu-frankfurt-1", "us-ashburn-1"]
+regions = ["eu-frankfurt-1", "uk-london-1"]
 
 # Specify your home region
 homeregion = "eu-frankfurt-1"
@@ -59,6 +62,9 @@ if confirm == "yes":
         print ("\n--[ Deleting Object Storage ]--")
         DeleteBuckets(config, processCompartments)
 
+        print ("\n--[ Deleting Auto Scaling Configurations ]--")
+        DeleteAutoScalingConfigurations(config, processCompartments)
+
         print ("\n--[ Deleting Compute Instances ]--")
         DeleteInstancePools(config,processCompartments)
         DeleteInstanceConfigs(config, processCompartments)
@@ -86,6 +92,11 @@ if confirm == "yes":
         print ("\n--[ Deleting VCNs ]--")
         DeleteVCN(config, processCompartments)
 
+        print ("\n--[ Deleting Alarms ]--")
+        DeleteAlarms(config, processCompartments)
+
+        print ("\n--[ Deleting Notifications ]--")
+        DeleteNotifications(config, processCompartments)
 
     print ("\n--[ Hopefully deleting compartments, if empty ]--")
     config["region"] = homeregion
