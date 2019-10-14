@@ -12,13 +12,14 @@ from ocimodules.FileStorage import *
 from ocimodules.Monitoring import *
 from ocimodules.Notifications import *
 from ocimodules.Autoscaling import *
+from ocimodules.FunctionsService import *
 
 ########## Configuration ####################
 # Specify your config file
 configfile = "~/.oci/config"
 
 # Specify the compartment OCID that you want to delete
-DeleteCompartmentOCID = "ocid1.xxxxx"
+DeleteCompartmentOCID = "ocid1.compartment.oc1..aaaaaaaa456vlgfybg2obpz7hrwjrqcyzme5mtgtqcetgt4tl2bs3kubmmea"
 
 # Search for resources in regions:
 regions = ["eu-frankfurt-1", "uk-london-1"]
@@ -26,7 +27,6 @@ regions = ["eu-frankfurt-1", "uk-london-1"]
 # Specify your home region
 homeregion = "eu-frankfurt-1"
 #############################################
-
 
 config = oci.config.from_file(configfile)
 
@@ -72,6 +72,9 @@ if confirm == "yes":
         DeleteImages(config, processCompartments)
         DeleteBootVolumes(config, processCompartments)
         DeleteDedicatedVMHosts(config, processCompartments)
+
+        print("\n--[ Deleting Application Functions ]--")
+        DeleteApplications(config, processCompartments)
 
         print ("\n--[ Deleting Database Instances ]--")
         DeleteDBCS(config,processCompartments)
