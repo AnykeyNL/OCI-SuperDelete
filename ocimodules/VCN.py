@@ -181,6 +181,7 @@ def DeleteRouteTables(config, compartment, vcn):
 
             print ("Emptying route table for {}".format(item.display_name))
             result = object.update_route_table(rt_id=item.id, update_route_table_details=details)
+            time.sleep(1)
 
         print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
