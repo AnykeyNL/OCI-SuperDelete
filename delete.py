@@ -37,8 +37,10 @@ processCompartments=[]
 clear()
 
 print ("\n--[ Compartments to process ]--")
+
+# Add all active compartments, but exclude the ManagementCompartmentForPaas (as this is locked compartment)
 for compartment in compartments:
-    if compartment.lifecycle_state== "ACTIVE":
+    if compartment.lifecycle_state== "ACTIVE" and compartment.name != "ManagedCompartmentForPaaS":
         processCompartments.append(compartment)
         print (compartment.name)
 
