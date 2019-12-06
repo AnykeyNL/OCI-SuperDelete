@@ -45,10 +45,10 @@ def DeleteWAFs(config, Compartments):
 def DeleteHTTPHealthchecks(config, Compartments):
     AllItems = []
     object = oci.healthchecks.HealthChecksClient(config)
-
+    currentregion = config['region']
     print ("Getting all Healthchecks HTTP monitor objects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_http_monitors, compartment_id=Compartment.id).data
+        items = oci.pagination.list_call_get_all_results(object.list_http_monitors, compartment_id=Compartment.id,home_region=currentregion).data
         for item in items:
                 AllItems.append(item)
                 print("- {}".format(item.display_name))
@@ -78,11 +78,11 @@ def DeleteHTTPHealthchecks(config, Compartments):
 def DeletePINGHealthchecks(config, Compartments):
     AllItems = []
     object = oci.healthchecks.HealthChecksClient(config)
-
+    currentregion = config['region']
     #functions.clear()
     print ("Getting all Healthchecks PING monitor objects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_ping_monitors, compartment_id=Compartment.id).data
+        items = oci.pagination.list_call_get_all_results(object.list_ping_monitors, compartment_id=Compartment.id,home_region=currentregion).data
         for item in items:
                 AllItems.append(item)
                 print("- {}".format(item.display_name))

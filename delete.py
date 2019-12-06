@@ -1,3 +1,5 @@
+#Use with PYTHON3!
+
 import oci
 from ocimodules.functions import *
 from ocimodules.EdgeServices import *

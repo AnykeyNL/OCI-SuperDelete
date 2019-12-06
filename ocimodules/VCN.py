@@ -23,12 +23,14 @@ def DeleteVCN(config,compartments):
             DeleteSubnets(config,Compartment, item)
             DeleteDHCPoptions(config,Compartment, item)
             DeleteSecurityLists(config, Compartment, item)
+            DeleteSecurityGroups(config, Compartment, item)
             DeleteRouteTables(config, Compartment, item)
             DeleteInternetGateways(config, Compartment, item)
             DeleteServiceGateways(config, Compartment, item)
             DeleteNATGateways(config, Compartment, item)
             DeleteLocalPeeringGateways(config, Compartment, item)
 
+        DeleteDRGAttachments(config, Compartment)
         DeleteDRGs(config, Compartment)
 
     print ("Getting all VCNs")
@@ -44,13 +46,6 @@ def DeleteVCN(config,compartments):
                     print("- {} - {}".format(item.display_name, item.lifecycle_state))
                     if (item.lifecycle_state != "TERMINATING"):
                         object.delete_vcn(vcn_id=item.id)
-
-
-
-
-
-
-
 
 def DeleteSubnets(config, compartment, vcn):
     AllItems = []
@@ -133,7 +128,7 @@ def DeleteSecurityLists(config, compartment, vcn):
     AllItems = []
     object = oci.core.VirtualNetworkClient(config)
 
-    print ("Getting SecurityLists for {}".format(vcn.display_name))
+    print ("Getting Security Lists for {}".format(vcn.display_name))
     items = oci.pagination.list_call_get_all_results(object.list_security_lists, compartment_id=compartment.id,vcn_id=vcn.id).data
     for item in items:
         if (item.lifecycle_state != "TERMINATED"):
@@ -166,6 +161,45 @@ def DeleteSecurityLists(config, compartment, vcn):
         else:
             itemsPresent = False
     print("All Objects deleted!")
+
+def DeleteSecurityGroups(config, compartment, vcn):
+    AllItems = []
+    object = oci.core.VirtualNetworkClient(config)
+
+    print ("Getting Network Security Groups for {}".format(vcn.display_name))
+    items = oci.pagination.list_call_get_all_results(object.list_network_security_groups, compartment_id=compartment.id,vcn_id=vcn.id).data
+    for item in items:
+        if (item.lifecycle_state != "TERMINATED"):
+            AllItems.append(item)
+        print("- {} - {}".format(item.display_name, item.lifecycle_state))
+
+    itemsPresent = True
+
+    while itemsPresent:
+        count = 0
+        for item in AllItems:
+            try:
+                itemstatus = object.get_network_security_group(network_security_group_id=item.id).data
+                if itemstatus.lifecycle_state != "TERMINATED":
+                    if itemstatus.lifecycle_state != "TERMINATING":
+                        try:
+                            print("Deleting: {}".format(itemstatus.display_name))
+                            object.delete_network_security_group(network_security_group_id=itemstatus.id)
+                            count = count + 1
+                        except:
+                            print("error trying to delete: {}".format(itemstatus.display_name))
+                    else:
+                        print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
+                        count = count + 1
+            except:
+                print("error deleting {}, probably already deleted".format(item.display_name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
+            time.sleep(WaitRefresh)
+        else:
+            itemsPresent = False
+    print("All Objects deleted!")
+
 
 def DeleteRouteTables(config, compartment, vcn):
     AllItems = []
@@ -255,7 +289,7 @@ def DeleteDRGs(config, compartment):
         count = 0
         for item in AllItems:
             try:
-                itemstatus = object.get_drg_attachment(drg_attachment_id=item.id).data
+                itemstatus = object.get_drg(drg_id=item.id).data
                 if itemstatus.lifecycle_state != "TERMINATED":
                     if itemstatus.lifecycle_state != "TERMINATING":
                         try:

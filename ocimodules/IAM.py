@@ -10,12 +10,20 @@ def Login(config, startcomp):
     # Add first level subcompartments
     compartments = oci.pagination.list_call_get_all_results(identity.list_compartments, compartment_id=startcomp).data
 
+    # Add 2nd level subcompartments
+    for compartment in compartments:
+        subcompartments = oci.pagination.list_call_get_all_results(identity.list_compartments, compartment_id=compartment.id).data
+        for sub in subcompartments:
+            compartments.append(sub)
+
     # Add start compartment to list
     compartment = identity.get_compartment(compartment_id=startcomp).data
     compartments.append(compartment)
 
     return compartments
 
+
+    
 
 
 def DeleteTagNameSpaces(config, compartments):
