@@ -1,6 +1,10 @@
 # OCI-SuperDelete
 Delete all OCI resources in a compartment
 
+## Running the script
+how to run:
+python3 delete.py -c <CompartmentID>
+
 ## WORK_IN_PROGRESS
 This script is still being worked on, not all OCI resources have been added yet. Currently supported:
 - Compute resources
