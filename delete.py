@@ -1,5 +1,5 @@
 #Use with PYTHON3!
-
+import sys, getopt
 import oci
 from ocimodules.functions import *
 from ocimodules.EdgeServices import *
@@ -20,15 +20,30 @@ from ocimodules.FunctionsService import *
 # Specify your config file
 configfile = "~/.oci/config"
 
-# Specify the compartment OCID that you want to delete
-DeleteCompartmentOCID = "ocid1.compartment.oc1..aaaaaaaa456vlgfybg2obpz7hrwjrqcyzme5mtgtqcetgt4tl2bs3kubmmea"
+# Specify the DEFAULT compartment OCID that you want to delete, Leave Empty for no default
+DeleteCompartmentOCID = ""
 
-# Search for resources in regions:
-regions = ["eu-frankfurt-1", "uk-london-1"]
+# Search for resources in regions, this is an Array, so you can specify multiple regions:
+regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
 
 # Specify your home region
 homeregion = "eu-frankfurt-1"
 #############################################
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:], "c:", ["compid="])
+except getopt.GetoptError:
+    print ("delete.py -c <compartmentID>")
+    sys.exit(2)
+
+for opt, arg in opts:
+    print ("{} - {}".format(opt,arg))
+    if opt == "-c":
+        DeleteCompartmentOCID = arg
+
+if DeleteCompartmentOCID =="":
+    print ("No compartment specified")
+    sys.exit(2)
 
 config = oci.config.from_file(configfile)
 
