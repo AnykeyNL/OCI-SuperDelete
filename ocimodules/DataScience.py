@@ -9,13 +9,16 @@ def DeleteNotebooks(config, Compartments):
 
     print ("Getting all Notebook sessions")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_notebook_sessions, compartment_id=Compartment.id).data
-        for item in items:
-            if (item.lifecycle_state != "DELETED"):
-                AllItems.append(item)
-                print("- {} - {}".format(item.display_name, item.lifecycle_state))
-
-    itemsPresent = True
+        try:
+            items = oci.pagination.list_call_get_all_results(object.list_notebook_sessions, compartment_id=Compartment.id).data
+            for item in items:
+                if (item.lifecycle_state != "DELETED"):
+                    AllItems.append(item)
+                    print("- {} - {}".format(item.display_name, item.lifecycle_state))
+            itemsPresent = True
+        except:
+            print ("Error getting all notebooks, likely service does not exist in this Region")
+            itemsPresent = False
 
     while itemsPresent:
         count = 0
@@ -33,7 +36,6 @@ def DeleteNotebooks(config, Compartments):
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
             except:
-
                 print ("-----------------> error deleting {}, probably already deleted: {}".format(item.display_name, item.lifecycle_state))
         if count > 0 :
             print ("Waiting for all Objects to be deleted...")
@@ -49,14 +51,17 @@ def DeleteProjects(config, Compartments):
 
     print ("Getting all DataScience Projects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_projects,
-                                                         compartment_id=Compartment.id).data
-        for item in items:
-            if (item.lifecycle_state != "DELETED"):
-                AllItems.append(item)
-                print("- {} - {}".format(item.display_name, item.lifecycle_state))
-
-    itemsPresent = True
+        try:
+            items = oci.pagination.list_call_get_all_results(object.list_projects,
+                                                             compartment_id=Compartment.id).data
+            for item in items:
+                if (item.lifecycle_state != "DELETED"):
+                    AllItems.append(item)
+                    print("- {} - {}".format(item.display_name, item.lifecycle_state))
+            itemsPresent = True
+        except:
+            print ("Error getting all notebooks, likely service does not exist in this Region")
+            itemsPresent = False
 
     while itemsPresent:
         count = 0
