@@ -15,6 +15,8 @@ from ocimodules.Monitoring import *
 from ocimodules.Notifications import *
 from ocimodules.Autoscaling import *
 from ocimodules.FunctionsService import *
+from ocimodules.DataScience import *
+
 
 ########## Configuration ####################
 # Specify your config file
@@ -91,6 +93,10 @@ if confirm == "yes":
         DeleteImages(config, processCompartments)
         DeleteBootVolumes(config, processCompartments)
         DeleteDedicatedVMHosts(config, processCompartments)
+
+        print ("\n--[ Deleting DataScience Components ]--")
+        DeleteNotebooks(config, processCompartments)
+        DeleteProjects(config, processCompartments)
 
         print("\n--[ Deleting Application Functions ]--")
         DeleteApplications(config, processCompartments)
