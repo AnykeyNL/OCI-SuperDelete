@@ -4,7 +4,7 @@ Delete all OCI resources in a compartment
 ## Running the script
 how to run:
 '''
-python3 delete.py -c <CompartmentID>
+python3 delete.py -c \<CompartmentID>
 '''
 
 ## WORK_IN_PROGRESS
