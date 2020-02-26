@@ -16,6 +16,7 @@ from ocimodules.Notifications import *
 from ocimodules.Autoscaling import *
 from ocimodules.FunctionsService import *
 from ocimodules.DataScience import *
+from ocimodules.OKE import *
 
 
 ########## Configuration ####################
@@ -49,11 +50,11 @@ if DeleteCompartmentOCID =="":
 
 config = oci.config.from_file(configfile)
 
+clear()
+
 print ("\n--[ Login check and getting all compartments from starting compartment ]--")
 compartments = Login(config, DeleteCompartmentOCID)
 processCompartments=[]
-
-clear()
 
 print ("\n--[ Compartments to process ]--")
 
@@ -82,6 +83,9 @@ if confirm == "yes":
 
         print ("\n--[ Deleting Object Storage ]--")
         DeleteBuckets(config, processCompartments)
+
+        print ("\n--[ Deleting OKE Clusters ]--")
+        DeleteClusters(config, processCompartments)
 
         print ("\n--[ Deleting Auto Scaling Configurations ]--")
         DeleteAutoScalingConfigurations(config, processCompartments)
