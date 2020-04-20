@@ -23,6 +23,12 @@ This script is still being worked on, not all OCI resources have been added yet.
 - Applications and Functions
 - DataScience Projects and Notebooks
 - Container Cluster resources
+- Nosql tables
+- Data Catalogs
+- Digital Assistants
+- KMS Vaults and Keys**
+
+** KMS Vaults and Keys can not instantly be deleted, but require a minimal 7 day grace period. The script will move all keys and vaults to the upper compartment and will schedule the deletion with 7 days grace period. This will allow all sub compartments to be instantly deleted, while the top compartment will only be able to be deleted after the grace period. 
 
 ## Purpose
 The purpose of this script is to remove all resources from a compartment, including subcompartments. In OCI you can only remove a compartment when it contains no more resources, but it can be a challenge to find all the resources tied to a compartment. 

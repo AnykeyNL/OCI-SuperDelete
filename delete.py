@@ -17,7 +17,11 @@ from ocimodules.Autoscaling import *
 from ocimodules.FunctionsService import *
 from ocimodules.DataScience import *
 from ocimodules.OKE import *
-
+from ocimodules.kms import *
+from ocimodules.Nosql import *
+from ocimodules.datacatalog import *
+from ocimodules.DigitalAssistant import *
+import logging
 
 ########## Configuration ####################
 # Specify your config file
@@ -32,6 +36,8 @@ regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
 # Specify your home region
 homeregion = "eu-frankfurt-1"
 #############################################
+
+debug = False
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "c:", ["compid="])
@@ -49,6 +55,11 @@ if DeleteCompartmentOCID =="":
     sys.exit(2)
 
 config = oci.config.from_file(configfile)
+
+if debug:
+    config['log_requests'] = True
+    logging.basicConfig()
+    logging.getLogger('oci').setLevel(logging.DEBUG)
 
 clear()
 
@@ -73,6 +84,9 @@ if confirm == "yes":
 
         print ("============[ Deleting resources in {} ]================".format(region))
         config["region"] = region
+
+        print ("\n--[ Moving and Scheduling KMS Vaults for deletion ]--")
+        DeleteKMSvaults(config, processCompartments, DeleteCompartmentOCID)
 
         print ("\n--[ Deleting Edge Services ]--")
         DeleteWAFs(config,processCompartments)
@@ -109,6 +123,15 @@ if confirm == "yes":
         DeleteDBCS(config,processCompartments)
         DeleteAutonomousDB(config,processCompartments)
         DeleteDBBackups(config, processCompartments)
+
+        print("\n--[ Deleting Nosql tables ]--")
+        DeleteNosql(config, processCompartments)
+
+        print("\n--[ Deleting Data Catalogs ]--")
+        DeleteDataCatalog(config, processCompartments)
+
+        print("\n--[ Deleting Digital Assistants ]--")
+        DeleteDigitalAssistant(config, processCompartments)
 
         print ("\n--[ Deleting Resource Manager Stacks ]--")
         DeleteStacks(config, processCompartments)
