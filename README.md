@@ -1,5 +1,7 @@
 # OCI-SuperDelete
-Delete all OCI resources in a compartment
+Delete all OCI resources in a compartment. 
+
+Written by Richard Garsthagen - www.oc-blog.com 
 
 ## Running the script
 how to run:
