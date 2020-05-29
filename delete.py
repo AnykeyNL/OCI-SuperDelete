@@ -110,6 +110,7 @@ if confirm == "yes":
         DeleteInstances(config,processCompartments)
         DeleteImages(config, processCompartments)
         DeleteBootVolumes(config, processCompartments)
+        DeleteBootVolumesBackups(config, processCompartments)
         DeleteDedicatedVMHosts(config, processCompartments)
 
         print ("\n--[ Deleting DataScience Components ]--")
