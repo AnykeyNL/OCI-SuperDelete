@@ -154,6 +154,9 @@ if confirm == "yes":
         print ("\n--[ Deleting Notifications ]--")
         DeleteNotifications(config, processCompartments)
 
+        print ("\n--[ Deleting Policies ]--")
+        DeletePolicies(config, processCompartments)
+
     print ("\n--[ Hopefully deleting compartments, if empty ]--")
     config["region"] = homeregion
     DeleteCompartments(config,processCompartments, DeleteCompartmentOCID)
