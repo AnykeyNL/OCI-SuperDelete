@@ -52,13 +52,11 @@ def DeleteBlockVolumesBackups(config, Compartments):
 
     print ("Getting all Block Volumes Backup objects")
     for compartment in Compartments:
-        ads = identity.list_availability_domains(compartment_id=compartment.id).data
-        for ad in ads:
-            items = oci.pagination.list_call_get_all_results(object.list_volume_backups, compartment_id=compartment.id).data
-            for item in items:
-                if (item.lifecycle_state != "TERMINATED"):
-                    AllItems.append(item)
-                    print("- {} - {}".format(item.display_name, item.lifecycle_state))
+        items = oci.pagination.list_call_get_all_results(object.list_volume_backups, compartment_id=compartment.id).data
+        for item in items:
+            if (item.lifecycle_state != "TERMINATED"):
+                AllItems.append(item)
+                print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
 
@@ -94,13 +92,11 @@ def DeleteBootVolumesBackups(config, Compartments):
 
     print ("Getting all Boot Volumes Backup objects")
     for compartment in Compartments:
-        ads = identity.list_availability_domains(compartment_id=compartment.id).data
-        for ad in ads:
-            items = oci.pagination.list_call_get_all_results(object.list_boot_volume_backups, compartment_id=compartment.id).data
-            for item in items:
-                if (item.lifecycle_state != "TERMINATED"):
-                    AllItems.append(item)
-                    print("- {} - {}".format(item.display_name, item.lifecycle_state))
+        items = oci.pagination.list_call_get_all_results(object.list_boot_volume_backups, compartment_id=compartment.id).data
+        for item in items:
+            if (item.lifecycle_state != "TERMINATED"):
+                AllItems.append(item)
+                print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
 
