@@ -3,7 +3,7 @@ Delete all OCI resources in a compartment.
 
 Initial development  by Richard Garsthagen - www.oc-blog.com 
 
-# Contributors (Thank you!!!)
+### Contributors (Thank you!!!)
 - Allen Kubai Wangu (https://github.com/allenkubai)
 - Alexey Dolganov (https://github.com/aorcl)
 
