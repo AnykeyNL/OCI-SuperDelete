@@ -21,6 +21,7 @@ from ocimodules.kms import *
 from ocimodules.Nosql import *
 from ocimodules.datacatalog import *
 from ocimodules.DigitalAssistant import *
+from ocimodules.APIGateway import *
 import logging
 
 ########## Configuration ####################
@@ -119,6 +120,9 @@ if confirm == "yes":
 
         print("\n--[ Deleting Application Functions ]--")
         DeleteApplications(config, processCompartments)
+        
+        print("\n--[ Deleting API Gateways ]--")
+        DeleteAPIGateways(config, processCompartments)
 
         print ("\n--[ Deleting Database Instances ]--")
         DeleteDBCS(config,processCompartments)
