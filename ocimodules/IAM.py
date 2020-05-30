@@ -1,6 +1,8 @@
 import oci
 import time
 
+WaitRefresh = 10
+
 def Login(config, startcomp):
     identity = oci.identity.IdentityClient(config)
     user = identity.get_user(config["user"]).data
@@ -79,6 +81,36 @@ def DeleteCompartments(config, compartments, startcomp):
                         retry = True
 
 
+def DeletePolicies(config, compartments):
 
+    AllItems = []
+    object = oci.identity.IdentityClient(config)
 
+    print ("Getting all Policy objects")
+    for Compartment in compartments:
+        items = oci.pagination.list_call_get_all_results(object.list_policies, compartment_id=Compartment.id).data
+        for item in items:
+                AllItems.append(item)
+                print("- {}".format(item.name))
 
+    itemsPresent = True
+
+    while itemsPresent:
+        count = 0
+        for item in AllItems:
+            try:
+                itemstatus = object.get_policy(policy_id=item.id).data
+                try:
+                    print ("Deleting: {}".format(itemstatus.name))
+                    object.delete_policy(policy_id=itemstatus.id)
+                except:
+                    print ("error trying to delete: {}".format(itemstatus.name))
+                count = count + 1
+            except:
+                print ("Deleted : {}".format(item.name))
+        if count > 0 :
+            print ("Waiting for all Objects to be deleted...")
+            time.sleep(WaitRefresh)
+        else:
+            itemsPresent = False
+    print ("All Objects deleted!")

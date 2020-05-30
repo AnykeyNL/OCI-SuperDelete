@@ -110,6 +110,7 @@ if confirm == "yes":
         DeleteInstances(config,processCompartments)
         DeleteImages(config, processCompartments)
         DeleteBootVolumes(config, processCompartments)
+        DeleteBootVolumesBackups(config, processCompartments)
         DeleteDedicatedVMHosts(config, processCompartments)
 
         print ("\n--[ Deleting DataScience Components ]--")
@@ -152,6 +153,9 @@ if confirm == "yes":
 
         print ("\n--[ Deleting Notifications ]--")
         DeleteNotifications(config, processCompartments)
+
+        print ("\n--[ Deleting Policies ]--")
+        DeletePolicies(config, processCompartments)
 
     print ("\n--[ Hopefully deleting compartments, if empty ]--")
     config["region"] = homeregion
