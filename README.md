@@ -1,5 +1,6 @@
 # OCI-SuperDelete
 Delete all OCI resources in a compartment. 
+
 Initial development  by Richard Garsthagen - www.oc-blog.com 
 
 # Contributors (Thank you!!!)
