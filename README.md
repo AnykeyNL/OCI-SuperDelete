@@ -16,7 +16,7 @@ This script is still being worked on, not all OCI resources have been added yet.
 - Edge Services
 - File Storage services
 - Tag Namespaces
-- Block Storage, Block Volume Backups
+- Block Storage, Block Volume Backups, Volume Groups, Volume Group Backups
 - Resource Manager Stacks
 - VCN resources
 - Autoscaling policies
@@ -30,6 +30,7 @@ This script is still being worked on, not all OCI resources have been added yet.
 - Digital Assistants
 - Policies
 - KMS Vaults and Keys**
+- API Gateways
 
 ** KMS Vaults and Keys can not instantly be deleted, but require a minimal 7 day grace period. The script will move all keys and vaults to the upper compartment and will schedule the deletion with 7 days grace period. This will allow all sub compartments to be instantly deleted, while the top compartment will only be able to be deleted after the grace period. 
 
