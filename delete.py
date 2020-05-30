@@ -1,3 +1,5 @@
+#Use with PYTHON3!
+import sys, getopt
 import oci
 from ocimodules.functions import *
 from ocimodules.EdgeServices import *
@@ -9,33 +11,67 @@ from ocimodules.VCN import *
 from ocimodules.BlockStorage import *
 from ocimodules.ResourceManager import *
 from ocimodules.FileStorage import *
+from ocimodules.Monitoring import *
+from ocimodules.Notifications import *
+from ocimodules.Autoscaling import *
+from ocimodules.FunctionsService import *
+from ocimodules.DataScience import *
+from ocimodules.OKE import *
+from ocimodules.kms import *
+from ocimodules.Nosql import *
+from ocimodules.datacatalog import *
+from ocimodules.DigitalAssistant import *
+import logging
 
 ########## Configuration ####################
 # Specify your config file
-configfile = "~/.oci/config_oractdemeaoci"
+configfile = "~/.oci/config"
 
-# Specify the compartment OCID that you want to delete
-DeleteCompartmentOCID = "ocid1.compartment.oc1..aaaaaaaa456vlgfybg2obpz7hrwjrqcyzme5mtgtqcetgt4tl2bs3kubmmea"
+# Specify the DEFAULT compartment OCID that you want to delete, Leave Empty for no default
+DeleteCompartmentOCID = ""
 
-# Search for resources in regions:
-regions = ["eu-frankfurt-1", "us-ashburn-1"]
+# Search for resources in regions, this is an Array, so you can specify multiple regions:
+regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
 
 # Specify your home region
 homeregion = "eu-frankfurt-1"
 #############################################
 
+debug = False
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:], "c:", ["compid="])
+except getopt.GetoptError:
+    print ("delete.py -c <compartmentID>")
+    sys.exit(2)
+
+for opt, arg in opts:
+    print ("{} - {}".format(opt,arg))
+    if opt == "-c":
+        DeleteCompartmentOCID = arg
+
+if DeleteCompartmentOCID =="":
+    print ("No compartment specified")
+    sys.exit(2)
 
 config = oci.config.from_file(configfile)
+
+if debug:
+    config['log_requests'] = True
+    logging.basicConfig()
+    logging.getLogger('oci').setLevel(logging.DEBUG)
+
+clear()
 
 print ("\n--[ Login check and getting all compartments from starting compartment ]--")
 compartments = Login(config, DeleteCompartmentOCID)
 processCompartments=[]
 
-clear()
-
 print ("\n--[ Compartments to process ]--")
+
+# Add all active compartments, but exclude the ManagementCompartmentForPaas (as this is locked compartment)
 for compartment in compartments:
-    if compartment.lifecycle_state== "ACTIVE":
+    if compartment.lifecycle_state== "ACTIVE" and compartment.name != "ManagedCompartmentForPaaS":
         processCompartments.append(compartment)
         print (compartment.name)
 
@@ -49,6 +85,9 @@ if confirm == "yes":
         print ("============[ Deleting resources in {} ]================".format(region))
         config["region"] = region
 
+        print ("\n--[ Moving and Scheduling KMS Vaults for deletion ]--")
+        DeleteKMSvaults(config, processCompartments, DeleteCompartmentOCID)
+
         print ("\n--[ Deleting Edge Services ]--")
         DeleteWAFs(config,processCompartments)
         DeleteHTTPHealthchecks(config, processCompartments)
@@ -59,17 +98,41 @@ if confirm == "yes":
         print ("\n--[ Deleting Object Storage ]--")
         DeleteBuckets(config, processCompartments)
 
+        print ("\n--[ Deleting OKE Clusters ]--")
+        DeleteClusters(config, processCompartments)
+
+        print ("\n--[ Deleting Auto Scaling Configurations ]--")
+        DeleteAutoScalingConfigurations(config, processCompartments)
+
         print ("\n--[ Deleting Compute Instances ]--")
         DeleteInstancePools(config,processCompartments)
         DeleteInstanceConfigs(config, processCompartments)
         DeleteInstances(config,processCompartments)
         DeleteImages(config, processCompartments)
         DeleteBootVolumes(config, processCompartments)
+        DeleteBootVolumesBackups(config, processCompartments)
+        DeleteDedicatedVMHosts(config, processCompartments)
+
+        print ("\n--[ Deleting DataScience Components ]--")
+        DeleteNotebooks(config, processCompartments)
+        DeleteProjects(config, processCompartments)
+
+        print("\n--[ Deleting Application Functions ]--")
+        DeleteApplications(config, processCompartments)
 
         print ("\n--[ Deleting Database Instances ]--")
         DeleteDBCS(config,processCompartments)
         DeleteAutonomousDB(config,processCompartments)
         DeleteDBBackups(config, processCompartments)
+
+        print("\n--[ Deleting Nosql tables ]--")
+        DeleteNosql(config, processCompartments)
+
+        print("\n--[ Deleting Data Catalogs ]--")
+        DeleteDataCatalog(config, processCompartments)
+
+        print("\n--[ Deleting Digital Assistants ]--")
+        DeleteDigitalAssistant(config, processCompartments)
 
         print ("\n--[ Deleting Resource Manager Stacks ]--")
         DeleteStacks(config, processCompartments)
@@ -85,6 +148,14 @@ if confirm == "yes":
         print ("\n--[ Deleting VCNs ]--")
         DeleteVCN(config, processCompartments)
 
+        print ("\n--[ Deleting Alarms ]--")
+        DeleteAlarms(config, processCompartments)
+
+        print ("\n--[ Deleting Notifications ]--")
+        DeleteNotifications(config, processCompartments)
+
+        print ("\n--[ Deleting Policies ]--")
+        DeletePolicies(config, processCompartments)
 
     print ("\n--[ Hopefully deleting compartments, if empty ]--")
     config["region"] = homeregion

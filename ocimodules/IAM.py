@@ -1,6 +1,8 @@
 import oci
 import time
 
+WaitRefresh = 10
+
 def Login(config, startcomp):
     identity = oci.identity.IdentityClient(config)
     user = identity.get_user(config["user"]).data
@@ -10,12 +12,20 @@ def Login(config, startcomp):
     # Add first level subcompartments
     compartments = oci.pagination.list_call_get_all_results(identity.list_compartments, compartment_id=startcomp).data
 
+    # Add 2nd level subcompartments
+    for compartment in compartments:
+        subcompartments = oci.pagination.list_call_get_all_results(identity.list_compartments, compartment_id=compartment.id).data
+        for sub in subcompartments:
+            compartments.append(sub)
+
     # Add start compartment to list
     compartment = identity.get_compartment(compartment_id=startcomp).data
     compartments.append(compartment)
 
     return compartments
 
+
+    
 
 
 def DeleteTagNameSpaces(config, compartments):
@@ -71,6 +81,36 @@ def DeleteCompartments(config, compartments, startcomp):
                         retry = True
 
 
+def DeletePolicies(config, compartments):
 
+    AllItems = []
+    object = oci.identity.IdentityClient(config)
 
+    print ("Getting all Policy objects")
+    for Compartment in compartments:
+        items = oci.pagination.list_call_get_all_results(object.list_policies, compartment_id=Compartment.id).data
+        for item in items:
+                AllItems.append(item)
+                print("- {}".format(item.name))
 
+    itemsPresent = True
+
+    while itemsPresent:
+        count = 0
+        for item in AllItems:
+            try:
+                itemstatus = object.get_policy(policy_id=item.id).data
+                try:
+                    print ("Deleting: {}".format(itemstatus.name))
+                    object.delete_policy(policy_id=itemstatus.id)
+                except:
+                    print ("error trying to delete: {}".format(itemstatus.name))
+                count = count + 1
+            except:
+                print ("Deleted : {}".format(item.name))
+        if count > 0 :
+            print ("Waiting for all Objects to be deleted...")
+            time.sleep(WaitRefresh)
+        else:
+            itemsPresent = False
+    print ("All Objects deleted!")
