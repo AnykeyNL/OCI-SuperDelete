@@ -144,6 +144,8 @@ if confirm == "yes":
         print ("\n--[ Deleting Block Volumes ]--")
         DeleteVolumes(config, processCompartments)
         DeleteBlockVolumesBackups(config, processCompartments)
+        DeleteVolumeGroups(config, processCompartments)
+        DeleteVolumeGroupBackups(config, processCompartments)
 
         print ("\n--[ Deleting FileSystem and Mount Targets ]--")
         DeleteMountTargets(config, processCompartments)
