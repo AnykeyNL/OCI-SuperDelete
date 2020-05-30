@@ -142,10 +142,10 @@ if confirm == "yes":
         DeleteStacks(config, processCompartments)
 
         print ("\n--[ Deleting Block Volumes ]--")
-        DeleteVolumes(config, processCompartments)
-        DeleteBlockVolumesBackups(config, processCompartments)
         DeleteVolumeGroups(config, processCompartments)
         DeleteVolumeGroupBackups(config, processCompartments)
+        DeleteVolumes(config, processCompartments)
+        DeleteBlockVolumesBackups(config, processCompartments)
 
         print ("\n--[ Deleting FileSystem and Mount Targets ]--")
         DeleteMountTargets(config, processCompartments)
