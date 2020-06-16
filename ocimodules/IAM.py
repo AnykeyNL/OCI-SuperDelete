@@ -25,10 +25,10 @@ def Login(config, startcomp):
     return compartments
 
 
-def SubscribedRegions(config)
+def SubscribedRegions(config):
     regions = []
-    IC = oci.identity.IdentityClient(config)
-    regionDetails=IC.list_region_subscriptions(tenancy_id=config["tenancy"]).data
+    identity = oci.identity.IdentityClient(config)
+    regionDetails=identity.list_region_subscriptions(tenancy_id=config["tenancy"]).data
     
     #Add subscribed regions to list
     for detail in regionDetails:
