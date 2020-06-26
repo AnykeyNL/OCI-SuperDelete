@@ -26,12 +26,14 @@ import logging
 
 ########## Configuration ####################
 # Specify your config file
-configfile = "~/.oci/config"
+configfile = "~/.oci/config"  # Linux
+#configfile = "\\Users\\username\\.oci\\config"  # Windows
 
 # Specify the DEFAULT compartment OCID that you want to delete, Leave Empty for no default
 DeleteCompartmentOCID = ""
 
 # Search for resources in regions, this is an Array, so you can specify multiple regions:
+# If no regions specified, it will be all subscribed regions.
 regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
 
 # Specify your home region
@@ -66,8 +68,11 @@ clear()
 
 print ("\n--[ Login check and getting all compartments from starting compartment ]--")
 compartments = Login(config, DeleteCompartmentOCID)
-#calling SubscribedRegions() function
-regions=SubscribedRegions(config)
+
+if len(regions) == 0:
+    # No specific region specified, getting all subscribed regions.
+    regions=SubscribedRegions(config)
+
 processCompartments=[]
 
 print ("\n--[ Compartments to process ]--")
