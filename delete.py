@@ -22,6 +22,7 @@ from ocimodules.Nosql import *
 from ocimodules.datacatalog import *
 from ocimodules.DigitalAssistant import *
 from ocimodules.APIGateway import *
+from ocimodules.Deployment import *
 import logging
 
 ########## Configuration ####################
@@ -66,6 +67,8 @@ clear()
 
 print ("\n--[ Login check and getting all compartments from starting compartment ]--")
 compartments = Login(config, DeleteCompartmentOCID)
+#calling SubscribedRegions() function
+regions=SubscribedRegions(config)
 processCompartments=[]
 
 print ("\n--[ Compartments to process ]--")
@@ -120,6 +123,9 @@ if confirm == "yes":
 
         print("\n--[ Deleting Application Functions ]--")
         DeleteApplications(config, processCompartments)
+
+        print("\n--[ Deleting Deployments ]--")
+        DeleteDeployments(config, processCompartments)        
         
         print("\n--[ Deleting API Gateways ]--")
         DeleteAPIGateways(config, processCompartments)
