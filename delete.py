@@ -22,7 +22,6 @@ from ocimodules.Nosql import *
 from ocimodules.datacatalog import *
 from ocimodules.DigitalAssistant import *
 from ocimodules.APIGateway import *
-from ocimodules.Deployment import *
 import logging
 
 ########## Configuration ####################
