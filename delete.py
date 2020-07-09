@@ -33,10 +33,10 @@ configfile = "~/.oci/config"
 DeleteCompartmentOCID = ""
 
 # Search for resources in regions, this is an Array, so you can specify multiple regions:
-regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
+regions = []
 
 # Specify your home region
-homeregion = "eu-frankfurt-1"
+homeregion = "us-ashburn-1"
 #############################################
 
 debug = False
