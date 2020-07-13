@@ -96,6 +96,7 @@ if confirm == "yes":
         DeleteWAFs(config,processCompartments)
         DeleteHTTPHealthchecks(config, processCompartments)
         DeletePINGHealthchecks(config, processCompartments)
+        DeleteTrafficSteeringsAttachments(config, processCompartments)
         DeleteTrafficSteerings(config, processCompartments)
         DeleteZones(config, processCompartments)
 
