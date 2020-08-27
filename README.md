@@ -6,6 +6,7 @@ Initial development  by Richard Garsthagen - www.oc-blog.com
 ### Contributors (Thank you!!!)
 - Allen Kubai Wangu (https://github.com/allenkubai)
 - Alexey Dolganov (https://github.com/aorcl)
+- T-Srikanth (https://github.com/T-Srikanth)
 
 ## Running the script
 how to run:
