@@ -22,6 +22,7 @@ This script is still being worked on, not all OCI resources have been added yet.
 - File Storage services
 - Tag Namespaces
 - Block Storage, Block Volume Backups, Volume Groups, Volume Group Backups
+- Object Storage buckets and (versioned) objectes
 - Resource Manager Stacks
 - VCN resources
 - Autoscaling policies
