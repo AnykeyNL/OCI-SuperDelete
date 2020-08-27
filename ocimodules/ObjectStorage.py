@@ -60,7 +60,41 @@ def DeleteObjects(config, bucket):
             more = False
 
 
+def DeleteVersionedObjects(config, bucket):
+    objectlimit = 20
+    object = oci.object_storage.ObjectStorageClient(config)
+    print ("Deleting objects in bucket: {}".format(bucket.name))
+    more = True
 
+    while more:
+        result = object.list_preauthenticated_requests(namespace_name=bucket.namespace, bucket_name=bucket.name, limit=objectlimit)
+        items = result.data
+        for item in items:
+            print ("Deleting {}:{}".format(bucket.name, item.name))
+            object.delete_preauthenticated_request(namespace_name=bucket.namespace, bucket_name=bucket.name, par_id=item.id)
+
+        if len(items) == objectlimit:
+            more = True
+        else:
+            more = False
+
+
+
+    more = True
+
+    while more:
+        result = object.list_object_versions(namespace_name=bucket.namespace, bucket_name=bucket.name, limit=objectlimit)
+        items = result.data.items
+
+        for item in items:
+            print ("Deleting {}:{}".format(bucket.name, item.name))
+            print(item.version_id)
+            object.delete_object(namespace_name=bucket.namespace, bucket_name=bucket.name, object_name=item.name, version_id=item.version_id)
+
+        if len(items) == objectlimit:
+            more = True
+        else:
+            more = False      
 
 
 

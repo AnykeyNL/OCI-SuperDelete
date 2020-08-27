@@ -34,10 +34,11 @@ DeleteCompartmentOCID = ""
 
 # Search for resources in regions, this is an Array, so you can specify multiple regions:
 # If no regions specified, it will be all subscribed regions.
-regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
+# regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
+regions = []
 
 # Specify your home region
-homeregion = "eu-frankfurt-1"
+homeregion = "us-ashburn-1"
 #############################################
 
 debug = False
@@ -100,6 +101,7 @@ if confirm == "yes":
         DeleteWAFs(config,processCompartments)
         DeleteHTTPHealthchecks(config, processCompartments)
         DeletePINGHealthchecks(config, processCompartments)
+        DeleteTrafficSteeringsAttachments(config, processCompartments)
         DeleteTrafficSteerings(config, processCompartments)
         DeleteZones(config, processCompartments)
 
