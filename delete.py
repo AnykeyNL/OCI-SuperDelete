@@ -26,16 +26,19 @@ import logging
 
 ########## Configuration ####################
 # Specify your config file
-configfile = "~/.oci/config"
+configfile = "~/.oci/config"  # Linux
+#configfile = "\\Users\\username\\.oci\\config"  # Windows
 
 # Specify the DEFAULT compartment OCID that you want to delete, Leave Empty for no default
 DeleteCompartmentOCID = ""
 
 # Search for resources in regions, this is an Array, so you can specify multiple regions:
-regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
+# If no regions specified, it will be all subscribed regions.
+# regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
+regions = []
 
 # Specify your home region
-homeregion = "eu-frankfurt-1"
+homeregion = "us-ashburn-1"
 #############################################
 
 debug = False
@@ -66,6 +69,11 @@ clear()
 
 print ("\n--[ Login check and getting all compartments from starting compartment ]--")
 compartments = Login(config, DeleteCompartmentOCID)
+
+if len(regions) == 0:
+    # No specific region specified, getting all subscribed regions.
+    regions=SubscribedRegions(config)
+
 processCompartments=[]
 
 print ("\n--[ Compartments to process ]--")
@@ -93,6 +101,7 @@ if confirm == "yes":
         DeleteWAFs(config,processCompartments)
         DeleteHTTPHealthchecks(config, processCompartments)
         DeletePINGHealthchecks(config, processCompartments)
+        DeleteTrafficSteeringsAttachments(config, processCompartments)
         DeleteTrafficSteerings(config, processCompartments)
         DeleteZones(config, processCompartments)
 
@@ -120,6 +129,9 @@ if confirm == "yes":
 
         print("\n--[ Deleting Application Functions ]--")
         DeleteApplications(config, processCompartments)
+
+        print("\n--[ Deleting Deployments ]--")
+        DeleteDeployments(config, processCompartments)        
         
         print("\n--[ Deleting API Gateways ]--")
         DeleteAPIGateways(config, processCompartments)

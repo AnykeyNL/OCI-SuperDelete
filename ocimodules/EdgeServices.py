@@ -110,6 +110,45 @@ def DeletePINGHealthchecks(config, Compartments):
     print ("All Objects deleted!")
 
 
+def DeleteTrafficSteeringsAttachments(config, Compartments):
+    AllItems = []
+    object = oci.dns.DnsClient(config)
+
+    print ("Getting all Traffic Steering Policy Attachment objects")
+    for Compartment in Compartments:
+        items = oci.pagination.list_call_get_all_results(object.list_steering_policy_attachments, compartment_id=Compartment.id).data
+        for item in items:
+            if (item.lifecycle_state != "DELETING"):
+                AllItems.append(item)
+                print("- {} - {}".format(item.display_name, item.lifecycle_state))
+
+    itemsPresent = True
+
+    while itemsPresent:
+        count = 0
+        for item in AllItems:
+            try:
+                itemstatus = object.get_steering_policy_attachment(steering_policy_attachment_id=item.id).data
+                # if itemstatus.lifecycle_state != "DELETED":
+                if itemstatus.lifecycle_state != "DELETING":
+                    try:
+                        print ("Deleting: {}".format(itemstatus.display_name))
+                        object.delete_steering_policy_attachment(steering_policy_attachment_id=itemstatus.id)
+                    except:
+                        print ("error trying to delete: {}".format(itemstatus.display_name))
+                else:
+                    print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
+                count = count + 1
+            except:
+                print ("error getting : {}, probably already deleted".format(item.display_name))
+        if count > 0 :
+            print ("Waiting for all Objects to be deleted...")
+            time.sleep(WaitRefresh)
+        else:
+            itemsPresent = False
+    print ("All Objects deleted!")    
+    
+    
 def DeleteTrafficSteerings(config, Compartments):
     AllItems = []
     object = oci.dns.DnsClient(config)
