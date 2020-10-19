@@ -37,6 +37,7 @@ This script is still being worked on, not all OCI resources have been added yet.
 - Policies
 - KMS Vaults and Keys**
 - API Gateways
+- Analytics
 
 ** KMS Vaults and Keys can not instantly be deleted, but require a minimal 7 day grace period. The script will move all keys and vaults to the upper compartment and will schedule the deletion with 7 days grace period. This will allow all sub compartments to be instantly deleted, while the top compartment will only be able to be deleted after the grace period. 
 

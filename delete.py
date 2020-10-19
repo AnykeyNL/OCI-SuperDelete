@@ -22,6 +22,7 @@ from ocimodules.Nosql import *
 from ocimodules.datacatalog import *
 from ocimodules.DigitalAssistant import *
 from ocimodules.APIGateway import *
+from ocimodules.Analytics import *
 import logging
 
 ########## Configuration ####################
@@ -149,6 +150,9 @@ if confirm == "yes":
 
         print("\n--[ Deleting Digital Assistants ]--")
         DeleteDigitalAssistant(config, processCompartments)
+
+        print("\n--[ Deleting Analytics ]--")
+        DeleteAnalytics(config, processCompartments)
 
         print ("\n--[ Deleting Resource Manager Stacks ]--")
         DeleteStacks(config, processCompartments)
