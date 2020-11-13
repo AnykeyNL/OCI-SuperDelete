@@ -116,11 +116,14 @@ def DeleteTrafficSteeringsAttachments(config, Compartments):
 
     print ("Getting all Traffic Steering Policy Attachment objects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_steering_policy_attachments, compartment_id=Compartment.id).data
-        for item in items:
-            if (item.lifecycle_state != "DELETING"):
-                AllItems.append(item)
-                print("- {} - {}".format(item.display_name, item.lifecycle_state))
+        try:
+            items = oci.pagination.list_call_get_all_results(object.list_steering_policy_attachments, compartment_id=Compartment.id).data
+            for item in items:
+                if (item.lifecycle_state != "DELETING"):
+                    AllItems.append(item)
+                    print("- {} - {}".format(item.display_name, item.lifecycle_state))
+        except:
+            print ("error getting steering policy attachements")
 
     itemsPresent = True
 

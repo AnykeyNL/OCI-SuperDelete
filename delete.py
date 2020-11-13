@@ -23,6 +23,7 @@ from ocimodules.datacatalog import *
 from ocimodules.DigitalAssistant import *
 from ocimodules.APIGateway import *
 from ocimodules.Analytics import *
+from ocimodules.MySQL import *
 import logging
 
 ########## Configuration ####################
@@ -36,10 +37,10 @@ DeleteCompartmentOCID = ""
 # Search for resources in regions, this is an Array, so you can specify multiple regions:
 # If no regions specified, it will be all subscribed regions.
 # regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
-regions = []
+regions = ["eu-frankfurt-1"]
 
 # Specify your home region
-homeregion = "us-ashburn-1"
+homeregion = "eu-frankfurt-1"
 #############################################
 
 debug = False
@@ -141,6 +142,9 @@ if confirm == "yes":
         DeleteDBCS(config,processCompartments)
         DeleteAutonomousDB(config,processCompartments)
         DeleteDBBackups(config, processCompartments)
+
+        print("\n--[ Deleting MySQL Database Instances ]--")
+        DeleteMySQL(config, processCompartments)
 
         print("\n--[ Deleting Nosql tables ]--")
         DeleteNosql(config, processCompartments)
