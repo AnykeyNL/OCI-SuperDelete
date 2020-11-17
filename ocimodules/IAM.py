@@ -43,8 +43,8 @@ def DeleteTagNameSpaces(config, compartments):
     AllItems = []
     object = oci.identity.IdentityClient(config)
 
-    print ("Getting all Healthchecks PING monitor objects")
-    for Compartment in Compartments:
+    print ("Getting all Tag Namespace objects")
+    for Compartment in compartments:
         items = oci.pagination.list_call_get_all_results(object.list_tag_namespaces, compartment_id=Compartment.id).data
         for item in items:
                 AllItems.append(item)
@@ -57,15 +57,25 @@ def DeleteTagNameSpaces(config, compartments):
         for item in AllItems:
             try:
                 itemstatus = object.get_tag_namespace(tag_namespace_id=item.id).data
-                try:
-                    print ("Deleting: {}".format(itemstatus.display_name))
-                    # Need to retire tag namespace
-
-                except:
-                    print ("error trying to delete: {}".format(itemstatus.display_name))
-                count = count + 1
+                if itemstatus.is_retired == "False":
+                    print ("Retiring tag namespace {}".format(itemstatus.name))
+                    tagdetails = oci.identity.models.UpdateTagNamespaceDetails()
+                    tagdetails.is_retired = True
+                    object.update_tag_namespace(tag_namespace_id=item.id, update_tag_namespace_details=tagdetails)
+                    count = count + 1
+                else:
+                    if itemstatus.lifecycle_state != "DELETED":
+                        if itemstatus.lifecycle_state != "DELETING":
+                            #try:
+                            print ("Deleting: {}".format(itemstatus.name))
+                            object.cascade_delete_tag_namespace(tag_namespace_id=item.id)
+                            #except oci.exceptions.ServiceError as response:
+                            #    print ("error trying to delete: {} - {}".format(itemstatus.name, response.message))
+                        else:
+                            print ("Waiting for tag {} to finish deleting...This can take a long time :-(".format(itemstatus.name))
+                        count = count + 1
             except:
-                print ("Deleted : {}".format(item.display_name))
+                print ("Tag has been deleted")
         if count > 0 :
             print ("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
