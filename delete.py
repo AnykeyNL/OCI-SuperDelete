@@ -24,6 +24,7 @@ from ocimodules.DigitalAssistant import *
 from ocimodules.APIGateway import *
 from ocimodules.Analytics import *
 from ocimodules.MySQL import *
+from ocimodules.Logging import *
 import logging
 
 ########## Configuration ####################
@@ -37,7 +38,7 @@ DeleteCompartmentOCID = ""
 # Search for resources in regions, this is an Array, so you can specify multiple regions:
 # If no regions specified, it will be all subscribed regions.
 # regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
-regions = ["eu-frankfurt-1", "uk-london-1"]
+regions = []
 
 # Specify your home region
 homeregion = "eu-frankfurt-1"
@@ -182,6 +183,13 @@ if confirm == "yes":
 
         print ("\n--[ Deleting Policies ]--")
         DeletePolicies(config, processCompartments)
+
+        print("\n--[ Deleting Log Groups ]--")
+        DeleteLogGroups(config, processCompartments)
+
+        print("\n--[ Deleting Tag Namespaces ]--")
+        DeleteTagNameSpaces(config, processCompartments)
+
 
     print ("\n--[ Hopefully deleting compartments, if empty ]--")
     config["region"] = homeregion

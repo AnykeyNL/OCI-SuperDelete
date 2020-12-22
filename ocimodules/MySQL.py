@@ -9,11 +9,14 @@ def DeleteMySQL(config, Compartments):
 
     print ("Getting all MySQL Services")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_db_systems, compartment_id=Compartment.id).data
-        for item in items:
-            if (item.lifecycle_state != "DELETED"):
-                AllItems.append(item)
-                print("- {} - {}".format(item.display_name, item.lifecycle_state))
+        try:
+            items = oci.pagination.list_call_get_all_results(object.list_db_systems, compartment_id=Compartment.id).data
+            for item in items:
+                if (item.lifecycle_state != "DELETED"):
+                    AllItems.append(item)
+                    print("- {} - {}".format(item.display_name, item.lifecycle_state))
+        except:
+            print ("MSQL Service likely does not exist in this region")
 
     itemsPresent = True
 
