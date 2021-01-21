@@ -38,7 +38,7 @@ DeleteCompartmentOCID = ""
 # Search for resources in regions, this is an Array, so you can specify multiple regions:
 # If no regions specified, it will be all subscribed regions.
 # regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
-regions = []
+regions = ["uk-london-1"]
 
 # Specify your home region
 homeregion = "eu-frankfurt-1"
@@ -134,8 +134,8 @@ if confirm == "yes":
         DeleteApplications(config, processCompartments)
 
         print("\n--[ Deleting Deployments ]--")
-        DeleteDeployments(config, processCompartments)        
-        
+        DeleteDeployments(config, processCompartments)
+
         print("\n--[ Deleting API Gateways ]--")
         DeleteAPIGateways(config, processCompartments)
 

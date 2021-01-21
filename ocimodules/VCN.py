@@ -4,13 +4,17 @@ import time
 WaitRefresh = 15
 
 def DeleteVCN(config,compartments):
-    AllItems = []
     object = oci.core.VirtualNetworkClient(config)
 
     print ("Getting all VCN objects")
     for Compartment in compartments:
+        AllItems = []
+        print("---[ Deleting Load Balancers and Reserved IPs ]----")
         DeleteLoadBalancers(config, Compartment)
         DeleteReservedIPs(config, Compartment)
+        print("---[ Deleting DRGs ]----")
+        DeleteDRGAttachments(config, Compartment)
+        DeleteDRGs(config, Compartment)
 
         items = oci.pagination.list_call_get_all_results(object.list_vcns, compartment_id=Compartment.id).data
         for item in items:
@@ -30,22 +34,9 @@ def DeleteVCN(config,compartments):
             DeleteNATGateways(config, Compartment, item)
             DeleteLocalPeeringGateways(config, Compartment, item)
 
-        DeleteDRGAttachments(config, Compartment)
-        DeleteDRGs(config, Compartment)
+            print("---[ Deleting VCN ]----")
+            object.delete_vcn(vcn_id=item.id)
 
-    print ("Getting all VCNs")
-    deleting = True
-    while deleting:
-        deleting = False
-        for Compartment in compartments:
-            items = oci.pagination.list_call_get_all_results(object.list_vcns, compartment_id=Compartment.id).data
-            for item in items:
-                if (item.lifecycle_state != "TERMINATED"):
-                    deleting = True
-                    AllItems.append(item)
-                    print("- {} - {}".format(item.display_name, item.lifecycle_state))
-                    if (item.lifecycle_state != "TERMINATING"):
-                        object.delete_vcn(vcn_id=item.id)
 
 def DeleteSubnets(config, compartment, vcn):
     AllItems = []
