@@ -123,8 +123,8 @@ def DeletePolicies(config, compartments):
                 try:
                     print ("Deleting: {}".format(itemstatus.name))
                     object.delete_policy(policy_id=itemstatus.id)
-                except:
-                    print ("error trying to delete: {}".format(itemstatus.name))
+                except oci.exceptions.ServiceError as itemstatus:
+                    print ("error trying to delete: {} - {}".format(itemstatus.name, itemstatus.message))
                 count = count + 1
             except:
                 print ("Deleted : {}".format(item.name))

@@ -35,8 +35,15 @@ def DeleteVCN(config,compartments):
             DeleteLocalPeeringGateways(config, Compartment, item)
 
             print("---[ Deleting VCN ]----")
-            object.delete_vcn(vcn_id=item.id)
-
+            deleted = False
+            if not deleted:
+                try:
+                    object.delete_vcn(vcn_id=item.id)
+                    print ("VNC has been deleted")
+                    deleted = True
+                except oci.exceptions.ServiceError as response:
+                    print ("Error deleting VCN : {} - {}".format(response.status, response.message))
+                    time.sleep(5)
 
 def DeleteSubnets(config, compartment, vcn):
     AllItems = []
@@ -107,7 +114,6 @@ def DeleteDHCPoptions(config, compartment, vcn):
                         count = count + 1
             except:
                 print("error deleting {}, probably already deleted".format(item.display_name))
-                print (e)
         if count > 0:
             print("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
