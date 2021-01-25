@@ -189,6 +189,7 @@ if confirm == "yes":
         DeleteLogGroups(config, processCompartments)
 
         print("\n--[ Deleting Tag Namespaces ]--")
+        DeleteTagDefaults(config, processCompartments)
         DeleteTagNameSpaces(config, processCompartments)
 
 

@@ -134,3 +134,20 @@ def DeletePolicies(config, compartments):
         else:
             itemsPresent = False
     print ("All Objects deleted!")
+
+def DeleteTagDefaults(config, compartments):
+
+        object = oci.identity.IdentityClient(config)
+
+        print("Getting all Policy objects")
+        for Compartment in compartments:
+            items = oci.pagination.list_call_get_all_results(object.list_tag_defaults, compartment_id=Compartment.id).data
+            for item in items:
+                print("- {}".format(item.tag_definition_name))
+                try:
+                    object.delete_tag_default(tag_default_id=item.id)
+                    print("- Deleted : {}".format(item.tag_definition_name))
+                except oci.exceptions.ServiceError as itemstatus:
+                        print("- error trying to delete: {} - {}".format(item.tag_definition_name, itemstatus.message))
+
+        print("All Objects deleted!")
