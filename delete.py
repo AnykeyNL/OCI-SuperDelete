@@ -123,7 +123,6 @@ if confirm == "yes":
         print ("\n--[ Deleting Repositories ]--")
         DeleteContainerRepositories(config, processCompartments)
         DeleteRepositories(config, processCompartments)
-        DeleteGenericArtifacts(config, processCompartments)
 
         print ("\n--[ Deleting Auto Scaling Configurations ]--")
         DeleteAutoScalingConfigurations(config, processCompartments)
