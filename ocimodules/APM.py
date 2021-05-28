@@ -27,11 +27,11 @@ def DeleteAPM(config,compartments):
             deleted = False
             if not deleted:
                 try:
-                    print ("Deleting: {}".format(item.name))
+                    print ("Deleting: {}".format(item.display_name))
                     object.delete_apm_domain(apm_domain_id=item.id)
                     deleted = True
                 except:
-                    print ("error trying to delete: {}".format(items.name))
+                    print ("error trying to delete: {}".format(items.display_name))
                     time.sleep(5)
 
 def DeleteSyntheticMonitoring(config, compartment, apmDomain):
