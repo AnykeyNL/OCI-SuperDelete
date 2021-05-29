@@ -39,7 +39,7 @@ This script is still being worked on, not all OCI resources have been added yet.
 - Policies
 - KMS Vaults and Keys**
 - API Gateways
-- Analytics, Streams, Stream Pools, Service Connectors
+- Analytics, Streams, Stream Pools, Connect Harnesses, Service Connectors
 - MySQL
 - Logs and Log Groups
 - Integration

@@ -172,6 +172,7 @@ if confirm == "yes":
         DeleteAnalytics(config, processCompartments)
         DeleteStreams(config, processCompartments)
         DeleteStreamPools(config, processCompartments)
+        DeleteConnectHarnesses(config, processCompartments)
         DeleteServiceConnectors(config, processCompartments)
 
         print("\n--[ Deleting Integration ]--")
