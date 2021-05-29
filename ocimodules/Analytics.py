@@ -58,7 +58,7 @@ def DeleteStreams(config, Compartments):
         for item in items:
             if (item.lifecycle_state != "DELETED"):
                 AllItems.append(item)
-                print("- {} - {}".format(item.display_name, item.lifecycle_state))
+                print("- {} - {}".format(item.name, item.lifecycle_state))
 
     itemsPresent = True
 
@@ -70,16 +70,16 @@ def DeleteStreams(config, Compartments):
                 if itemstatus.lifecycle_state != "DELETED":
                     if itemstatus.lifecycle_state != "DELETING":
                         try:
-                            print ("Deleting: {}".format(itemstatus.display_name))
+                            print ("Deleting: {}".format(itemstatus.name))
                             object.delete_stream(stream_id=itemstatus.id)
                         except:
-                            print ("error trying to delete: {}".format(itemstatus.display_name))
+                            print ("error trying to delete: {}".format(itemstatus.name))
                     else:
-                        print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
+                        print("{} = {}".format(itemstatus.name, itemstatus.lifecycle_state))
                     count = count + 1
             except:
 
-                print ("-----------------> error deleting {}, probably already deleted: {}.".format(item.display_name, item.lifecycle_state))
+                print ("-----------------> error deleting {}, probably already deleted: {}.".format(item.name, item.lifecycle_state))
         if count > 0 :
             print ("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
@@ -97,7 +97,7 @@ def DeleteStreamPools(config, Compartments):
         for item in items:
             if (item.lifecycle_state != "DELETED"):
                 AllItems.append(item)
-                print("- {} - {}".format(item.display_name, item.lifecycle_state))
+                print("- {} - {}".format(item.name, item.lifecycle_state))
 
     itemsPresent = True
 
@@ -109,16 +109,16 @@ def DeleteStreamPools(config, Compartments):
                 if itemstatus.lifecycle_state != "DELETED":
                     if itemstatus.lifecycle_state != "DELETING":
                         try:
-                            print ("Deleting: {}".format(itemstatus.display_name))
+                            print ("Deleting: {}".format(itemstatus.name))
                             object.delete_stream_pool(stream_pool_id=itemstatus.id)
                         except:
-                            print ("error trying to delete: {}".format(itemstatus.display_name))
+                            print ("error trying to delete: {}".format(itemstatus.name))
                     else:
-                        print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
+                        print("{} = {}".format(itemstatus.name, itemstatus.lifecycle_state))
                     count = count + 1
             except:
 
-                print ("-----------------> error deleting {}, probably already deleted: {}.".format(item.display_name, item.lifecycle_state))
+                print ("-----------------> error deleting {}, probably already deleted: {}.".format(item.name, item.lifecycle_state))
         if count > 0 :
             print ("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
