@@ -138,6 +138,8 @@ if confirm == "yes":
 
         print ("\n--[ Deleting DataScience Components ]--")
         DeleteNotebooks(config, processCompartments)
+        DeleteModelDeployments(config, processCompartments)
+        DeleteModels(config, processCompartments)
         DeleteProjects(config, processCompartments)
 
         print("\n--[ Deleting Application Functions ]--")
