@@ -148,8 +148,12 @@ if confirm == "yes":
         print("\n--[ Deleting Deployments ]--")
         DeleteDeployments(config, processCompartments)
 
+        print("\n--[ Deleting APIs ]--")
+        DeleteAPIs(config, processCompartments)        
+
         print("\n--[ Deleting API Gateways ]--")
         DeleteAPIGateways(config, processCompartments)
+        DeleteCertificates(config, processCompartments)
 
         print ("\n--[ Deleting Database Instances ]--")
         DeleteDBCS(config,processCompartments)

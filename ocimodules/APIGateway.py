@@ -78,3 +78,79 @@ def DeleteDeployments(config, Compartments):
         else:
             itemsPresent = False
     print ("All Objects deleted!")
+
+def DeleteAPIs(config, Compartments):
+    AllItems = []
+    object = oci.apigateway.ApiGatewayClient(config)
+
+    print ("Getting all API objects")
+    for Compartment in Compartments:
+        items = oci.pagination.list_call_get_all_results(object.list_apis, compartment_id=Compartment.id).data
+        for item in items:
+            if (item.lifecycle_state != "DELETED"):
+                AllItems.append(item)
+                print("- {} - {}".format(item.display_name, item.lifecycle_state))
+
+    itemsPresent = True
+
+    while itemsPresent:
+        count = 0
+        for item in AllItems:
+            try:
+                itemstatus = object.get_api(api_id=item.id).data
+                if itemstatus.lifecycle_state != "DELETED":
+                    if itemstatus.lifecycle_state != "DELETING":
+                        try:
+                            print ("Deleting: {}".format(itemstatus.display_name))
+                            object.delete_api(api_id=itemstatus.id)
+                        except:
+                            print ("error trying to delete: {}".format(itemstatus.display_name))
+                    else:
+                        print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
+                    count = count + 1
+            except:
+                print ("error getting : {}".format(item.display_name))
+        if count > 0 :
+            print ("Waiting for all Objects to be deleted...")
+            time.sleep(WaitRefresh)
+        else:
+            itemsPresent = False
+    print ("All Objects deleted!")
+
+def DeleteCertificates(config, Compartments):
+    AllItems = []
+    object = oci.apigateway.ApiGatewayClient(config)
+
+    print ("Getting all Certificate objects")
+    for Compartment in Compartments:
+        items = oci.pagination.list_call_get_all_results(object.list_certificates, compartment_id=Compartment.id).data
+        for item in items:
+            if (item.lifecycle_state != "DELETED"):
+                AllItems.append(item)
+                print("- {} - {}".format(item.display_name, item.lifecycle_state))
+
+    itemsPresent = True
+
+    while itemsPresent:
+        count = 0
+        for item in AllItems:
+            try:
+                itemstatus = object.get_certificate(certificate_id=item.id).data
+                if itemstatus.lifecycle_state != "DELETED":
+                    if itemstatus.lifecycle_state != "DELETING":
+                        try:
+                            print ("Deleting: {}".format(itemstatus.display_name))
+                            object.delete_certificate(certificate_id=itemstatus.id)
+                        except:
+                            print ("error trying to delete: {}".format(itemstatus.display_name))
+                    else:
+                        print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
+                    count = count + 1
+            except:
+                print ("error getting : {}".format(item.display_name))
+        if count > 0 :
+            print ("Waiting for all Objects to be deleted...")
+            time.sleep(WaitRefresh)
+        else:
+            itemsPresent = False
+    print ("All Objects deleted!")

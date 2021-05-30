@@ -38,7 +38,7 @@ This script is still being worked on, not all OCI resources have been added yet.
 - Digital Assistants
 - Policies
 - KMS Vaults and Keys**
-- API Gateways
+- API Gateways, APIs, Certificates
 - Analytics, Streams, Stream Pools, Connect Harnesses, Service Connectors
 - MySQL
 - Logs and Log Groups
