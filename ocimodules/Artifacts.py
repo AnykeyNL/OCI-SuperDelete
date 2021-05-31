@@ -3,13 +3,13 @@ import time
 
 WaitRefresh = 10
 
-def DeleteAPIGateways(config, Compartments):
+def DeleteContainerRepositories(config, Compartments):
     AllItems = []
-    object = oci.apigateway.GatewayClient(config)
+    object = oci.artifacts.ArtifactsClient(config)
 
-    print ("Getting all API Gateways objects")
+    print ("Getting all Container Repositories objects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_gateways, compartment_id=Compartment.id).data
+        items = oci.pagination.list_call_get_all_results(object.list_container_repositories, compartment_id=Compartment.id).data
         for item in items:
             if (item.lifecycle_state != "DELETED"):
                 AllItems.append(item)
@@ -21,19 +21,20 @@ def DeleteAPIGateways(config, Compartments):
         count = 0
         for item in AllItems:
             try:
-                itemstatus = object.get_gateway(gateway_id=item.id).data
+                itemstatus = object.get_container_repository(repository_id =item.id).data
                 if itemstatus.lifecycle_state != "DELETED":
                     if itemstatus.lifecycle_state != "DELETING":
                         try:
                             print ("Deleting: {}".format(itemstatus.display_name))
-                            object.delete_gateway(gateway_id=itemstatus.id)
+                            object.delete_container_repository(repository_id=itemstatus.id)
                         except:
                             print ("error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
             except:
-                print ("error getting : {}".format(item.display_name))
+
+                print ("-----------------> error deleting {}, probably already deleted: {}.".format(item.display_name, item.lifecycle_state))
         if count > 0 :
             print ("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
@@ -41,13 +42,13 @@ def DeleteAPIGateways(config, Compartments):
             itemsPresent = False
     print ("All Objects deleted!")
 
-def DeleteDeployments(config, Compartments):
+def DeleteRepositories(config, Compartments):
     AllItems = []
-    object = oci.apigateway.DeploymentClient(config)
+    object = oci.artifacts.ArtifactsClient(config)
 
-    print ("Getting all Deployment objects")
+    print ("Getting all Repositories objects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_deployments, compartment_id=Compartment.id).data
+        items = oci.pagination.list_call_get_all_results(object.list_repositories, compartment_id=Compartment.id).data
         for item in items:
             if (item.lifecycle_state != "DELETED"):
                 AllItems.append(item)
@@ -59,19 +60,20 @@ def DeleteDeployments(config, Compartments):
         count = 0
         for item in AllItems:
             try:
-                itemstatus = object.get_deployment(deployment_id=item.id).data
+                itemstatus = object.get_repository(repository_id =item.id).data
                 if itemstatus.lifecycle_state != "DELETED":
                     if itemstatus.lifecycle_state != "DELETING":
                         try:
                             print ("Deleting: {}".format(itemstatus.display_name))
-                            object.delete_deployment(deployment_id=itemstatus.id)
+                            object.delete_repository(repository_id=itemstatus.id)
                         except:
                             print ("error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
             except:
-                print ("error getting : {}".format(item.display_name))
+
+                print ("-----------------> error deleting {}, probably already deleted: {}.".format(item.display_name, item.lifecycle_state))
         if count > 0 :
             print ("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
@@ -79,13 +81,13 @@ def DeleteDeployments(config, Compartments):
             itemsPresent = False
     print ("All Objects deleted!")
 
-def DeleteAPIs(config, Compartments):
+def DeleteGenericArtifacts(config, Compartments):
     AllItems = []
-    object = oci.apigateway.ApiGatewayClient(config)
+    object = oci.artifacts.ArtifactsClient(config)
 
-    print ("Getting all API objects")
+    print ("Getting all Repositories objects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_apis, compartment_id=Compartment.id).data
+        items = oci.pagination.list_call_get_all_results(object.list_generic_artifacts, compartment_id=Compartment.id).data
         for item in items:
             if (item.lifecycle_state != "DELETED"):
                 AllItems.append(item)
@@ -97,57 +99,20 @@ def DeleteAPIs(config, Compartments):
         count = 0
         for item in AllItems:
             try:
-                itemstatus = object.get_api(api_id=item.id).data
+                itemstatus = object.get_generic_artifact(repository_id =item.id).data
                 if itemstatus.lifecycle_state != "DELETED":
                     if itemstatus.lifecycle_state != "DELETING":
                         try:
                             print ("Deleting: {}".format(itemstatus.display_name))
-                            object.delete_api(api_id=itemstatus.id)
+                            object.delete_generic_artifact(repository_id=itemstatus.id)
                         except:
                             print ("error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
             except:
-                print ("error getting : {}".format(item.display_name))
-        if count > 0 :
-            print ("Waiting for all Objects to be deleted...")
-            time.sleep(WaitRefresh)
-        else:
-            itemsPresent = False
-    print ("All Objects deleted!")
 
-def DeleteCertificates(config, Compartments):
-    AllItems = []
-    object = oci.apigateway.ApiGatewayClient(config)
-
-    print ("Getting all Certificate objects")
-    for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_certificates, compartment_id=Compartment.id).data
-        for item in items:
-            if (item.lifecycle_state != "DELETED"):
-                AllItems.append(item)
-                print("- {} - {}".format(item.display_name, item.lifecycle_state))
-
-    itemsPresent = True
-
-    while itemsPresent:
-        count = 0
-        for item in AllItems:
-            try:
-                itemstatus = object.get_certificate(certificate_id=item.id).data
-                if itemstatus.lifecycle_state != "DELETED":
-                    if itemstatus.lifecycle_state != "DELETING":
-                        try:
-                            print ("Deleting: {}".format(itemstatus.display_name))
-                            object.delete_certificate(certificate_id=itemstatus.id)
-                        except:
-                            print ("error trying to delete: {}".format(itemstatus.display_name))
-                    else:
-                        print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
-                    count = count + 1
-            except:
-                print ("error getting : {}".format(item.display_name))
+                print ("-----------------> error deleting {}, probably already deleted: {}.".format(item.display_name, item.lifecycle_state))
         if count > 0 :
             print ("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)

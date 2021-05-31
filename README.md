@@ -28,7 +28,9 @@ This script is still being worked on, not all OCI resources have been added yet.
 - Autoscaling policies
 - Notifications
 - Alarms
+- Events
 - Applications and Functions
+- Repositories
 - DataScience Projects and Notebooks
 - Container Cluster resources
 - Nosql tables
@@ -36,10 +38,13 @@ This script is still being worked on, not all OCI resources have been added yet.
 - Digital Assistants
 - Policies
 - KMS Vaults and Keys**
-- API Gateways
-- Analytics
+- API Gateways, APIs, Certificates
+- Analytics, Streams, Stream Pools, Connect Harnesses, Service Connectors
 - MySQL
 - Logs and Log Groups
+- Integration
+- Blockchain
+- Application Performance Monitoring
 
 ** KMS Vaults and Keys can not instantly be deleted, but require a minimal 7 day grace period. The script will move all keys and vaults to the upper compartment and will schedule the deletion with 7 days grace period. This will allow all sub compartments to be instantly deleted, while the top compartment will only be able to be deleted after the grace period. 
 
