@@ -25,6 +25,11 @@ from ocimodules.APIGateway import *
 from ocimodules.Analytics import *
 from ocimodules.MySQL import *
 from ocimodules.Logging import *
+from ocimodules.Integration import *
+from ocimodules.Blockchain import *
+from ocimodules.APM import *
+from ocimodules.Artifacts import *
+from ocimodules.Events import *
 import logging
 
 ########## Configuration ####################
@@ -115,6 +120,10 @@ if confirm == "yes":
         print ("\n--[ Deleting OKE Clusters ]--")
         DeleteClusters(config, processCompartments)
 
+        print ("\n--[ Deleting Repositories ]--")
+        DeleteContainerRepositories(config, processCompartments)
+        DeleteRepositories(config, processCompartments)
+
         print ("\n--[ Deleting Auto Scaling Configurations ]--")
         DeleteAutoScalingConfigurations(config, processCompartments)
 
@@ -129,6 +138,8 @@ if confirm == "yes":
 
         print ("\n--[ Deleting DataScience Components ]--")
         DeleteNotebooks(config, processCompartments)
+        DeleteModelDeployments(config, processCompartments)
+        DeleteModels(config, processCompartments)
         DeleteProjects(config, processCompartments)
 
         print("\n--[ Deleting Application Functions ]--")
@@ -137,8 +148,12 @@ if confirm == "yes":
         print("\n--[ Deleting Deployments ]--")
         DeleteDeployments(config, processCompartments)
 
+        print("\n--[ Deleting APIs ]--")
+        DeleteAPIs(config, processCompartments)        
+
         print("\n--[ Deleting API Gateways ]--")
         DeleteAPIGateways(config, processCompartments)
+        DeleteCertificates(config, processCompartments)
 
         print ("\n--[ Deleting Database Instances ]--")
         DeleteDBCS(config,processCompartments)
@@ -159,6 +174,16 @@ if confirm == "yes":
 
         print("\n--[ Deleting Analytics ]--")
         DeleteAnalytics(config, processCompartments)
+        DeleteStreams(config, processCompartments)
+        DeleteStreamPools(config, processCompartments)
+        DeleteConnectHarnesses(config, processCompartments)
+        DeleteServiceConnectors(config, processCompartments)
+
+        print("\n--[ Deleting Integration ]--")
+        DeleteIntegration(config, processCompartments)
+
+        print("\n--[ Deleting Blockchain ]--")
+        DeleteBlockchain(config, processCompartments)
 
         print ("\n--[ Deleting Resource Manager Stacks ]--")
         DeleteStacks(config, processCompartments)
@@ -182,11 +207,17 @@ if confirm == "yes":
         print ("\n--[ Deleting Notifications ]--")
         DeleteNotifications(config, processCompartments)
 
+        print ("\n--[ Deleting Events ]--")
+        DeleteEvents(config, processCompartments)
+
         print ("\n--[ Deleting Policies ]--")
         DeletePolicies(config, processCompartments)
 
         print("\n--[ Deleting Log Groups ]--")
         DeleteLogGroups(config, processCompartments)
+
+        print("\n--[ Deleting Application Performance Monitoring ]--")
+        DeleteAPM(config, processCompartments)
 
         print("\n--[ Deleting Tag Namespaces ]--")
         DeleteTagDefaults(config, processCompartments)
