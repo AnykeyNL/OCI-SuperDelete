@@ -209,16 +209,19 @@ def DeleteZones(config, Compartments):
         for item in AllItems:
             try:
                 itemstatus = object.get_zone(zone_name_or_id=item.id).data
-                if itemstatus.lifecycle_state != "DELETED":
-                    if itemstatus.lifecycle_state != "DELETING":
-                        try:
-                            print ("Deleting: {}".format(itemstatus.name))
-                            object.delete_zone(zone_name_or_id=itemstatus.id)
-                        except:
-                            print ("error trying to delete: {}".format(itemstatus.name))
-                    else:
-                        print("{} = {}".format(itemstatus.name, itemstatus.lifecycle_state))
-                    count = count + 1
+                if not itemstatus.is_protected:
+                    if itemstatus.lifecycle_state != "DELETED":
+                        if itemstatus.lifecycle_state != "DELETING":
+                            try:
+                                print ("Deleting: {}".format(itemstatus.name))
+                                object.delete_zone(zone_name_or_id=itemstatus.id)
+                            except:
+                                print ("error trying to delete: {}".format(itemstatus.name))
+                        else:
+                            print("{} = {}".format(itemstatus.name, itemstatus.lifecycle_state))
+                        count = count + 1
+                else:
+                    print ("ignoring protected zone {}".format(itemstatus.name))
             except:
                 print ("error getting : {}, probably already deleted".format(item.name))
         if count > 0 :
@@ -247,16 +250,19 @@ def DeleteDNSViews(config, Compartments):
         for item in AllItems:
             try:
                 itemstatus = object.get_view(view_id=item.id).data
-                if itemstatus.lifecycle_state != "DELETED":
-                    if itemstatus.lifecycle_state != "DELETING":
-                        try:
-                            print ("Deleting: {}".format(itemstatus.display_name))
-                            object.delete_view(view_id=itemstatus.id)
-                        except:
-                            print ("error trying to delete: {}".format(itemstatus.display_name))
-                    else:
-                        print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
-                    count = count + 1
+                if not itemstatus.is_protected:
+                    if itemstatus.lifecycle_state != "DELETED":
+                        if itemstatus.lifecycle_state != "DELETING":
+                            try:
+                                print ("Deleting: {}".format(itemstatus.display_name))
+                                object.delete_view(view_id=itemstatus.id)
+                            except:
+                                print ("error trying to delete: {}".format(itemstatus.display_name))
+                        else:
+                            print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
+                        count = count + 1
+                else:
+                    print ("Ignoring protected view {}".format(itemstatus.display_name))
             except:
                 print ("error getting : {}, probably already deleted".format(item.display_name))
         if count > 0 :

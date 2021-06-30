@@ -43,13 +43,38 @@ DeleteCompartmentOCID = ""
 # Search for resources in regions, this is an Array, so you can specify multiple regions:
 # If no regions specified, it will be all subscribed regions.
 # regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
-regions = ["eu-frankfurt-1"]
+regions = []
 
 # Specify your home region
 homeregion = "eu-frankfurt-1"
 #############################################
 
 debug = False
+
+class MyWriter:
+
+    filename = "log.txt"
+
+    def __init__(self, stdout, filename):
+        self.stdout = stdout
+        self.filename = filename
+        self.logfile = open(self.filename, "a")
+
+    def write(self, text):
+        self.stdout.write(text)
+        self.logfile.write(text)
+
+    def close(self):
+        self.stdout.close()
+        self.logfile.close()
+
+    def flush(self):
+        self.logfile.close()
+        self.logfile = open(self.filename, "a")
+
+
+writer = MyWriter(sys.stdout, 'log.txt')
+sys.stdout = writer
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "c:", ["compid="])
@@ -149,7 +174,7 @@ if confirm == "yes":
         DeleteDeployments(config, processCompartments)
 
         print("\n--[ Deleting APIs ]--")
-        DeleteAPIs(config, processCompartments)        
+        DeleteAPIs(config, processCompartments)
 
         print("\n--[ Deleting API Gateways ]--")
         DeleteAPIGateways(config, processCompartments)
@@ -227,6 +252,9 @@ if confirm == "yes":
     print ("\n--[ Hopefully deleting compartments, if empty ]--")
     config["region"] = homeregion
     DeleteCompartments(config,processCompartments, DeleteCompartmentOCID)
+
+else:
+    print ("ok, doing nothing")
 
 
 

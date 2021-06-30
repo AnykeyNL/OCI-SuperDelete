@@ -8,14 +8,22 @@ def DeleteBlockchain(config, Compartments):
     object = oci.blockchain.BlockchainPlatformClient(config)
 
     print ("Getting all Blockchain objects")
-    for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_blockchain_platforms, compartment_id=Compartment.id).data
-        for item in items:
-            if (item.lifecycle_state != "DELETED"):
-                AllItems.append(item)
-                print("- {} - {}".format(item.display_name, item.lifecycle_state))
+    try:
+        for Compartment in Compartments:
+            items = oci.pagination.list_call_get_all_results(object.list_blockchain_platforms, compartment_id=Compartment.id).data
+            for item in items:
+                if (item.lifecycle_state != "DELETED"):
+                    AllItems.append(item)
+                    print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
-    itemsPresent = True
+        itemsPresent = True
+    except oci.exceptions.ServiceError as response:
+        if response.status == 404:
+            print ("Ignoring this service, as not available in this region")
+        else:
+            pritn ("Error getting blockchain service")
+        itemsPresent = False
+
 
     while itemsPresent:
         count = 0
