@@ -57,9 +57,9 @@ v1,v2,v3 = oci.__version__.split(".")
 
 outdated = False
 
-if v1 >= mv1:
-    if v2 >= mv2:
-        if v3 >= mv3:
+if int(v1) >= mv1:
+    if int(v2) >= mv2:
+        if int(v3) >= mv3:
             pass
         else:
             outdated = True
