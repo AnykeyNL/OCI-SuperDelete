@@ -49,6 +49,29 @@ regions = []
 homeregion = "eu-frankfurt-1"
 #############################################
 
+# Minimum version requirements for OCI SDK
+mv1 = 2
+mv2 = 41
+mv3 = 0
+v1,v2,v3 = oci.__version__.split(".")
+
+outdated = False
+
+if v1 >= mv1:
+    if v2 >= mv2:
+        if v3 >= mv3:
+            pass
+        else:
+            outdated = True
+    else:
+        outdated = True
+else:
+    outdated = True
+
+if outdated:
+    print ("Your version of the OCI SDK is out-of-date. Please first upgrade your OCI SDK Library bu running the command:")
+    print ("pip install --upgrade oci")
+    quit()
 debug = False
 
 class MyWriter:
