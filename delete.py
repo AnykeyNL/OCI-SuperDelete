@@ -30,6 +30,8 @@ from ocimodules.Blockchain import *
 from ocimodules.APM import *
 from ocimodules.Artifacts import *
 from ocimodules.Events import *
+from ocimodules.VulnerabilityScanning import *
+from ocimodules.Bastion import *
 import logging
 
 ########## Configuration ####################
@@ -43,18 +45,20 @@ DeleteCompartmentOCID = ""
 # Search for resources in regions, this is an Array, so you can specify multiple regions:
 # If no regions specified, it will be all subscribed regions.
 # regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
-regions = []
+regions = ["uk-london-1"]
 
 # Specify your home region
 homeregion = "eu-frankfurt-1"
 #############################################
 
+clear()
+
 # Minimum version requirements for OCI SDK
 mv1 = 2
 mv2 = 41
-mv3 = 0
+mv3 = 1
 v1,v2,v3 = oci.__version__.split(".")
-
+print ("OCI SDK Version: {}".format(oci.__version__))
 outdated = False
 
 if int(v1) >= mv1:
@@ -121,8 +125,6 @@ if debug:
     logging.basicConfig()
     logging.getLogger('oci').setLevel(logging.DEBUG)
 
-clear()
-
 print ("\n--[ Login check and getting all compartments from starting compartment ]--")
 compartments = Login(config, DeleteCompartmentOCID)
 
@@ -152,6 +154,14 @@ if confirm == "yes":
 
         print ("\n--[ Moving and Scheduling KMS Vaults for deletion ]--")
         DeleteKMSvaults(config, processCompartments, DeleteCompartmentOCID)
+
+        print ("\n--[ Deleting Vulnerability Scanning Services ]--")
+        DeleteScanResults(config, processCompartments)
+        DeleteTargets(config, processCompartments)
+        DeleteRecipes(config, processCompartments)
+
+        print ("\n--[ Deleting Bastion Services ]--")
+        DeleteBastion(config, processCompartments)
 
         print ("\n--[ Deleting Edge Services ]--")
         DeleteWAFs(config,processCompartments)
