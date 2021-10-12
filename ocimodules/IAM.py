@@ -1,5 +1,6 @@
 import oci
 import time
+import sys
 
 WaitRefresh = 10
 
@@ -10,7 +11,16 @@ def Login(config, startcomp):
     print("Logged in as: {} @ {}".format(user.description, config["region"]))
 
     # Add first level subcompartments
-    compartments = oci.pagination.list_call_get_all_results(identity.list_compartments, compartment_id=startcomp).data
+    compartments = []
+    try:
+        compartments = oci.pagination.list_call_get_all_results(identity.list_compartments, compartment_id=startcomp).data
+    except Exception as e:
+        if e.status == 404:
+            print ("Compartment not found")
+            sys.exit(2)
+        else:
+            print ("Error {}".format(e.status))
+            sys.exit(2)
 
     # Add 2nd level subcompartments
     for compartment in compartments:

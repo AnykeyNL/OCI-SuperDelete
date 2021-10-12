@@ -10,7 +10,7 @@ def DeleteBastion(config, Compartments):
     print ("Getting all Bastion objects")
     for Compartment in Compartments:
         # SDK2.41.1 does not seem to support list_call_get_all_results, so using direct object list for now.
-        items = object.list_bastions(compartment_id=Compartment.id).data
+        items = object.list_bastions(compartment_id=Compartment.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY ).data
         for item in items:
             if (item.lifecycle_state != "DELETED"):
                 AllItems.append(item)
@@ -22,7 +22,7 @@ def DeleteBastion(config, Compartments):
         count = 0
         for item in AllItems:
             try:
-                itemstatus = object.get_bastion(bastion_id=item.id).data
+                itemstatus = object.get_bastion(bastion_id=item.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY ).data
                 if itemstatus.lifecycle_state != "DELETED":
                     if itemstatus.lifecycle_state != "DELETING":
                         try:
