@@ -1,5 +1,6 @@
-#Use with PYTHON3!
-import sys, getopt
+# Use with PYTHON3!
+import sys
+import getopt
 import oci
 from ocimodules.functions import *
 from ocimodules.EdgeServices import *
@@ -34,10 +35,11 @@ from ocimodules.VulnerabilityScanning import *
 from ocimodules.Bastion import *
 import logging
 
-########## Configuration ####################
+############### Configuration ####################
 # Specify your config file
 configfile = "~/.oci/config"  # Linux
-#configfile = "\\Users\\username\\.oci\\config"  # Windows
+configProfile = "DEFAULT"
+# configfile = "\\Users\\username\\.oci\\config"  # Windows
 
 # Specify the DEFAULT compartment OCID that you want to delete, Leave Empty for no default
 DeleteCompartmentOCID = ""
@@ -54,30 +56,28 @@ homeregion = "eu-frankfurt-1"
 clear()
 
 # Minimum version requirements for OCI SDK
-mv1 = 2
-mv2 = 41
-mv3 = 1
-v1,v2,v3 = oci.__version__.split(".")
-print ("OCI SDK Version: {}".format(oci.__version__))
+print("OCI SDK Version: {}".format(oci.__version__))
+min_version_required = "2.41.1"
 outdated = False
 
-if int(v1) >= mv1:
-    if int(v2) >= mv2:
-        if int(v3) >= mv3:
-            pass
-        else:
-            outdated = True
-    else:
+for i, rl in zip(oci.__version__.split("."), min_version_required.split(".")):
+    if int(i) > int(rl):
+        break
+    if int(i) < int(rl):
         outdated = True
-else:
-    outdated = True
+        break
 
 if outdated:
-    print ("Your version of the OCI SDK is out-of-date. Please first upgrade your OCI SDK Library bu running the command:")
-    print ("pip install --upgrade oci")
+    print("Your version of the OCI SDK is out-of-date. Please first upgrade your OCI SDK Library bu running the command:")
+    print("pip install --upgrade oci")
     quit()
+
 debug = False
 
+
+############################################
+# Class MyWriter
+############################################
 class MyWriter:
 
     filename = "log.txt"
@@ -106,65 +106,65 @@ sys.stdout = writer
 try:
     opts, args = getopt.getopt(sys.argv[1:], "c:", ["compid="])
 except getopt.GetoptError:
-    print ("delete.py -c <compartmentID>")
+    print("delete.py -c <compartmentID>")
     sys.exit(2)
 
 for opt, arg in opts:
-    print ("{} - {}".format(opt,arg))
+    print("{} - {}".format(opt, arg))
     if opt == "-c":
         DeleteCompartmentOCID = arg
 
-if DeleteCompartmentOCID =="":
-    print ("No compartment specified")
+if DeleteCompartmentOCID == "":
+    print("No compartment specified")
     sys.exit(2)
 
-config = oci.config.from_file(configfile)
+config = oci.config.from_file(configfile, configProfile)
 
 if debug:
     config['log_requests'] = True
     logging.basicConfig()
     logging.getLogger('oci').setLevel(logging.DEBUG)
 
-print ("\n--[ Login check and getting all compartments from starting compartment ]--")
+print("\n--[ Login check and getting all compartments from starting compartment ]--")
 compartments = Login(config, DeleteCompartmentOCID)
 
 if len(regions) == 0:
     # No specific region specified, getting all subscribed regions.
-    regions=SubscribedRegions(config)
+    regions = SubscribedRegions(config)
 
-processCompartments=[]
+processCompartments = []
 
-print ("\n--[ Compartments to process ]--")
+print("\n--[ Compartments to process ]--")
 
-# Add all active compartments, but exclude the ManagementCompartmentForPaas (as this is locked compartment)
+# Add all active compartments, but exclude the ManagementCompartmentForPaas(as this is locked compartment)
 for compartment in compartments:
-    if compartment.lifecycle_state== "ACTIVE" and compartment.name != "ManagedCompartmentForPaaS":
+    if compartment.lifecycle_state == "ACTIVE" and compartment.name != "ManagedCompartmentForPaaS":
         processCompartments.append(compartment)
-        print (compartment.name)
+        print(compartment.name)
 
 
-confirm = input ("\ntype yes to delete all contents from these compartments: ")
+confirm = input("\ntype yes to delete all contents from these compartments: ")
 
 if confirm == "yes":
 
     for region in regions:
 
-        print ("============[ Deleting resources in {} ]================".format(region))
+        print("============[ Deleting resources in {} ]================".format(region))
         config["region"] = region
 
-        print ("\n--[ Moving and Scheduling KMS Vaults for deletion ]--")
+        print("\n--[ Moving and Scheduling KMS Vaults for deletion ]--")
         DeleteKMSvaults(config, processCompartments, DeleteCompartmentOCID)
 
-        print ("\n--[ Deleting Vulnerability Scanning Services ]--")
+        print("\n--[ Deleting Vulnerability Scanning Services ]--")
         DeleteScanResults(config, processCompartments)
         DeleteTargets(config, processCompartments)
         DeleteRecipes(config, processCompartments)
 
-        print ("\n--[ Deleting Bastion Services ]--")
+        print("\n--[ Deleting Bastion Services ]--")
         DeleteBastion(config, processCompartments)
 
-        print ("\n--[ Deleting Edge Services ]--")
-        DeleteWAFs(config,processCompartments)
+        print("\n--[ Deleting Edge Services ]--")
+        DeleteWAFs(config, processCompartments)
         DeleteHTTPHealthchecks(config, processCompartments)
         DeletePINGHealthchecks(config, processCompartments)
         DeleteTrafficSteeringsAttachments(config, processCompartments)
@@ -172,29 +172,29 @@ if confirm == "yes":
         DeleteZones(config, processCompartments)
         DeleteDNSViews(config, processCompartments)
 
-        print ("\n--[ Deleting Object Storage ]--")
+        print("\n--[ Deleting Object Storage ]--")
         DeleteBuckets(config, processCompartments)
 
-        print ("\n--[ Deleting OKE Clusters ]--")
+        print("\n--[ Deleting OKE Clusters ]--")
         DeleteClusters(config, processCompartments)
 
-        print ("\n--[ Deleting Repositories ]--")
+        print("\n--[ Deleting Repositories ]--")
         DeleteContainerRepositories(config, processCompartments)
         DeleteRepositories(config, processCompartments)
 
-        print ("\n--[ Deleting Auto Scaling Configurations ]--")
+        print("\n--[ Deleting Auto Scaling Configurations ]--")
         DeleteAutoScalingConfigurations(config, processCompartments)
 
-        print ("\n--[ Deleting Compute Instances ]--")
-        DeleteInstancePools(config,processCompartments)
+        print("\n--[ Deleting Compute Instances ]--")
+        DeleteInstancePools(config, processCompartments)
         DeleteInstanceConfigs(config, processCompartments)
-        DeleteInstances(config,processCompartments)
+        DeleteInstances(config, processCompartments)
         DeleteImages(config, processCompartments)
         DeleteBootVolumes(config, processCompartments)
         DeleteBootVolumesBackups(config, processCompartments)
         DeleteDedicatedVMHosts(config, processCompartments)
 
-        print ("\n--[ Deleting DataScience Components ]--")
+        print("\n--[ Deleting DataScience Components ]--")
         DeleteNotebooks(config, processCompartments)
         DeleteModelDeployments(config, processCompartments)
         DeleteModels(config, processCompartments)
@@ -213,9 +213,9 @@ if confirm == "yes":
         DeleteAPIGateways(config, processCompartments)
         DeleteCertificates(config, processCompartments)
 
-        print ("\n--[ Deleting Database Instances ]--")
-        DeleteDBCS(config,processCompartments)
-        DeleteAutonomousDB(config,processCompartments)
+        print("\n--[ Deleting Database Instances ]--")
+        DeleteDBCS(config, processCompartments)
+        DeleteAutonomousDB(config, processCompartments)
         DeleteDBBackups(config, processCompartments)
 
         print("\n--[ Deleting MySQL Database Instances ]--")
@@ -243,32 +243,32 @@ if confirm == "yes":
         print("\n--[ Deleting Blockchain ]--")
         DeleteBlockchain(config, processCompartments)
 
-        print ("\n--[ Deleting Resource Manager Stacks ]--")
+        print("\n--[ Deleting Resource Manager Stacks ]--")
         DeleteStacks(config, processCompartments)
 
-        print ("\n--[ Deleting Block Volumes ]--")
+        print("\n--[ Deleting Block Volumes ]--")
         DeleteVolumeGroups(config, processCompartments)
         DeleteVolumeGroupBackups(config, processCompartments)
         DeleteVolumes(config, processCompartments)
         DeleteBlockVolumesBackups(config, processCompartments)
 
-        print ("\n--[ Deleting FileSystem and Mount Targets ]--")
+        print("\n--[ Deleting FileSystem and Mount Targets ]--")
         DeleteMountTargets(config, processCompartments)
         DeleteFileStorage(config, processCompartments)
 
-        print ("\n--[ Deleting VCNs ]--")
+        print("\n--[ Deleting VCNs ]--")
         DeleteVCN(config, processCompartments)
 
-        print ("\n--[ Deleting Alarms ]--")
+        print("\n--[ Deleting Alarms ]--")
         DeleteAlarms(config, processCompartments)
 
-        print ("\n--[ Deleting Notifications ]--")
+        print("\n--[ Deleting Notifications ]--")
         DeleteNotifications(config, processCompartments)
 
-        print ("\n--[ Deleting Events ]--")
+        print("\n--[ Deleting Events ]--")
         DeleteEvents(config, processCompartments)
 
-        print ("\n--[ Deleting Policies ]--")
+        print("\n--[ Deleting Policies ]--")
         DeletePolicies(config, processCompartments)
 
         print("\n--[ Deleting Log Groups ]--")
@@ -281,13 +281,9 @@ if confirm == "yes":
         DeleteTagDefaults(config, processCompartments)
         DeleteTagNameSpaces(config, processCompartments)
 
-
-    print ("\n--[ Hopefully deleting compartments, if empty ]--")
+    print("\n--[ Hopefully deleting compartments, if empty ]--")
     config["region"] = homeregion
-    DeleteCompartments(config,processCompartments, DeleteCompartmentOCID)
+    DeleteCompartments(config, processCompartments, DeleteCompartmentOCID)
 
 else:
-    print ("ok, doing nothing")
-
-
-
+    print("ok, doing nothing")
