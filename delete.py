@@ -60,20 +60,21 @@ mv3 = 1
 v1,v2,v3 = oci.__version__.split(".")
 print ("OCI SDK Version: {}".format(oci.__version__))
 outdated = False
-
-if int(v1) >= mv1:
-    if int(v2) >= mv2:
-        if int(v3) >= mv3:
-            pass
-        else:
-            outdated = True
-    else:
+if int(v1) <= mv1:
+    if int(v2) < mv2:
         outdated = True
+    elif int(v2) > mv2:
+        outdated = False
+    else:
+        if int(v3) < mv3:
+            outdated = True
+        else:
+            outdated = False
 else:
-    outdated = True
+    outdated = False
 
 if outdated:
-    print ("Your version of the OCI SDK is out-of-date. Please first upgrade your OCI SDK Library bu running the command:")
+    print ("Your version ({}.{}.{}) of the OCI SDK is out-of-date. Please first upgrade your OCI SDK Library bu running the command:".format(v1,v2,v3))
     print ("pip install --upgrade oci")
     quit()
 debug = False
