@@ -3,12 +3,16 @@ import time
 
 WaitRefresh = 10
 
+
+###########################################
+# DeleteWAFs
+###########################################
 def DeleteWAFs(config, Compartments):
     AllItems = []
     object = oci.waas.WaasClient(config)
 
-    #functions.clear()
-    print ("Getting all WAF Policy objects")
+    # functions.clear()
+    print("Getting all WAF Policy objects")
     for Compartment in Compartments:
         items = oci.pagination.list_call_get_all_results(object.list_waas_policies, compartment_id=Compartment.id).data
         for item in items:
@@ -26,32 +30,36 @@ def DeleteWAFs(config, Compartments):
                 if itemstatus.lifecycle_state != "DELETED":
                     if itemstatus.lifecycle_state != "DELETING":
                         try:
-                            print ("Deleting: {}".format(itemstatus.display_name))
+                            print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_waas_policy(waas_policy_id=itemstatus.id)
-                        except:
-                            print ("error trying to delete: {}".format(itemstatus.display_name))
+                        except Exception:
+                            print("error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
-            except:
-                print ("error getting : {}".format(item.display_name))
-        if count > 0 :
-            print ("Waiting for all Objects to be deleted...")
+            except Exception:
+                print("error getting : {}".format(item.display_name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
         else:
             itemsPresent = False
-    print ("All Objects deleted!")
+    print("All WAF Policy Objects deleted!")
 
+
+###########################################
+# DeleteHTTPHealthchecks
+###########################################
 def DeleteHTTPHealthchecks(config, Compartments):
     AllItems = []
     object = oci.healthchecks.HealthChecksClient(config)
     currentregion = config['region']
-    print ("Getting all Healthchecks HTTP monitor objects")
+    print("Getting all Healthchecks HTTP monitor objects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_http_monitors, compartment_id=Compartment.id,home_region=currentregion).data
+        items = oci.pagination.list_call_get_all_results(object.list_http_monitors, compartment_id=Compartment.id, home_region=currentregion).data
         for item in items:
-                AllItems.append(item)
-                print("- {}".format(item.display_name))
+            AllItems.append(item)
+            print("- {}".format(item.display_name))
 
     itemsPresent = True
 
@@ -61,31 +69,35 @@ def DeleteHTTPHealthchecks(config, Compartments):
             try:
                 itemstatus = object.get_http_monitor(monitor_id=item.id).data
                 try:
-                    print ("Deleting: {}".format(itemstatus.display_name))
+                    print("Deleting: {}".format(itemstatus.display_name))
                     object.delete_http_monitor(monitor_id=itemstatus.id)
-                except:
-                    print ("error trying to delete: {}".format(itemstatus.display_name))
+                except Exception:
+                    print("error trying to delete: {}".format(itemstatus.display_name))
                 count = count + 1
-            except:
-                print ("Deleted : {}".format(item.display_name))
-        if count > 0 :
-            print ("Waiting for all Objects to be deleted...")
+            except Exception:
+                print("Deleted : {}".format(item.display_name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
         else:
             itemsPresent = False
-    print ("All Objects deleted!")
+    print("All Healthchecks HTTP monitor Objects deleted!")
 
+
+###########################################
+# DeletePINGHealthchecks
+###########################################
 def DeletePINGHealthchecks(config, Compartments):
     AllItems = []
     object = oci.healthchecks.HealthChecksClient(config)
     currentregion = config['region']
-    #functions.clear()
-    print ("Getting all Healthchecks PING monitor objects")
+    # functions.clear()
+    print("Getting all Healthchecks PING monitor objects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_ping_monitors, compartment_id=Compartment.id,home_region=currentregion).data
+        items = oci.pagination.list_call_get_all_results(object.list_ping_monitors, compartment_id=Compartment.id, home_region=currentregion).data
         for item in items:
-                AllItems.append(item)
-                print("- {}".format(item.display_name))
+            AllItems.append(item)
+            print("- {}".format(item.display_name))
 
     itemsPresent = True
 
@@ -95,26 +107,29 @@ def DeletePINGHealthchecks(config, Compartments):
             try:
                 itemstatus = object.get_ping_monitor(monitor_id=item.id).data
                 try:
-                    print ("Deleting: {}".format(itemstatus.display_name))
+                    print("Deleting: {}".format(itemstatus.display_name))
                     object.delete_ping_monitor(monitor_id=itemstatus.id)
-                except:
-                    print ("error trying to delete: {}".format(itemstatus.display_name))
+                except Exception:
+                    print("error trying to delete: {}".format(itemstatus.display_name))
                 count = count + 1
-            except:
-                print ("Deleted : {}".format(item.display_name))
-        if count > 0 :
-            print ("Waiting for all Objects to be deleted...")
+            except Exception:
+                print("Deleted : {}".format(item.display_name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
         else:
             itemsPresent = False
-    print ("All Objects deleted!")
+    print("All Healthchecks PING monitor Objects deleted!")
 
 
+###########################################
+# DeleteTrafficSteeringsAttachments
+###########################################
 def DeleteTrafficSteeringsAttachments(config, Compartments):
     AllItems = []
     object = oci.dns.DnsClient(config)
 
-    print ("Getting all Traffic Steering Policy Attachment objects")
+    print("Getting all Traffic Steering Policy Attachment objects")
     for Compartment in Compartments:
         try:
             items = oci.pagination.list_call_get_all_results(object.list_steering_policy_attachments, compartment_id=Compartment.id).data
@@ -122,8 +137,8 @@ def DeleteTrafficSteeringsAttachments(config, Compartments):
                 if (item.lifecycle_state != "DELETING"):
                     AllItems.append(item)
                     print("- {} - {}".format(item.display_name, item.lifecycle_state))
-        except:
-            print ("error getting steering policy attachements")
+        except Exception:
+            print("error getting steering policy attachements")
 
     itemsPresent = True
 
@@ -135,28 +150,32 @@ def DeleteTrafficSteeringsAttachments(config, Compartments):
                 # if itemstatus.lifecycle_state != "DELETED":
                 if itemstatus.lifecycle_state != "DELETING":
                     try:
-                        print ("Deleting: {}".format(itemstatus.display_name))
+                        print("Deleting: {}".format(itemstatus.display_name))
                         object.delete_steering_policy_attachment(steering_policy_attachment_id=itemstatus.id)
-                    except:
-                        print ("error trying to delete: {}".format(itemstatus.display_name))
+                    except Exception:
+                        print("error trying to delete: {}".format(itemstatus.display_name))
                 else:
                     print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                 count = count + 1
-            except:
-                print ("error getting : {}, probably already deleted".format(item.display_name))
-        if count > 0 :
-            print ("Waiting for all Objects to be deleted...")
+            except Exception:
+                print("error getting : {}, probably already deleted".format(item.display_name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
         else:
             itemsPresent = False
-    print ("All Objects deleted!")    
-    
-    
+
+    print("All Traffic Steering Policy Attachment Objects deleted!")
+
+
+###########################################
+# DeleteTrafficSteerings
+###########################################
 def DeleteTrafficSteerings(config, Compartments):
     AllItems = []
     object = oci.dns.DnsClient(config)
 
-    print ("Getting all Traffic Steering Policy objects")
+    print("Getting all Traffic Steering Policy objects")
     for Compartment in Compartments:
         items = oci.pagination.list_call_get_all_results(object.list_steering_policies, compartment_id=Compartment.id).data
         for item in items:
@@ -174,27 +193,31 @@ def DeleteTrafficSteerings(config, Compartments):
                 if itemstatus.lifecycle_state != "DELETED":
                     if itemstatus.lifecycle_state != "DELETING":
                         try:
-                            print ("Deleting: {}".format(itemstatus.display_name))
+                            print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_steering_policy(steering_policy_id=itemstatus.id)
-                        except:
-                            print ("error trying to delete: {}".format(itemstatus.display_name))
+                        except Exception:
+                            print("error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
-            except:
-                print ("error getting : {}, probably already deleted".format(item.display_name))
-        if count > 0 :
-            print ("Waiting for all Objects to be deleted...")
+            except Exception:
+                print("error getting : {}, probably already deleted".format(item.display_name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
         else:
             itemsPresent = False
-    print ("All Objects deleted!")
+    print("All Traffic Steering Policy Objects deleted!")
 
+
+###########################################
+# DeleteZones
+###########################################
 def DeleteZones(config, Compartments):
     AllItems = []
     object = oci.dns.DnsClient(config)
 
-    print ("Getting all DNS Zone objects, this can be slow, be patient")
+    print("Getting all DNS Zone objects, this can be slow, be patient")
     for Compartment in Compartments:
         items = oci.pagination.list_call_get_all_results(object.list_zones, compartment_id=Compartment.id).data
         for item in items:
@@ -213,29 +236,33 @@ def DeleteZones(config, Compartments):
                     if itemstatus.lifecycle_state != "DELETED":
                         if itemstatus.lifecycle_state != "DELETING":
                             try:
-                                print ("Deleting: {}".format(itemstatus.name))
+                                print("Deleting: {}".format(itemstatus.name))
                                 object.delete_zone(zone_name_or_id=itemstatus.id)
-                            except:
-                                print ("error trying to delete: {}".format(itemstatus.name))
+                            except Exception:
+                                print("error trying to delete: {}".format(itemstatus.name))
                         else:
                             print("{} = {}".format(itemstatus.name, itemstatus.lifecycle_state))
                         count = count + 1
                 else:
-                    print ("ignoring protected zone {}".format(itemstatus.name))
-            except:
-                print ("error getting : {}, probably already deleted".format(item.name))
-        if count > 0 :
-            print ("Waiting for all Objects to be deleted...")
+                    print("ignoring protected zone {}".format(itemstatus.name))
+            except Exception:
+                print("error getting : {}, probably already deleted".format(item.name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
         else:
             itemsPresent = False
-    print ("All Objects deleted!")
+    print("All DNS Zones Objects deleted!")
 
+
+###########################################
+# DeleteDNSViews
+###########################################
 def DeleteDNSViews(config, Compartments):
     AllItems = []
     object = oci.dns.DnsClient(config)
 
-    print ("Getting all DNS View objects, this can be slow, be patient")
+    print("Getting all DNS View objects, this can be slow, be patient")
     for Compartment in Compartments:
         items = oci.pagination.list_call_get_all_results(object.list_views, compartment_id=Compartment.id, scope="PRIVATE").data
         for item in items:
@@ -254,23 +281,20 @@ def DeleteDNSViews(config, Compartments):
                     if itemstatus.lifecycle_state != "DELETED":
                         if itemstatus.lifecycle_state != "DELETING":
                             try:
-                                print ("Deleting: {}".format(itemstatus.display_name))
+                                print("Deleting: {}".format(itemstatus.display_name))
                                 object.delete_view(view_id=itemstatus.id)
-                            except:
-                                print ("error trying to delete: {}".format(itemstatus.display_name))
+                            except Exception:
+                                print("error trying to delete: {}".format(itemstatus.display_name))
                         else:
                             print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                         count = count + 1
                 else:
-                    print ("Ignoring protected view {}".format(itemstatus.display_name))
-            except:
-                print ("error getting : {}, probably already deleted".format(item.display_name))
-        if count > 0 :
-            print ("Waiting for all Objects to be deleted...")
+                    print("Ignoring protected view {}".format(itemstatus.display_name))
+            except Exception:
+                print("error getting : {}, probably already deleted".format(item.display_name))
+        if count > 0:
+            print("Waiting for all DNS View objects Objects to be deleted...")
             time.sleep(WaitRefresh)
         else:
             itemsPresent = False
-    print ("All Objects deleted!")
-
-
-
+    print("All DNS View Objects deleted!")

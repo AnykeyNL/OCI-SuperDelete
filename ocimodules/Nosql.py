@@ -3,11 +3,15 @@ import time
 
 WaitRefresh = 10
 
+
+##############################################
+# DeleteNosql
+##############################################
 def DeleteNosql(config, Compartments):
     AllItems = []
     object = oci.nosql.NosqlClient(config)
 
-    print ("Getting all Nosql objects")
+    print("Getting all Nosql objects")
     for Compartment in Compartments:
         items = oci.pagination.list_call_get_all_results(object.list_tables, compartment_id=Compartment.id).data
         for item in items:
@@ -25,19 +29,19 @@ def DeleteNosql(config, Compartments):
                 if itemstatus.lifecycle_state != "DELETED":
                     if itemstatus.lifecycle_state != "DELETING":
                         try:
-                            print ("Deleting: {}".format(itemstatus.name))
+                            print("Deleting: {}".format(itemstatus.name))
                             object.delete_table(table_name_or_id=itemstatus.id)
-                        except:
-                            print ("error trying to delete: {}".format(itemstatus.name))
+                        except Exception:
+                            print("error trying to delete: {}".format(itemstatus.name))
                     else:
                         print("{} = {}".format(itemstatus.name, itemstatus.lifecycle_state))
                     count = count + 1
-            except:
+            except Exception:
 
-                print ("-----------------> error deleting {}, probably already deleted: {}".format(item.name, item.lifecycle_state))
-        if count > 0 :
-            print ("Waiting for all Objects to be deleted...")
+                print("-----------------> error deleting {}, probably already deleted: {}".format(item.name, item.lifecycle_state))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
         else:
             itemsPresent = False
-    print ("All Objects deleted!")
+    print("All Nosql Objects deleted!")
