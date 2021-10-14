@@ -3,12 +3,16 @@ import time
 
 WaitRefresh = 15
 
+
+##############################################
+# DeleteMountTargets
+##############################################
 def DeleteMountTargets(config, Compartments):
     AllItems = []
     object = oci.file_storage.FileStorageClient(config)
     identity = oci.identity.IdentityClient(config)
 
-    print ("Getting all Mount Targets objects")
+    print("Getting all Mount Targets objects")
     for compartment in Compartments:
         ads = identity.list_availability_domains(compartment_id=compartment.id).data
         for ad in ads:
@@ -30,27 +34,30 @@ def DeleteMountTargets(config, Compartments):
                         try:
                             print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_mount_target(mount_target_id=itemstatus.id)
-                        except:
+                        except Exception:
                             print("error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
-            except:
+            except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
             print("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
         else:
             itemsPresent = False
-    print("All Objects deleted!")
+    print("All Mount Targets Objects deleted!")
 
 
+##############################################
+# DeleteFileStorage
+##############################################
 def DeleteFileStorage(config, Compartments):
     AllItems = []
     object = oci.file_storage.FileStorageClient(config)
     identity = oci.identity.IdentityClient(config)
 
-    print ("Getting all File Storage objects")
+    print("Getting all File Storage objects")
     for compartment in Compartments:
         ads = identity.list_availability_domains(compartment_id=compartment.id).data
         for ad in ads:
@@ -72,16 +79,16 @@ def DeleteFileStorage(config, Compartments):
                         try:
                             print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_file_system(file_system_id=itemstatus.id)
-                        except:
+                        except Exception:
                             print("error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
-            except:
+            except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
             print("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
         else:
             itemsPresent = False
-    print("All Objects deleted!")
+    print("All File Storage Objects deleted!")

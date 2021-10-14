@@ -4,10 +4,13 @@ import sys
 
 WaitRefresh = 10
 
+
+#################################################
+#                 Login                 #
+#################################################
 def Login(config, startcomp):
     identity = oci.identity.IdentityClient(config)
     user = identity.get_user(config["user"]).data
-    RootCompartmentID = user.compartment_id
     print("Logged in as: {} @ {}".format(user.description, config["region"]))
 
     # Add first level subcompartments
@@ -16,10 +19,10 @@ def Login(config, startcomp):
         compartments = oci.pagination.list_call_get_all_results(identity.list_compartments, compartment_id=startcomp).data
     except Exception as e:
         if e.status == 404:
-            print ("Compartment not found")
+            print("Compartment not found")
             sys.exit(2)
         else:
-            print ("Error {}".format(e.status))
+            print("Error {}".format(e.status))
             sys.exit(2)
 
     # Add 2nd level subcompartments
@@ -35,42 +38,47 @@ def Login(config, startcomp):
     return compartments
 
 
+#################################################
+#              SubscribedRegions
+#################################################
 def SubscribedRegions(config):
     regions = []
     identity = oci.identity.IdentityClient(config)
-    regionDetails=identity.list_region_subscriptions(tenancy_id=config["tenancy"]).data
-    
-    #Add subscribed regions to list
+    regionDetails = identity.list_region_subscriptions(tenancy_id=config["tenancy"]).data
+
+    # Add subscribed regions to list
     for detail in regionDetails:
         regions.append(detail.region_name)
-        
-    return regions        
-    
+
+    return regions
 
 
+#################################################
+#              DeleteTagNameSpaces
+#################################################
 def DeleteTagNameSpaces(config, compartments):
 
     AllItems = []
     object = oci.identity.IdentityClient(config)
 
-    print ("Getting all Tag Namespace objects")
+    print("Getting all Tag Namespace objects")
     for Compartment in compartments:
         items = oci.pagination.list_call_get_all_results(object.list_tag_namespaces, compartment_id=Compartment.id).data
         for item in items:
-                AllItems.append(item)
-                print("- {}".format(item.name))
+            AllItems.append(item)
+            print("- {}".format(item.name))
 
-        print ("Retiring all namespaces..")
+        print("Retiring all namespaces..")
         for item in AllItems:
             itemstatus = object.get_tag_namespace(tag_namespace_id=item.id).data
-            print ("Tag {} retired: {}".format(itemstatus.name, itemstatus.is_retired))
+            print("Tag {} retired: {}".format(itemstatus.name, itemstatus.is_retired))
             if "{}".format(itemstatus.is_retired) == "False":
-                print ("Retiring tag namespace {}".format(itemstatus.name))
+                print("Retiring tag namespace {}".format(itemstatus.name))
                 tagdetails = oci.identity.models.UpdateTagNamespaceDetails()
                 tagdetails.is_retired = True
                 object.update_tag_namespace(tag_namespace_id=item.id, update_tag_namespace_details=tagdetails)
 
-        print ("Retired all namespaces.. pauzing")
+        print("Retired all namespaces.. pauzing")
         time.sleep(5)
 
         done = False
@@ -79,25 +87,29 @@ def DeleteTagNameSpaces(config, compartments):
             for item in AllItems:
                 try:
                     itemstatus = object.get_tag_namespace(tag_namespace_id=item.id).data
-                except:
-                    print ("Not found, tag deleted")
+                except Exception:
+                    print("Not found, tag deleted")
                 else:
                     if itemstatus.lifecycle_state != "DELETED":
                         done = False
                         if itemstatus.lifecycle_state != "DELETING":
                             try:
-                                print ("Deleting: {}".format(itemstatus.name))
+                                print("Deleting: {}".format(itemstatus.name))
                                 object.cascade_delete_tag_namespace(tag_namespace_id=item.id)
-                            except:
-                                print ("failed, trying again...")
+                            except Exception:
+                                print("failed, trying again...")
                         else:
-                            print ("Waiting for tag {} to finish deleting...This can take a long time :-(".format(itemstatus.name))
+                            print("Waiting for tag {} to finish deleting...This can take a long time :-(".format(itemstatus.name))
 
-            print ("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
 
-    print ("All Objects deleted!")
+    print("All Tag Namespace Objects deleted!")
 
+
+#################################################
+#              DeleteCompartments
+#################################################
 def DeleteCompartments(config, compartments, startcomp):
 
     object = oci.identity.IdentityClient(config)
@@ -108,42 +120,49 @@ def DeleteCompartments(config, compartments, startcomp):
                 retry = False
                 try:
                     object.delete_compartment(compartment_id=Compartment.id)
-                    print ("Deleted compartment: {}".format(Compartment.name))
+                    print("Deleted compartment: {}".format(Compartment.name))
                 except Exception as e:
                     if e.status == 429:
-                        print ("Delaying.. api calls")
+                        print("Delaying.. api calls")
                         time.sleep(10)
                         retry = True
 
 
+#################################################
+#              DeletePolicies
+#################################################
 def DeletePolicies(config, compartments):
     object = oci.identity.IdentityClient(config)
 
-    print ("Getting all Policy objects")
+    print("Getting all Policy objects")
     for Compartment in compartments:
         items = oci.pagination.list_call_get_all_results(object.list_policies, compartment_id=Compartment.id).data
         for item in items:
             try:
-                print ("Deleting: {}".format(item.name))
+                print("Deleting: {}".format(item.name))
                 object.delete_policy(policy_id=item.id)
             except oci.exceptions.ServiceError as itemstatus:
-                    print ("error trying to delete: {} - {}".format(item.name, itemstatus.message))
+                print("error trying to delete: {} - {}".format(item.name, itemstatus.message))
 
-    print ("All Objects deleted!")
+    print("All Policies Objects deleted!")
 
+
+#################################################
+#              DeleteTagDefaults
+#################################################
 def DeleteTagDefaults(config, compartments):
 
-        object = oci.identity.IdentityClient(config)
+    object = oci.identity.IdentityClient(config)
 
-        print("Getting all Policy objects")
-        for Compartment in compartments:
-            items = oci.pagination.list_call_get_all_results(object.list_tag_defaults, compartment_id=Compartment.id).data
-            for item in items:
-                print("- {}".format(item.tag_definition_name))
-                try:
-                    object.delete_tag_default(tag_default_id=item.id)
-                    print("- Deleted : {}".format(item.tag_definition_name))
-                except oci.exceptions.ServiceError as itemstatus:
-                        print("- error trying to delete: {} - {}".format(item.tag_definition_name, itemstatus.message))
+    print("Getting all Policy objects")
+    for Compartment in compartments:
+        items = oci.pagination.list_call_get_all_results(object.list_tag_defaults, compartment_id=Compartment.id).data
+        for item in items:
+            print("- {}".format(item.tag_definition_name))
+            try:
+                object.delete_tag_default(tag_default_id=item.id)
+                print("- Deleted : {}".format(item.tag_definition_name))
+            except oci.exceptions.ServiceError as itemstatus:
+                print("- error trying to delete: {} - {}".format(item.tag_definition_name, itemstatus.message))
 
-        print("All Objects deleted!")
+    print("All Tag Defaults Objects deleted!")

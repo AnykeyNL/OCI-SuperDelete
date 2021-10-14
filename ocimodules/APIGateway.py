@@ -3,11 +3,15 @@ import time
 
 WaitRefresh = 10
 
+
+##############################################
+# DeleteAPIGateways
+##############################################
 def DeleteAPIGateways(config, Compartments):
     AllItems = []
     object = oci.apigateway.GatewayClient(config)
 
-    print ("Getting all API Gateways objects")
+    print("Getting all API Gateways objects")
     for Compartment in Compartments:
         items = oci.pagination.list_call_get_all_results(object.list_gateways, compartment_id=Compartment.id).data
         for item in items:
@@ -25,27 +29,31 @@ def DeleteAPIGateways(config, Compartments):
                 if itemstatus.lifecycle_state != "DELETED":
                     if itemstatus.lifecycle_state != "DELETING":
                         try:
-                            print ("Deleting: {}".format(itemstatus.display_name))
+                            print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_gateway(gateway_id=itemstatus.id)
-                        except:
-                            print ("error trying to delete: {}".format(itemstatus.display_name))
+                        except Exception:
+                            print("error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
-            except:
-                print ("error getting : {}".format(item.display_name))
-        if count > 0 :
-            print ("Waiting for all Objects to be deleted...")
+            except Exception:
+                print("error getting : {}".format(item.display_name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
         else:
             itemsPresent = False
-    print ("All Objects deleted!")
+    print("All API Gateways Objects deleted!")
 
+
+##############################################
+# DeleteDeployments
+##############################################
 def DeleteDeployments(config, Compartments):
     AllItems = []
     object = oci.apigateway.DeploymentClient(config)
 
-    print ("Getting all Deployment objects")
+    print("Getting all Deployment objects")
     for Compartment in Compartments:
         items = oci.pagination.list_call_get_all_results(object.list_deployments, compartment_id=Compartment.id).data
         for item in items:
@@ -63,27 +71,31 @@ def DeleteDeployments(config, Compartments):
                 if itemstatus.lifecycle_state != "DELETED":
                     if itemstatus.lifecycle_state != "DELETING":
                         try:
-                            print ("Deleting: {}".format(itemstatus.display_name))
+                            print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_deployment(deployment_id=itemstatus.id)
-                        except:
-                            print ("error trying to delete: {}".format(itemstatus.display_name))
+                        except Exception:
+                            print("error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
-            except:
-                print ("error getting : {}".format(item.display_name))
-        if count > 0 :
-            print ("Waiting for all Objects to be deleted...")
+            except Exception:
+                print("error getting : {}".format(item.display_name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
         else:
             itemsPresent = False
-    print ("All Objects deleted!")
+    print("All APIGW Deployments Objects deleted!")
 
+
+##############################################
+# DeleteAPIs
+##############################################
 def DeleteAPIs(config, Compartments):
     AllItems = []
     object = oci.apigateway.ApiGatewayClient(config)
 
-    print ("Getting all API objects")
+    print("Getting all API objects")
     for Compartment in Compartments:
         items = oci.pagination.list_call_get_all_results(object.list_apis, compartment_id=Compartment.id).data
         for item in items:
@@ -101,27 +113,31 @@ def DeleteAPIs(config, Compartments):
                 if itemstatus.lifecycle_state != "DELETED":
                     if itemstatus.lifecycle_state != "DELETING":
                         try:
-                            print ("Deleting: {}".format(itemstatus.display_name))
+                            print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_api(api_id=itemstatus.id)
-                        except:
-                            print ("error trying to delete: {}".format(itemstatus.display_name))
+                        except Exception:
+                            print("error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
-            except:
-                print ("error getting : {}".format(item.display_name))
-        if count > 0 :
-            print ("Waiting for all Objects to be deleted...")
+            except Exception:
+                print("error getting : {}".format(item.display_name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
         else:
             itemsPresent = False
-    print ("All Objects deleted!")
+    print("All APIGW Objects deleted!")
 
+
+##############################################
+# DeleteCertificates
+##############################################
 def DeleteCertificates(config, Compartments):
     AllItems = []
     object = oci.apigateway.ApiGatewayClient(config)
 
-    print ("Getting all Certificate objects")
+    print("Getting all Certificate objects")
     for Compartment in Compartments:
         items = oci.pagination.list_call_get_all_results(object.list_certificates, compartment_id=Compartment.id).data
         for item in items:
@@ -139,18 +155,18 @@ def DeleteCertificates(config, Compartments):
                 if itemstatus.lifecycle_state != "DELETED":
                     if itemstatus.lifecycle_state != "DELETING":
                         try:
-                            print ("Deleting: {}".format(itemstatus.display_name))
+                            print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_certificate(certificate_id=itemstatus.id)
-                        except:
-                            print ("error trying to delete: {}".format(itemstatus.display_name))
+                        except Exception:
+                            print("error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
-            except:
-                print ("error getting : {}".format(item.display_name))
-        if count > 0 :
-            print ("Waiting for all Objects to be deleted...")
+            except Exception:
+                print("error getting : {}".format(item.display_name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted...")
             time.sleep(WaitRefresh)
         else:
             itemsPresent = False
-    print ("All Objects deleted!")
+    print("All APIGW Certificates Objects deleted!")
