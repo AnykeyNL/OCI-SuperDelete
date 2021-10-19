@@ -2,6 +2,7 @@ import oci
 import time
 
 WaitRefresh = 15
+MaxIDeleteIteration = 20
 
 
 ##############################################
@@ -65,6 +66,7 @@ def DeleteSubnets(config, compartment, vcn):
         print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -84,8 +86,13 @@ def DeleteSubnets(config, compartment, vcn):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some subnets not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All Subnets Objects deleted!")
@@ -106,6 +113,7 @@ def DeleteDHCPoptions(config, compartment, vcn):
         print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -126,8 +134,13 @@ def DeleteDHCPoptions(config, compartment, vcn):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some DHCP Options not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All DHCP options Objects deleted!")
@@ -148,6 +161,7 @@ def DeleteSecurityLists(config, compartment, vcn):
         print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -168,8 +182,13 @@ def DeleteSecurityLists(config, compartment, vcn):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some Security List not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All Security Lists Objects deleted!")
@@ -190,6 +209,7 @@ def DeleteSecurityGroups(config, compartment, vcn):
         print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -210,8 +230,13 @@ def DeleteSecurityGroups(config, compartment, vcn):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some Network Security Groups not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All Network Security Groups Objects deleted!")
@@ -239,6 +264,7 @@ def DeleteRouteTables(config, compartment, vcn):
         print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -259,8 +285,13 @@ def DeleteRouteTables(config, compartment, vcn):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some Route Tables not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All Route Tables Objects deleted!")
@@ -275,7 +306,9 @@ def DeleteDRGAttachments(config, compartment):
 
     print("Getting DRG Attachmentss for {}".format(compartment.name))
     AllItems = oci.pagination.list_call_get_all_results(object.list_drg_attachments, compartment_id=compartment.id).data
+
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -294,8 +327,13 @@ def DeleteDRGAttachments(config, compartment):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some objects not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All DRG Attachmentss Objects deleted!")
@@ -316,6 +354,7 @@ def DeleteLoadBalancers(config, compartment):
             print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -335,8 +374,13 @@ def DeleteLoadBalancers(config, compartment):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some Load Balancers not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All Load Balancer Objects deleted!")
@@ -358,6 +402,7 @@ def DeleteReservedIPs(config, compartment):
         print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     if itemsPresent:
         count = 0
@@ -377,8 +422,13 @@ def DeleteReservedIPs(config, compartment):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some objects not deleted, skipping!")
+                return
         else:
             itemsPresent = False
 
@@ -401,6 +451,7 @@ def DeleteInternetGateways(config, compartment, vcn):
         print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     if itemsPresent:
         count = 0
@@ -420,8 +471,13 @@ def DeleteInternetGateways(config, compartment, vcn):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some objects not deleted, skipping!")
+                return
         else:
             itemsPresent = False
 
@@ -444,6 +500,7 @@ def DeleteServiceGateways(config, compartment, vcn):
         print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     if itemsPresent:
         count = 0
@@ -463,8 +520,13 @@ def DeleteServiceGateways(config, compartment, vcn):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some objects not deleted, skipping!")
+                return
         else:
             itemsPresent = False
 
@@ -487,6 +549,7 @@ def DeleteNATGateways(config, compartment, vcn):
         print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     if itemsPresent:
         count = 0
@@ -506,8 +569,13 @@ def DeleteNATGateways(config, compartment, vcn):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some objects not deleted, skipping!")
+                return
         else:
             itemsPresent = False
 
@@ -530,6 +598,7 @@ def DeleteLocalPeeringGateways(config, compartment, vcn):
         print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     if itemsPresent:
         count = 0
@@ -549,8 +618,13 @@ def DeleteLocalPeeringGateways(config, compartment, vcn):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some Local Peering Objects not deleted, skipping!")
+                return
         else:
             itemsPresent = False
 
@@ -573,6 +647,7 @@ def DeleteDRGs(config, compartment):
         print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     if itemsPresent:
         count = 0
@@ -592,8 +667,13 @@ def DeleteDRGs(config, compartment):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some DRG Objects not deleted, skipping!")
+                return
         else:
             itemsPresent = False
 
@@ -609,7 +689,9 @@ def DeleteDRGsDuplicate(config, compartment):
 
     print("Getting DRGs for {}".format(compartment.name))
     AllItems = oci.pagination.list_call_get_all_results(object.list_drgs, compartment_id=compartment.id).data
+
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -629,8 +711,13 @@ def DeleteDRGsDuplicate(config, compartment):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some DRG Objects not deleted, skipping!")
+                return
         else:
             itemsPresent = False
-    print("All Objects deleted!")
+    print("All DRG Objects Objects deleted!")
