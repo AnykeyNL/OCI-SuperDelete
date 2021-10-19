@@ -3,8 +3,10 @@
 #                                                         #
 # Use with PYTHON3!                                       #
 ###########################################################
+
 import sys
 import getopt
+import time
 import oci
 from ocimodules.functions import *
 from ocimodules.EdgeServices import *
@@ -60,13 +62,13 @@ regions = ["uk-london-1"]
 # Specify your home region
 homeregion = "eu-frankfurt-1"
 
-#############################################
-# Checking SDK Version
-#############################################
 
 clear()
 
+#############################################
+# Checking SDK Version
 # Minimum version requirements for OCI SDK
+#############################################
 print("OCI SDK Version: {}".format(oci.__version__))
 min_version_required = "2.41.1"
 outdated = False
@@ -111,6 +113,9 @@ class MyWriter:
         self.logfile = open(self.filename, "a")
 
 
+##########################################################################
+# Main Program
+##########################################################################
 writer = MyWriter(sys.stdout, 'log.txt')
 sys.stdout = writer
 
@@ -139,7 +144,7 @@ if debug:
     logging.basicConfig()
     logging.getLogger('oci').setLevel(logging.DEBUG)
 
-print("\n--[ Login check and getting all compartments from starting compartment ]--")
+print_header("Login check and getting all compartments from starting compartment", 0)
 compartments = Login(config, DeleteCompartmentOCID)
 
 if len(regions) == 0:
@@ -148,7 +153,7 @@ if len(regions) == 0:
 
 processCompartments = []
 
-print("\n--[ Compartments to process ]--")
+print_header("Compartments to process", 1)
 
 # Add all active compartments, but exclude the ManagementCompartmentForPaas (as this is locked compartment)
 for compartment in compartments:
@@ -161,23 +166,26 @@ confirm = input("\ntype yes to delete all contents from these compartments: ")
 
 if confirm == "yes":
 
+    ######################################################
+    # Loop on Regions
+    ######################################################
     for region in regions:
 
-        print("============[ Deleting resources in {} ]================".format(region))
+        print_header("Deleting resources in region " + region, 0)
         config["region"] = region
 
-        print("\n--[ Moving and Scheduling KMS Vaults for deletion ]--")
+        print_header("Moving and Scheduling KMS Vaults for deletion at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteKMSvaults(config, processCompartments, DeleteCompartmentOCID)
 
-        print("\n--[ Deleting Vulnerability Scanning Services ]--")
+        print_header("Deleting Vulnerability Scanning Services at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteScanResults(config, processCompartments)
         DeleteTargets(config, processCompartments)
         DeleteRecipes(config, processCompartments)
 
-        print("\n--[ Deleting Bastion Services ]--")
+        print_header("Deleting Bastion Services at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteBastion(config, processCompartments)
 
-        print("\n--[ Deleting Edge Services ]--")
+        print_header("Deleting Edge Services at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteWAFs(config, processCompartments)
         DeleteHTTPHealthchecks(config, processCompartments)
         DeletePINGHealthchecks(config, processCompartments)
@@ -186,20 +194,20 @@ if confirm == "yes":
         DeleteZones(config, processCompartments)
         DeleteDNSViews(config, processCompartments)
 
-        print("\n--[ Deleting Object Storage ]--")
+        print_header("Deleting Object Storage at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteBuckets(config, processCompartments)
 
-        print("\n--[ Deleting OKE Clusters ]--")
+        print_header("Deleting OKE Clusters at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteClusters(config, processCompartments)
 
-        print("\n--[ Deleting Repositories ]--")
+        print_header("Deleting Repositories at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteContainerRepositories(config, processCompartments)
         DeleteRepositories(config, processCompartments)
 
-        print("\n--[ Deleting Auto Scaling Configurations ]--")
+        print_header("Deleting Auto Scaling Configurations at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteAutoScalingConfigurations(config, processCompartments)
 
-        print("\n--[ Deleting Compute Instances ]--")
+        print_header("Deleting Compute Instances at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteInstancePools(config, processCompartments)
         DeleteInstanceConfigs(config, processCompartments)
         DeleteInstances(config, processCompartments)
@@ -208,94 +216,96 @@ if confirm == "yes":
         DeleteBootVolumesBackups(config, processCompartments)
         DeleteDedicatedVMHosts(config, processCompartments)
 
-        print("\n--[ Deleting DataScience Components ]--")
+        print_header("Deleting DataScience Components at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteNotebooks(config, processCompartments)
         DeleteModelDeployments(config, processCompartments)
         DeleteModels(config, processCompartments)
         DeleteProjects(config, processCompartments)
 
-        print("\n--[ Deleting Application Functions ]--")
+        print_header("Deleting Application Functions at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteApplications(config, processCompartments)
 
-        print("\n--[ Deleting Deployments ]--")
+        print_header("Deleting Deployments at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteDeployments(config, processCompartments)
 
-        print("\n--[ Deleting APIs ]--")
+        print_header("Deleting APIs at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteAPIs(config, processCompartments)
 
-        print("\n--[ Deleting API Gateways ]--")
+        print_header("Deleting API Gateways at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteAPIGateways(config, processCompartments)
         DeleteCertificates(config, processCompartments)
 
-        print("\n--[ Deleting Database Instances ]--")
+        print_header("Deleting Database Instances at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteDBCS(config, processCompartments)
         DeleteAutonomousDB(config, processCompartments)
         DeleteDBBackups(config, processCompartments)
 
-        print("\n--[ Deleting MySQL Database Instances ]--")
+        print_header("Deleting MySQL Database Instances at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteMySQL(config, processCompartments)
 
-        print("\n--[ Deleting Nosql tables ]--")
+        print_header("Deleting Nosql tables at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteNosql(config, processCompartments)
 
-        print("\n--[ Deleting Data Catalogs ]--")
+        print_header("Deleting Data Catalogs at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteDataCatalog(config, processCompartments)
 
-        print("\n--[ Deleting Digital Assistants ]--")
+        print_header("Deleting Digital Assistants at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteDigitalAssistant(config, processCompartments)
 
-        print("\n--[ Deleting Analytics ]--")
+        print_header("Deleting Analytics at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteAnalytics(config, processCompartments)
         DeleteStreams(config, processCompartments)
         DeleteStreamPools(config, processCompartments)
         DeleteConnectHarnesses(config, processCompartments)
         DeleteServiceConnectors(config, processCompartments)
 
-        print("\n--[ Deleting Integration ]--")
+        print_header("Deleting Integration at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteIntegration(config, processCompartments)
 
-        print("\n--[ Deleting Blockchain ]--")
+        print_header("Deleting Blockchain at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteBlockchain(config, processCompartments)
 
-        print("\n--[ Deleting Resource Manager Stacks ]--")
+        print_header("Deleting Resource Manager Stacks at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteStacks(config, processCompartments)
 
-        print("\n--[ Deleting Block Volumes ]--")
+        print_header("Deleting Block Volumes at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteVolumeGroups(config, processCompartments)
         DeleteVolumeGroupBackups(config, processCompartments)
         DeleteVolumes(config, processCompartments)
         DeleteBlockVolumesBackups(config, processCompartments)
 
-        print("\n--[ Deleting FileSystem and Mount Targets ]--")
+        print_header("Deleting FileSystem and Mount Targets at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteMountTargets(config, processCompartments)
         DeleteFileStorage(config, processCompartments)
 
-        print("\n--[ Deleting VCNs ]--")
+        print_header("Deleting VCNs at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteVCN(config, processCompartments)
 
-        print("\n--[ Deleting Alarms ]--")
+        print_header("Deleting Alarms at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteAlarms(config, processCompartments)
 
-        print("\n--[ Deleting Notifications ]--")
+        print_header("Deleting Notifications at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteNotifications(config, processCompartments)
 
-        print("\n--[ Deleting Events ]--")
+        print_header("Deleting Events at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteEvents(config, processCompartments)
 
-        print("\n--[ Deleting Policies ]--")
+        print_header("Deleting Policies at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeletePolicies(config, processCompartments)
 
-        print("\n--[ Deleting Log Groups ]--")
+        print_header("Deleting Log Groups at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteLogGroups(config, processCompartments)
 
-        print("\n--[ Deleting Application Performance Monitoring ]--")
+        print_header("Deleting Application Performance Monitoring at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteAPM(config, processCompartments)
 
-        print("\n--[ Deleting Tag Namespaces ]--")
-        DeleteTagDefaults(config, processCompartments)
-        DeleteTagNameSpaces(config, processCompartments)
+        # delete tags and namespace only if home region
+        if region == homeregion:
+            print_header("Deleting Tag Namespaces at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+            DeleteTagDefaults(config, processCompartments)
+            DeleteTagNameSpaces(config, processCompartments)
 
-    print("\n--[ Hopefully deleting compartments, if empty ]--")
+    print("Hopefully deleting compartments, if empty at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
     config["region"] = homeregion
     DeleteCompartments(config, processCompartments, DeleteCompartmentOCID)
 

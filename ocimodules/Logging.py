@@ -1,6 +1,9 @@
 import oci
 import time
 
+WaitRefresh = 15
+MaxIDeleteIteration = 20
+
 
 ##############################################
 # DeleteLogGroups
@@ -16,6 +19,7 @@ def DeleteLogGroups(config, Compartments):
             AllItems.append(item)
             print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
+    iteration = 0
     for item in AllItems:
         logs = object.list_logs(log_group_id=item.id)
         print(" - Log group {} has {} logs".format(item.display_name, len(logs.data)))
@@ -26,7 +30,15 @@ def DeleteLogGroups(config, Compartments):
                     object.delete_log(log_group_id=item.id, log_id=log.id)
                 except Exception:
                     print("Error deleting log {} in log group {}".format(log.id, item.id))
-            time.sleep(5)
+
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some Logs not deleted, skipping!")
+                return
+
             logs = object.list_logs(log_group_id=item.id)
 
         try:

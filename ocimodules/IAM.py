@@ -3,6 +3,7 @@ import time
 import sys
 
 WaitRefresh = 10
+MaxIDeleteTagIteration = 5
 
 
 #################################################
@@ -68,7 +69,7 @@ def DeleteTagNameSpaces(config, compartments):
             AllItems.append(item)
             print("- {}".format(item.name))
 
-        print("Retiring all namespaces..")
+        print("Retiring all namespaces.. in compartment " + str(Compartment.name))
         for item in AllItems:
             itemstatus = object.get_tag_namespace(tag_namespace_id=item.id).data
             print("Tag {} retired: {}".format(itemstatus.name, itemstatus.is_retired))
@@ -78,10 +79,11 @@ def DeleteTagNameSpaces(config, compartments):
                 tagdetails.is_retired = True
                 object.update_tag_namespace(tag_namespace_id=item.id, update_tag_namespace_details=tagdetails)
 
-        print("Retired all namespaces.. pauzing")
-        time.sleep(5)
+        print("Retired all namespaces.. Waiting...")
+        time.sleep(2)
 
         done = False
+        iteration = 0
         while not done:
             done = True
             for item in AllItems:
@@ -101,8 +103,13 @@ def DeleteTagNameSpaces(config, compartments):
                         else:
                             print("Waiting for tag {} to finish deleting...This can take a long time :-(".format(itemstatus.name))
 
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteTagIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteTagIteration:
+                print("Tag Namespace not deleted, skipping!")
+                continue
 
     print("All Tag Namespace Objects deleted!")
 
