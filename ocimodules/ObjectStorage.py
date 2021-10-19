@@ -24,7 +24,10 @@ def DeleteBuckets(config, Compartments):
     for buckets in AllBuckets:
         for bucket in buckets:
             print("Delete bucket: {}".format(bucket.name))
-            object.delete_bucket(namespace_name=bucket.namespace, bucket_name=bucket.name)
+            try:
+                object.delete_bucket(namespace_name=bucket.namespace, bucket_name=bucket.name)
+            except Exception:
+                print("Error deleting bucket {}".format(bucket.name))
 
 
 ###########################################
