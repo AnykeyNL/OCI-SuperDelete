@@ -13,11 +13,15 @@ def DeleteContainerRepositories(config, Compartments):
 
     print("Getting all Container Repositories objects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_container_repositories, compartment_id=Compartment.id).data
-        for item in items:
-            if (item.lifecycle_state != "DELETED"):
-                AllItems.append(item)
-                print("- {} - {}".format(item.display_name, item.lifecycle_state))
+        try:
+            items = oci.pagination.list_call_get_all_results(object.list_container_repositories, compartment_id=Compartment.id).data
+            for item in items:
+                if (item.lifecycle_state != "DELETED"):
+                    AllItems.append(item)
+                    print("- {} - {}".format(item.display_name, item.lifecycle_state))
+        except Exception:
+            print("Error listing compartment {}".format(Compartment.name))
+            continue
 
     itemsPresent = True
 
@@ -56,11 +60,15 @@ def DeleteRepositories(config, Compartments):
 
     print("Getting all Repositories objects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_repositories, compartment_id=Compartment.id).data
-        for item in items:
-            if (item.lifecycle_state != "DELETED"):
-                AllItems.append(item)
-                print("- {} - {}".format(item.display_name, item.lifecycle_state))
+        try:
+            items = oci.pagination.list_call_get_all_results(object.list_repositories, compartment_id=Compartment.id).data
+            for item in items:
+                if (item.lifecycle_state != "DELETED"):
+                    AllItems.append(item)
+                    print("- {} - {}".format(item.display_name, item.lifecycle_state))
+        except Exception:
+            print("Error listing compartment {}".format(Compartment.name))
+            continue
 
     itemsPresent = True
 
@@ -99,11 +107,15 @@ def DeleteGenericArtifacts(config, Compartments):
 
     print("Getting all Repositories objects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_generic_artifacts, compartment_id=Compartment.id).data
-        for item in items:
-            if (item.lifecycle_state != "DELETED"):
-                AllItems.append(item)
-                print("- {} - {}".format(item.display_name, item.lifecycle_state))
+        try:
+            items = oci.pagination.list_call_get_all_results(object.list_generic_artifacts, compartment_id=Compartment.id).data
+            for item in items:
+                if (item.lifecycle_state != "DELETED"):
+                    AllItems.append(item)
+                    print("- {} - {}".format(item.display_name, item.lifecycle_state))
+        except Exception:
+            print("Error listing compartment {}".format(Compartment.name))
+            continue
 
     itemsPresent = True
 

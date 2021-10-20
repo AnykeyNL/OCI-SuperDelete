@@ -32,6 +32,11 @@ def DeleteBootVolumes(config, Compartments):
                 if itemstatus.lifecycle_state != "TERMINATED":
                     if itemstatus.lifecycle_state != "TERMINATING":
                         try:
+                            print("Disable volume replication")
+                            object.update_boot_volume(
+                                boot_volume_id=itemstatus.id,
+                                update_boot_volume_details=oci.core.models.UpdateBootVolumeDetails(boot_volume_replicas=[])
+                            )
                             print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_boot_volume(boot_volume_id=itemstatus.id)
                         except Exception:

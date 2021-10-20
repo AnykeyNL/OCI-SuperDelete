@@ -14,7 +14,12 @@ def DeleteWAFs(config, Compartments):
     # functions.clear()
     print("Getting all WAF Policy objects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_waas_policies, compartment_id=Compartment.id).data
+        items = []
+        try:
+            items = oci.pagination.list_call_get_all_results(object.list_waas_policies, compartment_id=Compartment.id).data
+        except Exception:
+            print("Error listing compartment {}".format(Compartment.name))
+            continue
         for item in items:
             if (item.lifecycle_state != "DELETED"):
                 AllItems.append(item)
@@ -56,7 +61,12 @@ def DeleteHTTPHealthchecks(config, Compartments):
     currentregion = config['region']
     print("Getting all Healthchecks HTTP monitor objects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_http_monitors, compartment_id=Compartment.id, home_region=currentregion).data
+        items = []
+        try:
+            items = oci.pagination.list_call_get_all_results(object.list_http_monitors, compartment_id=Compartment.id, home_region=currentregion).data
+        except Exception:
+            print("Error listing compartment {}".format(Compartment.name))
+            continue
         for item in items:
             AllItems.append(item)
             print("- {}".format(item.display_name))
@@ -94,7 +104,12 @@ def DeletePINGHealthchecks(config, Compartments):
     # functions.clear()
     print("Getting all Healthchecks PING monitor objects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_ping_monitors, compartment_id=Compartment.id, home_region=currentregion).data
+        items = []
+        try:
+            items = oci.pagination.list_call_get_all_results(object.list_ping_monitors, compartment_id=Compartment.id, home_region=currentregion).data
+        except Exception:
+            print("Error listing compartment {}".format(Compartment.name))
+            continue
         for item in items:
             AllItems.append(item)
             print("- {}".format(item.display_name))
@@ -177,7 +192,13 @@ def DeleteTrafficSteerings(config, Compartments):
 
     print("Getting all Traffic Steering Policy objects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_steering_policies, compartment_id=Compartment.id).data
+        items = []
+        try:
+            items = oci.pagination.list_call_get_all_results(object.list_steering_policies, compartment_id=Compartment.id).data
+        except Exception:
+            print("Error listing compartment {}".format(Compartment.name))
+            continue
+
         for item in items:
             if (item.lifecycle_state != "DELETED"):
                 AllItems.append(item)
@@ -219,7 +240,13 @@ def DeleteZones(config, Compartments):
 
     print("Getting all DNS Zone objects, this can be slow, be patient")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_zones, compartment_id=Compartment.id).data
+        items = []
+        try:
+            items = oci.pagination.list_call_get_all_results(object.list_zones, compartment_id=Compartment.id).data
+        except Exception:
+            print("Error listing compartment {}".format(Compartment.name))
+            continue
+
         for item in items:
             if (item.lifecycle_state != "DELETED"):
                 AllItems.append(item)
@@ -264,7 +291,12 @@ def DeleteDNSViews(config, Compartments):
 
     print("Getting all DNS View objects, this can be slow, be patient")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_views, compartment_id=Compartment.id, scope="PRIVATE").data
+        items = []
+        try:
+            items = oci.pagination.list_call_get_all_results(object.list_views, compartment_id=Compartment.id, scope="PRIVATE").data
+        except Exception:
+            print("Error listing compartment {}".format(Compartment.name))
+            continue
         for item in items:
             if (item.lifecycle_state != "DELETED"):
                 AllItems.append(item)
