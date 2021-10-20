@@ -55,6 +55,31 @@ def SubscribedRegions(config):
 
 
 #################################################
+#              GetHomeRegion
+#################################################
+def GetHomeRegion(config):
+    home_region = ""
+    identity = oci.identity.IdentityClient(config)
+    regionDetails = identity.list_region_subscriptions(tenancy_id=config["tenancy"]).data
+
+    # Set home region for connection
+    for reg in regionDetails:
+        if reg.is_home_region:
+            home_region = str(reg.region_name)
+
+    return home_region
+
+
+#################################################
+#              GetTenantName
+#################################################
+def GetTenantName(config):
+    identity = oci.identity.IdentityClient(config)
+    tenancy = identity.get_tenancy(config['tenancy']).data
+    return tenancy.name
+
+
+#################################################
 #              DeleteTagNameSpaces
 #################################################
 def DeleteTagNameSpaces(config, compartments):
