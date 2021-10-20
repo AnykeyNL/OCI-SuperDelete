@@ -3,11 +3,22 @@
 #                                                         #
 # Use with PYTHON3!                                       #
 ###########################################################
+# Application Command line parameters
+#
+#   -cf config     - OCI CLI Config File
+#   -cp profile    - profile inside the config file
+#   -force         - force delete without confirmation
+#   -rg            - Regions to delete comma separated
+#   -c compartment - top level compartment to delete
+#   -debug         - enable debug
+#
+###########################################################
 
 import sys
-import getopt
 import time
 import oci
+import platform
+import logging
 from ocimodules.functions import *
 from ocimodules.EdgeServices import *
 from ocimodules.ObjectStorage import *
@@ -39,10 +50,10 @@ from ocimodules.Artifacts import *
 from ocimodules.Events import *
 from ocimodules.VulnerabilityScanning import *
 from ocimodules.Bastion import *
-import logging
+
 
 #################################################
-#                 Configuration                 #
+#           Manual Configuration                #
 #################################################
 # Specify your config file
 configfile = "~/.oci/config"  # Linux
@@ -56,40 +67,19 @@ DeleteCompartmentOCID = ""
 
 # Search for resources in regions, this is an Array, so you can specify multiple regions:
 # If no regions specified, it will be all subscribed regions.
-# regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
-regions = ["uk-london-1"]
+regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
+# regions = ["uk-london-1"]
 
-# Specify your home region
-homeregion = "eu-frankfurt-1"
-
-
-clear()
-
-#############################################
-# Checking SDK Version
-# Minimum version requirements for OCI SDK
-#############################################
-print("OCI SDK Version: {}".format(oci.__version__))
+#################################################
+#           Application Configuration           #
+#################################################
 min_version_required = "2.41.1"
-outdated = False
-
-for i, rl in zip(oci.__version__.split("."), min_version_required.split(".")):
-    if int(i) > int(rl):
-        break
-    if int(i) < int(rl):
-        outdated = True
-        break
-
-if outdated:
-    print("Your version of the OCI SDK is out-of-date. Please first upgrade your OCI SDK Library bu running the command:")
-    print("pip install --upgrade oci")
-    quit()
-
+application_version = "21.10.19"
 debug = False
 
 
 #############################################
-# MyWriter
+# MyWriter to redirect output
 #############################################
 class MyWriter:
 
@@ -116,26 +106,28 @@ class MyWriter:
 ##########################################################################
 # Main Program
 ##########################################################################
+check_oci_version(min_version_required)
+
+# Redirect output to log.txt
 writer = MyWriter(sys.stdout, 'log.txt')
 sys.stdout = writer
 
-try:
-    opts, args = getopt.getopt(sys.argv[1:], "c:", ["compid="])
-except getopt.GetoptError:
-    print("delete.py -c <compartmentID>")
-    sys.exit(2)
-
-for opt, arg in opts:
-    print("{} - {}".format(opt, arg))
-    if opt == "-c":
-        DeleteCompartmentOCID = arg
+# Check command line
+cmd = input_command_line()
+configfile = cmd.config_file if cmd.config_file else configfile
+configProfile = cmd.config_profile if cmd.config_profile else configProfile
+debug = cmd.debug if cmd.debug else debug
+force = cmd.force
+regions = cmd.regions.split(",") if cmd.regions else regions
+DeleteCompartmentOCID = cmd.compartment if cmd.compartment else DeleteCompartmentOCID
 
 if DeleteCompartmentOCID == "":
-    print("No compartment specified")
+    print("No compartment specified \n")
+    input_command_line(help=True)
     sys.exit(2)
 
 ######################################################
-# Config
+# oci config and debug handle
 ######################################################
 config = oci.config.from_file(configfile, configProfile)
 
@@ -144,25 +136,53 @@ if debug:
     logging.basicConfig()
     logging.getLogger('oci').setLevel(logging.DEBUG)
 
-print_header("Login check and getting all compartments from starting compartment", 0)
+######################################################
+# Loading Compartments
+# Add all active compartments,
+# exclude the ManagementCompartmentForPaas (as this is locked compartment)
+######################################################
+print("\nLogin check and loading comaprtments...\n")
 compartments = Login(config, DeleteCompartmentOCID)
-
-if len(regions) == 0:
-    # No specific region specified, getting all subscribed regions.
-    regions = SubscribedRegions(config)
-
 processCompartments = []
-
-print_header("Compartments to process", 1)
-
-# Add all active compartments, but exclude the ManagementCompartmentForPaas (as this is locked compartment)
 for compartment in compartments:
     if compartment.lifecycle_state == "ACTIVE" and compartment.name != "ManagedCompartmentForPaaS":
         processCompartments.append(compartment)
-        print(compartment.name)
 
+# Check if regions specified if not getting all subscribed regions.
+if len(regions) == 0:
+    regions = SubscribedRegions(config)
 
-confirm = input("\ntype yes to delete all contents from these compartments: ")
+homeregion = GetHomeRegion(config)
+tenane_name = GetTenantName(config)
+
+######################################################
+# Header Print and Confirmation
+######################################################
+print_header("OCI-SuperDelete", 0)
+
+print("Date/Time          : " + time.strftime("%D %H:%M:%S", time.localtime()))
+print("Command Line       : " + ' '.join(x for x in sys.argv[1:]))
+print("App Version        : " + application_version)
+print("Machine            : " + platform.node() + " (" + platform.machine() + ")")
+print("OCI SDK Version    : " + oci.version.__version__)
+print("Python Version     : " + platform.python_version())
+print("Config File        : " + configfile)
+print("Config Profile     : " + configProfile)
+print("")
+print("Tenant Name        : " + tenane_name)
+print("Tenant Id          : " + config['tenancy'])
+print("Home Region        : " + homeregion)
+print("Regions to Process : " + ','.join(x for x in regions))
+print("\nCompartments to Process : \n" + ','.join(x.name for x in processCompartments))
+
+#########################################
+# Check confirmation for execution
+#########################################
+confirm = ""
+if force:
+    confirm = "yes"
+else:
+    confirm = input("\ntype yes to delete all contents from these compartments: ")
 
 if confirm == "yes":
 

@@ -2,6 +2,7 @@ import oci
 import time
 
 WaitRefresh = 15
+MaxIDeleteIteration = 20
 
 
 ###########################################
@@ -20,7 +21,7 @@ def DeleteInstancePools(config, Compartments):
                 print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
-
+    iteration = 0
     while itemsPresent:
         count = 0
         for item in AllItems:
@@ -39,8 +40,13 @@ def DeleteInstancePools(config, Compartments):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some InstancePools not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All InstancePools Objects deleted!")
@@ -78,6 +84,7 @@ def DeleteInstances(config, Compartments):
                 print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -95,11 +102,16 @@ def DeleteInstances(config, Compartments):
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
             except Exception:
-
                 print("-----------------> error deleting {}, probably already deleted: {}".format(item.display_name, item.lifecycle_state))
+
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some Instances not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All Instances Objects deleted!")
@@ -120,6 +132,7 @@ def DeleteImages(config, Compartments):
                 AllItems.append(item)
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -137,9 +150,15 @@ def DeleteImages(config, Compartments):
                     count = count + 1
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
+
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some Images not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All Custom Image Objects deleted!")
@@ -161,6 +180,7 @@ def DeleteVolumes(config, Compartments):
                 print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -180,8 +200,13 @@ def DeleteVolumes(config, Compartments):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some Volumes not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All Compute Volumes Objects deleted!")
@@ -203,6 +228,7 @@ def DeleteDedicatedVMHosts(config, Compartments):
                 print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -220,11 +246,16 @@ def DeleteDedicatedVMHosts(config, Compartments):
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
             except Exception:
-
                 print("-----------------> error deleting {}, probably already deleted: {}".format(item.display_name, item.lifecycle_state))
+
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some Dedicated VM not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All Dedicated VM Hosts Objects deleted!")
