@@ -11,6 +11,7 @@
 #   -rg            - Regions to delete comma separated
 #   -c compartment - top level compartment to delete
 #   -debug         - enable debug
+#   -skip_delete_compartment - skip delete the compartment at end of the process
 #
 ###########################################################
 
@@ -19,6 +20,7 @@ import time
 import oci
 import platform
 import logging
+from ocimodules.GoldenGate import *
 from ocimodules.functions import *
 from ocimodules.EdgeServices import *
 from ocimodules.ObjectStorage import *
@@ -120,6 +122,7 @@ debug = cmd.debug if cmd.debug else debug
 force = cmd.force
 regions = cmd.regions.split(",") if cmd.regions else regions
 DeleteCompartmentOCID = cmd.compartment if cmd.compartment else DeleteCompartmentOCID
+skip_delete_compartment = cmd.skip_delete_compartment
 
 if DeleteCompartmentOCID == "":
     print("No compartment specified \n")
@@ -196,6 +199,11 @@ if confirm == "yes":
 
         print_header("Moving and Scheduling KMS Vaults for deletion at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteKMSvaults(config, processCompartments, DeleteCompartmentOCID)
+
+        print_header("Deleting GoldenGate at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        DeleteGGDeploymentsbak(config, processCompartments)
+        DeleteGGRegistered(config, processCompartments)
+        DeleteGGDeployments(config, processCompartments)
 
         print_header("Deleting Vulnerability Scanning Services at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteScanResults(config, processCompartments)
@@ -325,9 +333,12 @@ if confirm == "yes":
             DeleteTagDefaults(config, processCompartments)
             DeleteTagNameSpaces(config, processCompartments)
 
-    print("Hopefully deleting compartments, if empty at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-    config["region"] = homeregion
-    DeleteCompartments(config, processCompartments, DeleteCompartmentOCID)
+    if not skip_delete_compartment:
+        print("Hopefully deleting compartments, if empty at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        config["region"] = homeregion
+        DeleteCompartments(config, processCompartments, DeleteCompartmentOCID)
+    else:
+        print("Skipping deletion of the compartments as specified at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
 
 else:
     print("ok, doing nothing")
