@@ -69,14 +69,15 @@ DeleteCompartmentOCID = ""
 
 # Search for resources in regions, this is an Array, so you can specify multiple regions:
 # If no regions specified, it will be all subscribed regions.
-regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
+# regions = ["eu-frankfurt-1", "eu-amsterdam-1"]
 # regions = ["uk-london-1"]
+regions = []
 
 #################################################
 #           Application Configuration           #
 #################################################
 min_version_required = "2.41.1"
-application_version = "21.10.19"
+application_version = "21.10.23"
 debug = False
 
 
@@ -110,12 +111,14 @@ class MyWriter:
 ##########################################################################
 check_oci_version(min_version_required)
 
-# Redirect output to log.txt
-writer = MyWriter(sys.stdout, 'log.txt')
-sys.stdout = writer
-
 # Check command line
 cmd = input_command_line()
+
+# Redirect output to log.txt
+logfile = cmd.log_file
+writer = MyWriter(sys.stdout, logfile)
+sys.stdout = writer
+
 configfile = cmd.config_file if cmd.config_file else configfile
 configProfile = cmd.config_profile if cmd.config_profile else configProfile
 debug = cmd.debug if cmd.debug else debug
@@ -171,6 +174,7 @@ print("OCI SDK Version    : " + oci.version.__version__)
 print("Python Version     : " + platform.python_version())
 print("Config File        : " + configfile)
 print("Config Profile     : " + configProfile)
+print("Log File           : " + logfile)
 print("")
 print("Tenant Name        : " + tenane_name)
 print("Tenant Id          : " + config['tenancy'])
@@ -301,6 +305,7 @@ if confirm == "yes":
         DeleteVolumeGroupBackups(config, processCompartments)
         DeleteVolumes(config, processCompartments)
         DeleteBlockVolumesBackups(config, processCompartments)
+        DeleteBlockVolumesBackupPolicies(config, processCompartments)
 
         print_header("Deleting FileSystem and Mount Targets at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteMountTargets(config, processCompartments)
