@@ -90,6 +90,9 @@ def DeleteTagNameSpaces(config, compartments):
     print("Getting all Tag Namespace objects")
     for Compartment in compartments:
         items = oci.pagination.list_call_get_all_results(object.list_tag_namespaces, compartment_id=Compartment.id).data
+        if len(AllItems) == 0:
+            continue
+
         for item in items:
             AllItems.append(item)
             print("- {}".format(item.name))
@@ -151,11 +154,12 @@ def DeleteCompartments(config, compartments, startcomp):
             while retry:
                 retry = False
                 try:
+                    timestr = time.strftime("%H:%M:%S", time.localtime())
                     object.delete_compartment(compartment_id=Compartment.id)
-                    print("Deleted compartment: {}".format(Compartment.name))
+                    print("{} Deleted compartment: {}".format(timestr, Compartment.name))
                 except Exception as e:
                     if e.status == 429:
-                        print("Delaying.. api calls")
+                        print("{} Delaying.. api calls".format(timestr))
                         time.sleep(10)
                         retry = True
 

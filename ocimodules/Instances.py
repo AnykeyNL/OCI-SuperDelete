@@ -128,7 +128,7 @@ def DeleteImages(config, Compartments):
     for Compartment in Compartments:
         items = oci.pagination.list_call_get_all_results(object.list_images, compartment_id=Compartment.id).data
         for item in items:
-            if item.operating_system_version == "Custom" or item.base_image_id:
+            if item.compartment_id is not None:
                 AllItems.append(item)
 
     itemsPresent = True
