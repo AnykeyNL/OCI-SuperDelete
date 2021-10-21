@@ -746,12 +746,27 @@ def DeleteDNSResolvers(config, compartment):
                 itemstatus = object.get_resolver(item.id, scope="PRIVATE").data
                 if itemstatus.lifecycle_state != "DELETED":
                     if itemstatus.lifecycle_state != "DELETING":
+
+                        # remove resolver rules first
+                        if itemstatus.rules:
+                            try:
+                                updateResolverDetails = oci.dns.models.UpdateResolverDetails(
+                                    display_name=itemstatus.display_name,
+                                    freeform_tags={},
+                                    defined_tags={},
+                                    attached_views=[],
+                                    rules=[]
+                                )
+                                object.update_resolver(resolver_id=itemstatus.id, update_resolver_details=updateResolverDetails)
+                            except Exception as e:
+                                print("error trying to delete resolver rules: {} - {}".format(itemstatus.display_name, str(e)))
+
                         for ep in itemstatus.endpoints:
                             try:
                                 print("Deleting: {} - {}".format(itemstatus.display_name, ep.name))
                                 object.delete_resolver_endpoint(resolver_id=itemstatus.id, resolver_endpoint_name=ep.name)
                             except Exception as e:
-                                print("error trying to delete: {} - {} - {}".format(itemstatus.display_name, ep.name, str(e)))
+                                print("error trying to delete resolver endpoint: {} - {} - {}".format(itemstatus.display_name, ep.name, str(e)))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
