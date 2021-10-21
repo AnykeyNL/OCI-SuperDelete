@@ -37,6 +37,7 @@ def input_command_line(help=False):
     parser = argparse.ArgumentParser(formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=80, width=130))
     parser.add_argument('-cf', default="", dest='config_file', help='OCI CLI Config file')
     parser.add_argument('-cp', default="", dest='config_profile', help='Config Profile inside the config file')
+    parser.add_argument('-log', default="log.txt", dest='log_file', help='output log file')
     parser.add_argument('-force', action='store_true', default=False, dest='force', help='force delete without confirmation')
     parser.add_argument('-debug', action='store_true', default=False, dest='debug', help='Enable debug')
     parser.add_argument('-skip_delete_compartment', action='store_true', default=False, dest='skip_delete_compartment', help='Skip Deleting the compartment at the end')

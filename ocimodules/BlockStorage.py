@@ -223,3 +223,27 @@ def DeleteVolumeGroupBackups(config, Compartments):
         else:
             itemsPresent = False
     print("All VolumeGroupBackups Objects deleted!")
+
+
+##############################################
+# DeleteBlockVolumesBackupPolicies
+##############################################
+def DeleteBlockVolumesBackupPolicies(config, Compartments):
+    AllItems = []
+    object = oci.core.BlockstorageClient(config)
+
+    print("Getting all Block Volumes Backup Policies objects")
+    for compartment in Compartments:
+        items = oci.pagination.list_call_get_all_results(object.list_volume_backup_policies, compartment_id=compartment.id).data
+        for item in items:
+            if item.display_name != "gold" and item.display_name != "silver" and item.display_name != "bronze":
+                AllItems.append(item)
+                print("- {} - {}".format(item.display_name, item.lifecycle_state))
+
+    for item in AllItems:
+        try:
+            object.delete_volume_backup_policy(policy_id=item.id).data
+        except Exception as e:
+            print("error deleting {}, Error {}".format(item.display_name, str(e)))
+
+    print("All BlockVolumesBackups Policies Objects deleted!")
