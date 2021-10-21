@@ -12,7 +12,21 @@ Initial development  by Richard Garsthagen - www.oc-blog.com
 ## Running the script
 how to run:
 
-python3 delete.py -c \<CompartmentID>
+```
+usage: delete.py [-h] [-cf CONFIG_FILE] [-cp CONFIG_PROFILE] [-force] [-debug] [-rg REGIONS] [-c COMPARTMENT]
+
+optional arguments:
+  -h, --help                show this help message and exit
+  -cf CONFIG_FILE           OCI CLI Config file
+  -cp CONFIG_PROFILE        Config Profile inside the config file
+  -force                    force delete without confirmation
+  -debug                    Enable debug
+  -rg REGIONS               Regions to delete comma separated
+  -c COMPARTMENT            top level compartment id to delete
+  -skip_delete_compartment  Skip Deleting the compartments at end of the process
+
+python3 delete.py -c <CompartmentID>
+```
 
 ## WORK_IN_PROGRESS
 This script is still being worked on, not all OCI resources have been added yet. Currently supported:
