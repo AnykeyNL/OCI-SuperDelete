@@ -2,6 +2,7 @@ import oci
 import time
 
 WaitRefresh = 10
+MaxIDeleteIteration = 5
 
 
 ###########################################
@@ -26,6 +27,7 @@ def DeleteWAFs(config, Compartments):
                 print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -45,8 +47,13 @@ def DeleteWAFs(config, Compartments):
             except Exception:
                 print("error getting : {}".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some WAF Policy not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All WAF Policy Objects deleted!")
@@ -72,6 +79,7 @@ def DeleteHTTPHealthchecks(config, Compartments):
             print("- {}".format(item.display_name))
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -87,8 +95,13 @@ def DeleteHTTPHealthchecks(config, Compartments):
             except Exception:
                 print("Deleted : {}".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some Healthchecks HTTP monitor not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All Healthchecks HTTP monitor Objects deleted!")
@@ -115,6 +128,7 @@ def DeletePINGHealthchecks(config, Compartments):
             print("- {}".format(item.display_name))
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -130,8 +144,13 @@ def DeletePINGHealthchecks(config, Compartments):
             except Exception:
                 print("Deleted : {}".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some Healthchecks PING monitor not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All Healthchecks PING monitor Objects deleted!")
@@ -156,6 +175,7 @@ def DeleteTrafficSteeringsAttachments(config, Compartments):
             print("error getting steering policy attachements")
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -175,8 +195,13 @@ def DeleteTrafficSteeringsAttachments(config, Compartments):
             except Exception:
                 print("error getting : {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some Traffic Steering Policy Attachment not deleted, skipping!")
+                return
         else:
             itemsPresent = False
 
@@ -205,6 +230,7 @@ def DeleteTrafficSteerings(config, Compartments):
                 print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -224,8 +250,13 @@ def DeleteTrafficSteerings(config, Compartments):
             except Exception:
                 print("error getting : {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some Traffic Steering Policy not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All Traffic Steering Policy Objects deleted!")
@@ -253,6 +284,7 @@ def DeleteZones(config, Compartments):
                 print("- {} - {}".format(item.name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -275,8 +307,13 @@ def DeleteZones(config, Compartments):
             except Exception:
                 print("error getting : {}, probably already deleted".format(item.name))
         if count > 0:
-            print("Waiting for all Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some DNS Zones Objects not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All DNS Zones Objects deleted!")
@@ -303,6 +340,7 @@ def DeleteDNSViews(config, Compartments):
                 print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
     itemsPresent = True
+    iteration = 0
 
     while itemsPresent:
         count = 0
@@ -325,8 +363,13 @@ def DeleteDNSViews(config, Compartments):
             except Exception:
                 print("error getting : {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all DNS View objects Objects to be deleted...")
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some DNS View not deleted, skipping!")
+                return
         else:
             itemsPresent = False
     print("All DNS View Objects deleted!")
