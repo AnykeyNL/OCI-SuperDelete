@@ -77,7 +77,7 @@ regions = []
 #           Application Configuration           #
 #################################################
 min_version_required = "2.41.1"
-application_version = "21.10.23"
+application_version = "21.10.25"
 debug = False
 
 
@@ -205,9 +205,9 @@ if confirm == "yes":
         DeleteKMSvaults(config, processCompartments, DeleteCompartmentOCID)
 
         print_header("Deleting GoldenGate at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteGGDeploymentsbak(config, processCompartments)
         DeleteGGRegistered(config, processCompartments)
         DeleteGGDeployments(config, processCompartments)
+        DeleteGGDeploymentsbak(config, processCompartments)
 
         print_header("Deleting Vulnerability Scanning Services at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteScanResults(config, processCompartments)
