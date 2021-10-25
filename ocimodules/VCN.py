@@ -19,7 +19,11 @@ def DeleteVCN(config, compartments):
         DeleteReservedIPs(config, Compartment)
         print("---[ Deleting DNS Resolvers ]----")
         DeleteDNSResolvers(config, Compartment)
-        print("---[ Deleting DRGs ]----")
+        print("---[ Deleting IPSEC Connections ]----")
+        DeleteIPSecConnections(config, Compartment)
+        print("---[ Deleting CPEs ]----")
+        DeleteCPEs(config, Compartment)
+        print("---[ Deleting DRG Components ]----")
         DeleteDRGAttachments(config, Compartment)
         DeleteDRGs(config, Compartment)
 
@@ -783,3 +787,90 @@ def DeleteDNSResolvers(config, compartment):
         else:
             itemsPresent = False
     print("All DNS Resolvers Objects deleted!")
+
+
+##############################################
+# DeleteCPEs
+##############################################
+def DeleteCPEs(config, compartment):
+    object = oci.core.VirtualNetworkClient(config)
+
+    print("Getting all CPE objects")
+    itemsPresent = True
+    iteration = 0
+
+    if itemsPresent:
+        count = 0
+        items = oci.pagination.list_call_get_all_results(object.list_cpes, compartment_id=compartment.id).data
+
+        for item in items:
+            count = count + 1
+            print("{}".format(item.display_name))
+
+            try:
+                print("Deleting: {}".format(item.display_name))
+                object.delete_cpe(cpe_id=item.id)
+            except Exception:
+                print("error trying to delete: {}".format(item.display_name))
+
+        if count > 0:
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some CPEs not deleted, skipping!")
+                return
+        else:
+            itemsPresent = False
+
+    print("All CPE Objects deleted!")
+
+
+##############################################
+# DeleteDRGs
+##############################################
+def DeleteIPSecConnections(config, compartment):
+    AllItems = []
+    object = oci.core.VirtualNetworkClient(config)
+
+    print("Getting all IPSEC Connection objects")
+    items = oci.pagination.list_call_get_all_results(object.list_ip_sec_connections, compartment_id=compartment.id).data
+
+    for item in items:
+        if (item.lifecycle_state != "TERMINATED"):
+            AllItems.append(item)
+        print("- {} - {}".format(item.display_name, item.lifecycle_state))
+
+    itemsPresent = True
+    iteration = 0
+
+    if itemsPresent:
+        count = 0
+        for item in AllItems:
+            try:
+                itemstatus = object.get_ip_sec_connection(ipsc_id=item.id).data
+                if itemstatus.lifecycle_state != "TERMINATED":
+                    if itemstatus.lifecycle_state != "TERMINATING":
+                        try:
+                            print("Deleting: {}".format(itemstatus.display_name))
+                            object.delete_ip_sec_connection(ipsc_id=itemstatus.id)
+                        except Exception:
+                            print("error trying to delete: {}".format(itemstatus.display_name))
+                    else:
+                        print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
+                    count = count + 1
+            except Exception as e:
+                print("error deleting {}, {}".format(item.display_name, str(e)))
+        if count > 0:
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some IPSEC Connection not deleted, skipping!")
+                return
+        else:
+            itemsPresent = False
+
+    print("All IPSEC Connection Objects deleted!")
