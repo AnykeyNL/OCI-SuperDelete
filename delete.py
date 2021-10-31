@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 ###########################################################
 # OCI-SuperDelete                                         #
 #                                                         #
@@ -204,6 +205,9 @@ if confirm == "yes":
         print_header("Moving and Scheduling KMS Vaults for deletion at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteKMSvaults(config, processCompartments, DeleteCompartmentOCID)
 
+        print_header("Deleting Oracle Cloud VMware solution at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        DeleteSDDC(config, processCompartments)
+        
         print_header("Deleting GoldenGate at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteGGRegistered(config, processCompartments)
         DeleteGGDeployments(config, processCompartments)
