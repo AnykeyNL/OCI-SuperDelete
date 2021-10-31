@@ -53,6 +53,7 @@ from ocimodules.Artifacts import *
 from ocimodules.Events import *
 from ocimodules.VulnerabilityScanning import *
 from ocimodules.Bastion import *
+from ocimodules.OCVS import *
 
 
 #################################################
