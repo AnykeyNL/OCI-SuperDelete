@@ -14,7 +14,7 @@ def DeleteKMSvaults(config, Compartments, MovetoCompartmentID):
 
     print("Getting all KMS Vault objects")
     for Compartment in Compartments:
-        items = oci.pagination.list_call_get_all_results(object.list_vaults, compartment_id=Compartment.id).data
+        items = oci.pagination.list_call_get_all_results(object.list_vaults, compartment_id=Compartment.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data
         for item in items:
             if (item.lifecycle_state != "DELETED"):
                 AllItems.append(item)
