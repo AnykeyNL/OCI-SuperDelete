@@ -54,7 +54,7 @@ from ocimodules.Events import *
 from ocimodules.VulnerabilityScanning import *
 from ocimodules.Bastion import *
 from ocimodules.OCVS import *
-
+from ocimodules.DatabaseMigrations import *
 
 #################################################
 #           Manual Configuration                #
@@ -93,7 +93,7 @@ class MyWriter:
     def __init__(self, stdout, filename):
         self.stdout = stdout
         self.filename = filename
-        self.logfile = open(self.filename, "a")
+        self.logfile = open(self.filename, "a", encoding="utf-8")
 
     def write(self, text):
         self.stdout.write(text)
@@ -105,7 +105,7 @@ class MyWriter:
 
     def flush(self):
         self.logfile.close()
-        self.logfile = open(self.filename, "a")
+        self.logfile = open(self.filename, "a", encoding="utf-8")
 
 
 ##########################################################################
@@ -149,7 +149,7 @@ if debug:
 # Add all active compartments,
 # exclude the ManagementCompartmentForPaas (as this is locked compartment)
 ######################################################
-print("\nLogin check and loading comaprtments...\n")
+print("\nLogin check and loading compartments...\n")
 compartments = Login(config, DeleteCompartmentOCID)
 processCompartments = []
 for compartment in compartments:
@@ -208,6 +208,10 @@ if confirm == "yes":
 
         print_header("Deleting Oracle Cloud VMware solution at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteSDDC(config, processCompartments)
+
+        print_header("Deleting Database Migrations at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        DeleteMigrations(config, processCompartments)
+        DeleteConections(config, processCompartments)
 
         print_header("Deleting GoldenGate at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteGGRegistered(config, processCompartments)
@@ -304,6 +308,7 @@ if confirm == "yes":
 
         print_header("Deleting Resource Manager Stacks at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteStacks(config, processCompartments)
+        DeleteSourceProviders(config, processCompartments)
 
         print_header("Deleting Block Volumes at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteVolumeGroups(config, processCompartments)

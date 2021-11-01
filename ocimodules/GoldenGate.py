@@ -106,7 +106,7 @@ def DeleteGGRegistered(config, Compartments):
     AllItems = []
     object = oci.golden_gate.GoldenGateClient(config)
 
-    print("Getting all GGRgeistered")
+    print("Getting all GGRegistered")
     for Compartment in Compartments:
         try:
             items = oci.pagination.list_call_get_all_results(object.list_database_registrations,
