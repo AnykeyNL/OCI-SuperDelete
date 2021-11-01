@@ -92,4 +92,3 @@ def DeleteEsxiHost(config, Compartments):
         else:
             itemsPresent = False
     print("All ESXi hosts deleted!")
-

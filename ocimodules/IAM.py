@@ -90,12 +90,14 @@ def DeleteTagNameSpaces(config, compartments):
     print("Getting all Tag Namespace objects")
     for Compartment in compartments:
         items = oci.pagination.list_call_get_all_results(object.list_tag_namespaces, compartment_id=Compartment.id).data
-        if len(AllItems) == 0:
+        if len(items) == 0:
             continue
 
         for item in items:
+            if item.lifecycle_state == 'DELETING':
+                continue
             AllItems.append(item)
-            print("- {}".format(item.name))
+            print("- Tag Namespace: {}".format(item.name))
 
         print("Retiring all namespaces.. in compartment " + str(Compartment.name))
         for item in AllItems:
@@ -105,7 +107,10 @@ def DeleteTagNameSpaces(config, compartments):
                 print("Retiring tag namespace {}".format(itemstatus.name))
                 tagdetails = oci.identity.models.UpdateTagNamespaceDetails()
                 tagdetails.is_retired = True
-                object.update_tag_namespace(tag_namespace_id=item.id, update_tag_namespace_details=tagdetails)
+                try:
+                    object.update_tag_namespace(tag_namespace_id=item.id, update_tag_namespace_details=tagdetails)
+                except Exception:
+                    print("Error retiring Tag, could be already in deleting phase.")
 
         print("Retired all namespaces.. Waiting...")
         time.sleep(2)
@@ -126,10 +131,10 @@ def DeleteTagNameSpaces(config, compartments):
                             try:
                                 print("Deleting: {}".format(itemstatus.name))
                                 object.cascade_delete_tag_namespace(tag_namespace_id=item.id)
-                            except Exception:
-                                print("failed, trying again...")
+                            except Exception as e:
+                                print("failed, trying again... {} ".format(str(e)))
                         else:
-                            print("Waiting for tag {} to finish deleting...This can take a long time :-(".format(itemstatus.name))
+                            print("Waiting for tag {} to finish deleting, status={}".format(itemstatus.name, itemstatus.lifecycle_state))
 
             print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteTagIteration) if iteration > 0 else ""))
             time.sleep(WaitRefresh)
@@ -137,6 +142,7 @@ def DeleteTagNameSpaces(config, compartments):
 
             if iteration >= MaxIDeleteTagIteration:
                 print("Tag Namespace not deleted, skipping!")
+                done = True
                 continue
 
     print("All Tag Namespace Objects deleted!")
