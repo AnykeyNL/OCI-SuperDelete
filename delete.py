@@ -208,7 +208,7 @@ if confirm == "yes":
 
         print_header("Deleting Oracle Cloud VMware solution at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteSDDC(config, processCompartments)
-        
+
         print_header("Deleting GoldenGate at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteGGRegistered(config, processCompartments)
         DeleteGGDeployments(config, processCompartments)
