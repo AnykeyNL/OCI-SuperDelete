@@ -55,6 +55,7 @@ from ocimodules.VulnerabilityScanning import *
 from ocimodules.Bastion import *
 from ocimodules.OCVS import *
 from ocimodules.DatabaseMigrations import *
+from ocimodules.DevOps import *
 
 #################################################
 #           Manual Configuration                #
@@ -205,6 +206,13 @@ if confirm == "yes":
 
         print_header("Moving and Scheduling KMS Vaults for deletion at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteKMSvaults(config, processCompartments, DeleteCompartmentOCID)
+
+        print_header("Deleting DevOps Projects at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        DeleteDeployStages(config, processCompartments)
+        DeleteDeployArtifacts(config, processCompartments)
+        DeleteDeployEnvironments(config, processCompartments)
+        DeleteDeployPipelines(config, processCompartments)
+        DeleteDevOpsProjects(config, processCompartments)
 
         print_header("Deleting Oracle Cloud VMware solution at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteSDDC(config, processCompartments)
