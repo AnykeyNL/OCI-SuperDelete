@@ -56,6 +56,7 @@ from ocimodules.Bastion import *
 from ocimodules.OCVS import *
 from ocimodules.DatabaseMigrations import *
 from ocimodules.DevOps import *
+from ocimodules.AnyDelete import *
 
 #################################################
 #           Manual Configuration                #
@@ -80,7 +81,7 @@ regions = []
 #           Application Configuration           #
 #################################################
 min_version_required = "2.41.1"
-application_version = "21.11.02"
+application_version = "21.11.14"
 debug = False
 
 
@@ -258,9 +259,12 @@ if confirm == "yes":
 
         print_header("Deleting Compute Instances at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteInstancePools(config, processCompartments)
-        DeleteInstanceConfigs(config, processCompartments)
-        DeleteInstances(config, processCompartments)
-        DeleteImages(config, processCompartments)
+        # DeleteInstanceConfigs(config, processCompartments)
+        DeleteAny(config, processCompartments, "ComputeManagementClient", "InstanceConfigs", "instance_configuration_id", "list_instance_configurations", "get_instance_configuration","delete_instance_configuration", "display_name", "", "")
+        # DeleteInstances(config, processCompartments)
+        DeleteAny(config, processCompartments, "ComputeClient", "Instances", "instance_id", "list_instances", "get_instance", "terminate_instance", "display_name", "TERMINATED", "TERMINATING")
+        # DeleteImages(config, processCompartments)
+        DeleteAny(config, processCompartments, "ComputeClient", "Images", "image_id", "list_images", "get_image", "delete_image", "display_name", "DELETED", "")
         DeleteBootVolumes(config, processCompartments)
         DeleteBootVolumesBackups(config, processCompartments)
         DeleteDedicatedVMHosts(config, processCompartments)
