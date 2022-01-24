@@ -209,7 +209,7 @@ if confirm == "yes":
         DeleteKMSvaults(config, processCompartments, DeleteCompartmentOCID)
 
         print_header("Deleting DevOps Projects at " + CurrentTimeString() + "@ " + region, 1)
-        elements = ["deploy_stage", "deploy_artifact", "deploy_environment", "deploy_pipeline"]
+        elements = ["deploy_stage", "deploy_artifact", "deploy_environment", "deploy_pipeline", "build_pipeline"]
         for element in elements:
             DeleteAny(config, processCompartments, "devops.DevopsClient", element)
         DeleteAny(config, processCompartments, "devops.DevopsClient", "repository", ObjectNameVar="name")
