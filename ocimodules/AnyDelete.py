@@ -54,7 +54,7 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
             # Delete objects that do not have lifecycle management status
             if DelState == "":
                 try:
-                    print("Deleting: {} - {} @ {}".format(Compartment.name, eval("item.{}".format(ObjectNameVar)), config["region"]))
+                    print("Deleting: {}:{} @ {}".format(Compartment.name, eval("item.{}".format(ObjectNameVar)), config["region"]))
                     eval("object.{}({}=item.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)".format(DeleteCommand, ServiceID))
                 except oci.exceptions.ServiceError as response:
                     if response.code == 404:
@@ -89,7 +89,7 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
                         if itemstatus.lifecycle_state != DelState:
                             if itemstatus.lifecycle_state != DelingSate:
                                 try:
-                                    print("Deleting: {}".format(eval("itemstatus.{}".format(ObjectNameVar))))
+                                    print("Deleting: {}:{} @ {}".format(Compartment.name, eval("itemstatus.{}".format(ObjectNameVar)), config["region"]))
                                     eval("object.{}({}=itemstatus.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)".format(DeleteCommand, ServiceID))
                                 except oci.exceptions.ServiceError as response:
                                     if response.code == 404:
