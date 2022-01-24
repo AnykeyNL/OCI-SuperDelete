@@ -346,8 +346,9 @@ if confirm == "yes":
         print_header("Deleting Events at " + CurrentTimeString() + "@ " + region, 1)
         DeleteEvents(config, processCompartments)
 
-        print_header("Deleting Policies at " + CurrentTimeString() + "@ " + region, 1)
-        DeletePolicies(config, processCompartments)
+        if region == homeregion:
+            print_header("Deleting Policies at " + CurrentTimeString() + "@ " + region, 1)
+            DeletePolicies(config, processCompartments)
 
         print_header("Deleting Log Groups at " + CurrentTimeString() + "@ " + region, 1)
         DeleteLogGroups(config, processCompartments)
