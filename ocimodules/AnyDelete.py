@@ -4,18 +4,57 @@ import time
 WaitRefresh = 15
 MaxIDeleteIteration = 20
 
-def DeleteAny(config, Compartments, ServiceObject, ServiceName, ServiceID, ListCommand, GetCommand, DeleteCommand, ObjectNameVar, DelState, DelingSate):
+def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", ListCommand = "", GetCommand = "", DeleteCommand = "", ObjectNameVar = "display_name", DelState = "DELETED", DelingSate = "DELETING", Extra = "", Filter="", PerAD=False):
     AllItems = []
-    object = eval("oci.core.{}(config)".format(ServiceObject))
+    object = eval("oci.{}(config)".format(ServiceClient))
+
+    if ServiceID == "":
+        ServiceID = ServiceName + "_id"
+    if ListCommand == "":
+        # If service name ends on 'y', make plural to 'ies', "ss" to "sses", else just add 's'
+        if ServiceName[-2:] == "ay":
+            ListCommand = "list_" + ServiceName + "s"
+        elif ServiceName[-1] == "y":
+            ListCommand = "list_" + ServiceName[0:-1] + "ies"
+        elif ServiceName[-2:] == "ss":
+            ListCommand = "list_" + ServiceName + "es"
+        else:
+            ListCommand = "list_" + ServiceName + "s"
+    if GetCommand == "" :
+        GetCommand = "get_" + ServiceName
+    if DeleteCommand == "":
+        DeleteCommand = "delete_" + ServiceName
+
+    if PerAD:
+        identity = oci.identity.IdentityClient(config)
 
     print("Getting all {} objects".format(ServiceName))
     for Compartment in Compartments:
-        items = eval("oci.pagination.list_call_get_all_results(object.{}, compartment_id=Compartment.id).data".format(ListCommand))
+        try:
+            if PerAD:
+                ads = identity.list_availability_domains(compartment_id=Compartment.id).data
+                items = []
+                for ad in ads:
+                    cmd = "oci.pagination.list_call_get_all_results(object.{}, availability_domain=\"{}\", compartment_id=Compartment.id{}).data".format(ListCommand, ad.name, Extra)
+                    itemstemp  = eval("oci.pagination.list_call_get_all_results(object.{}, availability_domain=\"{}\", compartment_id=Compartment.id{}).data".format(ListCommand, ad.name, Extra))
+                    for item in itemstemp:
+                        items.append(item)
+            else:
+                items = eval("oci.pagination.list_call_get_all_results(object.{}, compartment_id=Compartment.id{}).data".format(ListCommand, Extra))
+
+        except oci.exceptions.ServiceError as response:
+            if response.code == 404:
+                print ("No items found")
+                items = []
+            else:
+                items = []
+                print("error {}-{} trying to delete: {}".format(response.code, response.message, ServiceName))
+
         for item in items:
             # Delete objects that do not have lifecycle management status
             if DelState == "":
                 try:
-                    print("Deleting: {}".format(eval("item.{}".format(ObjectNameVar))))
+                    print("Deleting: {} - {} @ {}".format(Compartment.name, eval("item.{}".format(ObjectNameVar)), config["region"]))
                     eval("object.{}({}=item.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)".format(DeleteCommand, ServiceID))
                 except oci.exceptions.ServiceError as response:
                     if response.code == 404:
@@ -25,8 +64,13 @@ def DeleteAny(config, Compartments, ServiceObject, ServiceName, ServiceID, ListC
             # Add objects with lifecycle management to the queue
             elif item.lifecycle_state != DelState:
                 if item.compartment_id is not None:
-                    AllItems.append(item)
-                    print("- {} - {}".format(eval("item.{}".format(ObjectNameVar)), item.lifecycle_state))
+                    if Filter == "protected": # Filter for is-protected items
+                        if not item.is_protected:
+                            AllItems.append(item)
+                            print("- {} - {}".format(eval("item.{}".format(ObjectNameVar)), item.lifecycle_state))
+                    if Filter == "":
+                        AllItems.append(item)
+                        print("- {} - {}".format(eval("item.{}".format(ObjectNameVar)), item.lifecycle_state))
 
     if DelState == "":
         print("{} Objects deleted".format(ServiceName))

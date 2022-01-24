@@ -21,9 +21,8 @@ import time
 import oci
 import platform
 import logging
-from ocimodules.GoldenGate import *
 from ocimodules.functions import *
-from ocimodules.EdgeServices import *
+#from ocimodules.EdgeServices import *
 from ocimodules.ObjectStorage import *
 from ocimodules.Instances import *
 from ocimodules.Database import *
@@ -34,10 +33,10 @@ from ocimodules.ResourceManager import *
 from ocimodules.FileStorage import *
 from ocimodules.Monitoring import *
 from ocimodules.Notifications import *
-from ocimodules.Autoscaling import *
+#from ocimodules.Autoscaling import *
 from ocimodules.FunctionsService import *
 from ocimodules.DataScience import *
-from ocimodules.OKE import *
+#from ocimodules.OKE import *
 from ocimodules.kms import *
 from ocimodules.Nosql import *
 from ocimodules.datacatalog import *
@@ -49,13 +48,11 @@ from ocimodules.Logging import *
 from ocimodules.Integration import *
 from ocimodules.Blockchain import *
 from ocimodules.APM import *
-from ocimodules.Artifacts import *
+#from ocimodules.Artifacts import *
 from ocimodules.Events import *
-from ocimodules.VulnerabilityScanning import *
-from ocimodules.Bastion import *
-from ocimodules.OCVS import *
-from ocimodules.DatabaseMigrations import *
-from ocimodules.DevOps import *
+#from ocimodules.VulnerabilityScanning import *
+#from ocimodules.Bastion import *
+#from ocimodules.DatabaseMigrations import *
 from ocimodules.AnyDelete import *
 
 #################################################
@@ -109,6 +106,8 @@ class MyWriter:
         self.logfile.close()
         self.logfile = open(self.filename, "a", encoding="utf-8")
 
+def CurrentTimeString():
+    return time.strftime("%D %H:%M:%S", time.localtime())
 
 ##########################################################################
 # Main Program
@@ -170,7 +169,7 @@ tenane_name = GetTenantName(config)
 ######################################################
 print_header("OCI-SuperDelete", 0)
 
-print("Date/Time          : " + time.strftime("%D %H:%M:%S", time.localtime()))
+print("Date/Time          : " + CurrentTimeString())
 print("Command Line       : " + ' '.join(x for x in sys.argv[1:]))
 print("App Version        : " + application_version)
 print("Machine            : " + platform.node() + " (" + platform.machine() + ")")
@@ -205,167 +204,169 @@ if confirm == "yes":
         print_header("Deleting resources in region " + region, 0)
         config["region"] = region
 
-        print_header("Moving and Scheduling KMS Vaults for deletion at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        print_header("Moving and Scheduling KMS Vaults for deletion at " + CurrentTimeString() + "@ " + region, 1)
+        print ("Moving to: ".format(DeleteCompartmentOCID))
         DeleteKMSvaults(config, processCompartments, DeleteCompartmentOCID)
 
-        print_header("Deleting DevOps Projects at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteDeployStages(config, processCompartments)
-        DeleteDeployArtifacts(config, processCompartments)
-        DeleteDeployEnvironments(config, processCompartments)
-        DeleteDeployPipelines(config, processCompartments)
-        DeleteDevOpsProjects(config, processCompartments)
+        print_header("Deleting DevOps Projects at " + CurrentTimeString() + "@ " + region, 1)
+        elements = ["deploy_stage", "deploy_artifact", "deploy_environment", "deploy_pipeline"]
+        for element in elements:
+            DeleteAny(config, processCompartments, "devops.DevopsClient", element)
+        DeleteAny(config, processCompartments, "devops.DevopsClient", "repository", ObjectNameVar="name")
+        DeleteAny(config, processCompartments, "devops.DevopsClient", "project", ObjectNameVar= "name")
 
-        print_header("Deleting Oracle Cloud VMware solution at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteSDDC(config, processCompartments)
+        print_header("Deleting Oracle Cloud VMware solution at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "ocvp.SddcClient", "sddc")
 
-        print_header("Deleting Database Migrations at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteMigrations(config, processCompartments)
-        DeleteConections(config, processCompartments)
+        print_header("Deleting Database Migrations at " + CurrentTimeString() + "@ " + region, 1)
+        elements = ["migration", "connection"]
+        for element in elements:
+            DeleteAny(config, processCompartments, "database_migration.DatabaseMigrationClient", element)
 
-        print_header("Deleting GoldenGate at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteGGRegistered(config, processCompartments)
-        DeleteGGDeployments(config, processCompartments)
-        DeleteGGDeploymentsbak(config, processCompartments)
+        print_header("Deleting GoldenGate at " + CurrentTimeString() + "@ " + region, 1)
+        elements = ["database_registration", "deployment", "deployment_backup"]
+        for element in elements:
+            DeleteAny(config, processCompartments, "golden_gate.GoldenGateClient", element)
 
-        print_header("Deleting Vulnerability Scanning Services at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteScanResults(config, processCompartments)
-        DeleteTargets(config, processCompartments)
-        DeleteRecipes(config, processCompartments)
+        print_header("Deleting Vulnerability Scanning Services at " + CurrentTimeString() + "@ " + region, 1)
+        elements = ["host_agent_scan_result", "host_port_scan_result", "host_cis_benchmark_scan_result", "container_scan_result"]
+        for element in elements:
+            DeleteAny(config, processCompartments, "vulnerability_scanning.VulnerabilityScanningClient", element, DelState="", DelingSate="")
+        DeleteAny(config, processCompartments, "vulnerability_scanning.VulnerabilityScanningClient", "host_scan_target")
+        elements = ["host_scan_recipe", "container_scan_recipe"]
+        for element in elements:
+            DeleteAny(config, processCompartments, "vulnerability_scanning.VulnerabilityScanningClient", element, DelState="", DelingSate="")
 
-        print_header("Deleting Bastion Services at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteBastion(config, processCompartments)
+        print_header("Deleting Bastion Services at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "bastion.BastionClient", "bastion", ObjectNameVar= "name")
 
-        print_header("Deleting Edge Services at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteWAFs(config, processCompartments)
-        DeleteHTTPHealthchecks(config, processCompartments)
-        DeletePINGHealthchecks(config, processCompartments)
-        DeleteTrafficSteeringsAttachments(config, processCompartments)
-        DeleteTrafficSteerings(config, processCompartments)
-        DeleteZones(config, processCompartments)
-        DeleteDNSViews(config, processCompartments)
+        if region == homeregion:
+            print_header("Deleting Edge Services at " + CurrentTimeString() + "@ " + region, 1)
+            DeleteAny(config, processCompartments, "waas.WaasClient", "waas_policy")
+            DeleteAny(config, processCompartments, "healthchecks.HealthChecksClient", "http_monitor", ServiceID="monitor_id", DelState="", DelingSate="")
+            DeleteAny(config, processCompartments, "healthchecks.HealthChecksClient", "ping_monitor", ServiceID="monitor_id", DelState="", DelingSate="")
+            DeleteAny(config, processCompartments, "dns.DnsClient", "steering_policy_attachment")
+            DeleteAny(config, processCompartments, "dns.DnsClient", "steering_policy")
+            DeleteAny(config, processCompartments, "dns.DnsClient", "zone", ObjectNameVar="name", ServiceID="zone_name_or_id")
+            DeleteAny(config, processCompartments, "dns.DnsClient", "view", Extra=", scope=\"PRIVATE\"", Filter="protected")
 
-        print_header("Deleting Object Storage at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        print_header("Deleting Object Storage at " + CurrentTimeString() + "@ " + region, 1)
         DeleteBuckets(config, processCompartments)
 
-        print_header("Deleting OKE Clusters at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteClusters(config, processCompartments)
+        print_header("Deleting OKE Clusters at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "container_engine.ContainerEngineClient", "cluster", ObjectNameVar="name")
 
-        print_header("Deleting Repositories at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteContainerRepositories(config, processCompartments)
-        DeleteRepositories(config, processCompartments)
+        print_header("Deleting Repositories at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "artifacts.ArtifactsClient", "container_repository", ServiceID="repository_id")
+        DeleteAny(config, processCompartments, "artifacts.ArtifactsClient", "repository")
 
-        print_header("Deleting Auto Scaling Configurations at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteAutoScalingConfigurations(config, processCompartments)
+        print_header("Deleting Auto Scaling Configurations at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "autoscaling.AutoScalingClient", "auto_scaling_configuration", DelState="", DelingSate="")
 
-        print_header("Deleting Compute Instances at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteInstancePools(config, processCompartments)
-        # DeleteInstanceConfigs(config, processCompartments)
-        DeleteAny(config, processCompartments, "ComputeManagementClient", "InstanceConfigs", "instance_configuration_id", "list_instance_configurations", "get_instance_configuration","delete_instance_configuration", "display_name", "", "")
-        # DeleteInstances(config, processCompartments)
-        DeleteAny(config, processCompartments, "ComputeClient", "Instances", "instance_id", "list_instances", "get_instance", "terminate_instance", "display_name", "TERMINATED", "TERMINATING")
-        # DeleteImages(config, processCompartments)
-        DeleteAny(config, processCompartments, "ComputeClient", "Images", "image_id", "list_images", "get_image", "delete_image", "display_name", "DELETED", "")
-        DeleteBootVolumes(config, processCompartments)
-        DeleteBootVolumesBackups(config, processCompartments)
-        DeleteDedicatedVMHosts(config, processCompartments)
+        print_header("Deleting Compute Instances at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "core.ComputeManagementClient", "instance_pool", DeleteCommand="terminate_instance_pool", DelState="TERMINATED", DelingSate="TERMINATING")
+        DeleteAny(config, processCompartments, "core.ComputeManagementClient", "instance_configuration", DelState="", DelingSate="")
+        DeleteAny(config, processCompartments, "core.ComputeClient", "instance", DeleteCommand="terminate_instance", DelState="TERMINATED", DelingSate="TERMINATING")
+        DeleteAny(config, processCompartments, "core.ComputeClient", "image")
+        DeleteAny(config, processCompartments, "core.ComputeClient", "dedicated_vm_host")
 
-        print_header("Deleting DataScience Components at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteNotebooks(config, processCompartments)
-        DeleteModelDeployments(config, processCompartments)
-        DeleteModels(config, processCompartments)
-        DeleteProjects(config, processCompartments)
+        print_header("Deleting DataScience Components at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "data_science.DataScienceClient", "notebook_session")
+        DeleteAny(config, processCompartments, "data_science.DataScienceClient", "model_deployment")
+        DeleteAny(config, processCompartments, "data_science.DataScienceClient", "model")
+        DeleteAny(config, processCompartments, "data_science.DataScienceClient", "project")
 
-        print_header("Deleting Application Functions at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        print_header("Deleting Application Functions at " + CurrentTimeString() + "@ " + region, 1)
         DeleteApplications(config, processCompartments)
 
-        print_header("Deleting Deployments at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteDeployments(config, processCompartments)
+        print_header("Deleting API Gateway Service at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "apigateway.DeploymentClient", "deployment")
+        DeleteAny(config, processCompartments, "apigateway.GatewayClient", "gateway")
+        DeleteAny(config, processCompartments, "apigateway.ApiGatewayClient", "api")
+        DeleteAny(config, processCompartments, "apigateway.ApiGatewayClient", "certificate")
 
-        print_header("Deleting APIs at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteAPIs(config, processCompartments)
+        print_header("Deleting Oracle Databases at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "database.DatabaseClient", "db_system", DeleteCommand="terminate_db_system", DelState="TERMINATED", DelingSate="TERMINATING")
+        DeleteAny(config, processCompartments, "database.DatabaseClient", "backup")
+        DeleteAny(config, processCompartments, "database.DatabaseClient", "autonomous_database", DelState="TERMINATED", DelingSate="TERMINATING")
 
-        print_header("Deleting API Gateways at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteAPIGateways(config, processCompartments)
-        DeleteCertificates(config, processCompartments)
+        print_header("Deleting MySQL Database Instances at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "mysql.DbSystemClient", "db_system")
 
-        print_header("Deleting Database Instances at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteDBCS(config, processCompartments)
-        DeleteAutonomousDB(config, processCompartments)
-        DeleteDBBackups(config, processCompartments)
+        print_header("Deleting Nosql tables at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "nosql.NosqlClient", "table", ServiceID="table_name_or_id")
 
-        print_header("Deleting MySQL Database Instances at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteMySQL(config, processCompartments)
+        print_header("Deleting Data Catalogs at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "data_catalog.DataCatalogClient", "catalog")
 
-        print_header("Deleting Nosql tables at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteNosql(config, processCompartments)
+        print_header("Deleting Digital Assistants at " + CurrentTimeString() + "@ " + region, 1)
 
-        print_header("Deleting Data Catalogs at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteDataCatalog(config, processCompartments)
-
-        print_header("Deleting Digital Assistants at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
         DeleteDigitalAssistant(config, processCompartments)
+        DeleteAny(config, processCompartments, "oda.OdaClient", "oda_instance")
 
-        print_header("Deleting Analytics at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteAnalytics(config, processCompartments)
-        DeleteStreams(config, processCompartments)
-        DeleteStreamPools(config, processCompartments)
-        DeleteConnectHarnesses(config, processCompartments)
-        DeleteServiceConnectors(config, processCompartments)
+        print_header("Deleting Analytics at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "analytics.AnalyticsClient", "analytics_instance")
+        DeleteAny(config, processCompartments, "streaming.StreamAdminClient", "stream")
+        DeleteAny(config, processCompartments, "streaming.StreamAdminClient", "stream_pool")
+        DeleteAny(config, processCompartments, "streaming.StreamAdminClient", "connect_harness")
+        DeleteAny(config, processCompartments, "sch.ServiceConnectorClient", "service_connector")
 
-        print_header("Deleting Integration at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteIntegration(config, processCompartments)
+        print_header("Deleting Integration at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "integration.IntegrationInstanceClient", "integration_instance")
 
-        print_header("Deleting Blockchain at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteBlockchain(config, processCompartments)
+        print_header("Deleting Blockchain at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "blockchain.BlockchainPlatformClient", "blockchain_platform")
 
-        print_header("Deleting Resource Manager Stacks at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteStacks(config, processCompartments)
-        DeleteSourceProviders(config, processCompartments)
+        print_header("Deleting Resource Manager Stacks at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "resource_manager.ResourceManagerClient", "stack")
+        DeleteAny(config, processCompartments, "resource_manager.ResourceManagerClient", "configuration_source_provider")
 
-        print_header("Deleting Block Volumes at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteVolumeGroups(config, processCompartments)
-        DeleteVolumeGroupBackups(config, processCompartments)
-        DeleteVolumes(config, processCompartments)
-        DeleteBlockVolumesBackups(config, processCompartments)
-        DeleteBlockVolumesBackupPolicies(config, processCompartments)
+        print_header("Deleting Block Volumes at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "core.BlockstorageClient", "volume", DelState="TERMINATED", DelingSate="TERMINATING", PerAD=True)
+        DeleteAny(config, processCompartments, "core.BlockstorageClient", "volume_backup", DelState="TERMINATED", DelingSate="TERMINATING")
+        DeleteAny(config, processCompartments, "core.BlockstorageClient", "boot_volume", DelState="TERMINATED", DelingSate="TERMINATING", PerAD=True)
+        DeleteAny(config, processCompartments, "core.BlockstorageClient", "boot_volume_backup", DelState="TERMINATED", DelingSate="TERMINATING")
+        DeleteAny(config, processCompartments, "core.BlockstorageClient", "volume_group", DelState="TERMINATED", DelingSate="TERMINATING")
+        DeleteAny(config, processCompartments, "core.BlockstorageClient", "volume_group_backup", DelState="TERMINATED", DelingSate="TERMINATING")
+        DeleteAny(config, processCompartments, "core.BlockstorageClient", "volume_backup_policy", DelState="", ServiceID="policy_id")
 
-        print_header("Deleting FileSystem and Mount Targets at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
-        DeleteMountTargets(config, processCompartments)
-        DeleteFileStorage(config, processCompartments)
+        print_header("Deleting FileSystem and Mount Targets at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "file_storage.FileStorageClient" , "mount_target", PerAD=True)
+        DeleteAny(config, processCompartments, "file_storage.FileStorageClient", "file_system", PerAD=True)
 
-        print_header("Deleting VCNs at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        print_header("Deleting VCNs at " + CurrentTimeString() + "@ " + region, 1)
         DeleteVCN(config, processCompartments)
 
-        print_header("Deleting Alarms at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        print_header("Deleting Alarms at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAlarms(config, processCompartments)
 
-        print_header("Deleting Notifications at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        print_header("Deleting Notifications at " + CurrentTimeString() + "@ " + region, 1)
         DeleteNotifications(config, processCompartments)
 
-        print_header("Deleting Events at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        print_header("Deleting Events at " + CurrentTimeString() + "@ " + region, 1)
         DeleteEvents(config, processCompartments)
 
-        print_header("Deleting Policies at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        print_header("Deleting Policies at " + CurrentTimeString() + "@ " + region, 1)
         DeletePolicies(config, processCompartments)
 
-        print_header("Deleting Log Groups at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        print_header("Deleting Log Groups at " + CurrentTimeString() + "@ " + region, 1)
         DeleteLogGroups(config, processCompartments)
 
-        print_header("Deleting Application Performance Monitoring at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        print_header("Deleting Application Performance Monitoring at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAPM(config, processCompartments)
 
         # delete tags and namespace only if home region
         if region == homeregion:
-            print_header("Deleting Tag Namespaces at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+            print_header("Deleting Tag Namespaces at " + CurrentTimeString() + "@ " + region, 1)
             DeleteTagDefaults(config, processCompartments)
             DeleteTagNameSpaces(config, processCompartments)
 
     if not skip_delete_compartment:
-        print("Hopefully deleting compartments, if empty at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        print("Hopefully deleting compartments, if empty at " + CurrentTimeString() + "@ " + region, 1)
         config["region"] = homeregion
         DeleteCompartments(config, processCompartments, DeleteCompartmentOCID)
     else:
-        print("Skipping deletion of the compartments as specified at " + time.strftime("%D %H:%M:%S", time.localtime()), 1)
+        print("Skipping deletion of the compartments as specified at " + CurrentTimeString() + "@ " + region, 1)
 
 else:
     print("ok, doing nothing")
