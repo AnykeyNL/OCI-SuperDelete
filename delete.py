@@ -305,10 +305,10 @@ if confirm == "yes":
         DeleteAny(config, processCompartments, "oda.OdaClient", "oda_instance")
 
         print_header("Deleting Analytics at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteAny(config, processCompartments, "analytics.AnalyticsClient", "analytics_instance")
-        DeleteAny(config, processCompartments, "streaming.StreamAdminClient", "stream")
-        DeleteAny(config, processCompartments, "streaming.StreamAdminClient", "stream_pool")
-        DeleteAny(config, processCompartments, "streaming.StreamAdminClient", "connect_harness")
+        DeleteAny(config, processCompartments, "analytics.AnalyticsClient", "analytics_instance", ObjectNameVar="name")
+        DeleteAny(config, processCompartments, "streaming.StreamAdminClient", "stream", ObjectNameVar="name")
+        DeleteAny(config, processCompartments, "streaming.StreamAdminClient", "stream_pool", ObjectNameVar="name")
+        DeleteAny(config, processCompartments, "streaming.StreamAdminClient", "connect_harness", ObjectNameVar="name")
         DeleteAny(config, processCompartments, "sch.ServiceConnectorClient", "service_connector")
 
         print_header("Deleting Integration at " + CurrentTimeString() + "@ " + region, 1)
