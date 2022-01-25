@@ -35,12 +35,11 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
                 ads = identity.list_availability_domains(compartment_id=Compartment.id).data
                 items = []
                 for ad in ads:
-                    cmd = "oci.pagination.list_call_get_all_results(object.{}, availability_domain=\"{}\", compartment_id=Compartment.id{}).data".format(ListCommand, ad.name, Extra)
-                    itemstemp  = eval("oci.pagination.list_call_get_all_results(object.{}, availability_domain=\"{}\", compartment_id=Compartment.id{}).data".format(ListCommand, ad.name, Extra))
+                    itemstemp  = eval("oci.pagination.list_call_get_all_results(object.{}, availability_domain=\"{}\", compartment_id=Compartment.id{}, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data".format(ListCommand, ad.name, Extra))
                     for item in itemstemp:
                         items.append(item)
             else:
-                items = eval("oci.pagination.list_call_get_all_results(object.{}, compartment_id=Compartment.id{}).data".format(ListCommand, Extra))
+                items = eval("oci.pagination.list_call_get_all_results(object.{}, compartment_id=Compartment.id{}, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data".format(ListCommand, Extra))
 
         except oci.exceptions.ServiceError as response:
             if response.code == 404:
@@ -85,7 +84,7 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
                 count = 0
                 for item in AllItems:
                     try:
-                        itemstatus = eval("object.{}({}=item.id).data".format(GetCommand, ServiceID))
+                        itemstatus = eval("object.{}({}=item.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data".format(GetCommand, ServiceID))
                         if itemstatus.lifecycle_state != DelState:
                             if itemstatus.lifecycle_state != DelingSate:
                                 try:
