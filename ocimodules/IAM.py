@@ -288,7 +288,7 @@ def DeleteCompartments(config, compartments, startcomp):
     while level > 0:
         for C in compartments:
             Compartment = C.details
-            if C.level = level:
+            if C.level == level:
                 retry = True
                 while retry:
                     retry = False
