@@ -282,7 +282,7 @@ def DeleteTagNameSpaces(config, compartments):
 #################################################
 def DeleteCompartments(config, compartments, startcomp):
 
-    object = oci.identity.IdentityClient(config)
+    object = oci.identity.IdentityClient(config, circuit_breaker_strategy=oci.circuit_breaker.NoCircuitBreakerStrategy)
 
     level = 7
     while level > 0:
@@ -290,6 +290,7 @@ def DeleteCompartments(config, compartments, startcomp):
             Compartment = C.details
             if C.level == level:
                 retry = True
+                retrycount = 0
                 while retry:
                     retry = False
                     try:
@@ -298,8 +299,9 @@ def DeleteCompartments(config, compartments, startcomp):
                         print("{} Deleted compartment: {}".format(timestr, C.fullpath))
                     except Exception as e:
                         if e.status == 429:
-                            print("{} Delaying.. api calls".format(timestr))
+                            print("{} Delaying - retry attempt {} .. api calls           ".format(timestr, retrycount), end = "\r")
                             time.sleep(10)
+                            retrycount = retrycount + 1
                             retry = True
         level = level - 1
 
