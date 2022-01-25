@@ -154,7 +154,7 @@ print("\nLogin check and loading compartments...\n")
 compartments = Login(config, DeleteCompartmentOCID)
 processCompartments = []
 for compartment in compartments:
-    if compartment.lifecycle_state == "ACTIVE" and compartment.name != "ManagedCompartmentForPaaS":
+    if compartment.details.lifecycle_state == "ACTIVE" and compartment.details.name != "ManagedCompartmentForPaaS":
         processCompartments.append(compartment)
 
 # Check if regions specified if not getting all subscribed regions.
@@ -183,7 +183,10 @@ print("Tenant Name        : " + tenane_name)
 print("Tenant Id          : " + config['tenancy'])
 print("Home Region        : " + homeregion)
 print("Regions to Process : " + ','.join(x for x in regions))
-print("\nCompartments to Process : \n" + ','.join(x.name for x in processCompartments))
+print("\nCompartments to Process : \n")
+for c in processCompartments:
+    print("  " + c.fullpath)
+
 
 #########################################
 # Check confirmation for execution
@@ -337,37 +340,37 @@ if confirm == "yes":
         print_header("Deleting VCNs at " + CurrentTimeString() + "@ " + region, 1)
         DeleteVCN(config, processCompartments)
 
-        print_header("Deleting Alarms at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteAlarms(config, processCompartments)
+        # print_header("Deleting Alarms at " + CurrentTimeString() + "@ " + region, 1)
+        # DeleteAlarms(config, processCompartments)
+        #
+        # print_header("Deleting Notifications at " + CurrentTimeString() + "@ " + region, 1)
+        # DeleteNotifications(config, processCompartments)
+        #
+        # print_header("Deleting Events at " + CurrentTimeString() + "@ " + region, 1)
+        # DeleteEvents(config, processCompartments)
 
-        print_header("Deleting Notifications at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteNotifications(config, processCompartments)
+        # if region == homeregion:
+        #     print_header("Deleting Policies at " + CurrentTimeString() + "@ " + region, 1)
+        #     DeletePolicies(config, processCompartments)
+        #
+        # print_header("Deleting Log Groups at " + CurrentTimeString() + "@ " + region, 1)
+        # DeleteLogGroups(config, processCompartments)
+        #
+        # print_header("Deleting Application Performance Monitoring at " + CurrentTimeString() + "@ " + region, 1)
+        # DeleteAPM(config, processCompartments)
+        #
+        # # delete tags and namespace only if home region
+        # if region == homeregion:
+        #     print_header("Deleting Tag Namespaces at " + CurrentTimeString() + "@ " + region, 1)
+        #     DeleteTagDefaults(config, processCompartments)
+        #     DeleteTagNameSpaces(config, processCompartments)
 
-        print_header("Deleting Events at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteEvents(config, processCompartments)
-
-        if region == homeregion:
-            print_header("Deleting Policies at " + CurrentTimeString() + "@ " + region, 1)
-            DeletePolicies(config, processCompartments)
-
-        print_header("Deleting Log Groups at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteLogGroups(config, processCompartments)
-
-        print_header("Deleting Application Performance Monitoring at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteAPM(config, processCompartments)
-
-        # delete tags and namespace only if home region
-        if region == homeregion:
-            print_header("Deleting Tag Namespaces at " + CurrentTimeString() + "@ " + region, 1)
-            DeleteTagDefaults(config, processCompartments)
-            DeleteTagNameSpaces(config, processCompartments)
-
-    if not skip_delete_compartment:
-        print("Hopefully deleting compartments, if empty at " + CurrentTimeString() + "@ " + region, 1)
-        config["region"] = homeregion
-        DeleteCompartments(config, processCompartments, DeleteCompartmentOCID)
-    else:
-        print("Skipping deletion of the compartments as specified at " + CurrentTimeString() + "@ " + region, 1)
+    # if not skip_delete_compartment:
+    #     print("Hopefully deleting compartments, if empty at " + CurrentTimeString() + "@ " + region, 1)
+    #     config["region"] = homeregion
+    #     DeleteCompartments(config, processCompartments, DeleteCompartmentOCID)
+    # else:
+    #     print("Skipping deletion of the compartments as specified at " + CurrentTimeString() + "@ " + region, 1)
 
 else:
     print("ok, doing nothing")

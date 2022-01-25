@@ -14,7 +14,8 @@ def DeleteBuckets(config, Compartments):
 
     print("Getting all buckets for: {}".format(ns))
 
-    for Compartment in Compartments:
+    for C in Compartments:
+        Compartment = C.details
         items = object.list_buckets(namespace_name=ns, compartment_id=Compartment.id).data
         if len(items) > 0:
             AllBuckets.append(items)

@@ -9,7 +9,8 @@ def DeleteApplications(config, Compartments):
     object = oci.functions.FunctionsManagementClient(config)
 
     print("Deleting all Applications and Functions")
-    for Compartment in Compartments:
+    for C in Compartments:
+        Compartment = C.details
         items = oci.pagination.list_call_get_all_results(object.list_applications, compartment_id=Compartment.id).data
         for item in items:
             print("- {}".format(item.display_name))

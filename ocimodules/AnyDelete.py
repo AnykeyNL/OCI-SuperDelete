@@ -29,7 +29,8 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
         identity = oci.identity.IdentityClient(config)
 
     print("Getting all {} objects ".format(ServiceName), end = "\r")
-    for Compartment in Compartments:
+    for C in Compartments:
+        Compartment = C.details
         try:
             if PerAD:
                 ads = identity.list_availability_domains(compartment_id=Compartment.id).data
@@ -53,13 +54,13 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
             # Delete objects that do not have lifecycle management status
             if DelState == "":
                 try:
-                    print("Deleting: {}:{} @ {}".format(Compartment.name, eval("item.{}".format(ObjectNameVar)), config["region"]))
+                    print("Deleting: {}:{} @ {}".format(C.fullpath, eval("item.{}".format(ObjectNameVar)), config["region"]))
                     eval("object.{}({}=item.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)".format(DeleteCommand, ServiceID))
                 except oci.exceptions.ServiceError as response:
                     if response.code == 404:
                         print("Object already deleted", end = "\r")
                     else:
-                        print("error {}-{} trying to delete: {}".format(response.code, response.message, eval("item.{}".format(ObjectNameVar))))
+                        print("error {}-{} trying to delete: {} - {}".format(response.code, response.message, eval("item.{}".format(C.fullpath, ObjectNameVar))))
             # Add objects with lifecycle management to the queue
             elif item.lifecycle_state != DelState:
                 if item.compartment_id is not None:
@@ -88,13 +89,13 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
                         if itemstatus.lifecycle_state != DelState:
                             if itemstatus.lifecycle_state != DelingSate:
                                 try:
-                                    print("Deleting: {}:{} @ {}".format(Compartment.name, eval("itemstatus.{}".format(ObjectNameVar)), config["region"]))
+                                    print("Deleting: {}:{} @ {}".format(C.fullpath, eval("itemstatus.{}".format(ObjectNameVar)), config["region"]))
                                     eval("object.{}({}=itemstatus.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)".format(DeleteCommand, ServiceID))
                                 except oci.exceptions.ServiceError as response:
                                     if response.code == 404:
                                         print ("Object deleted", end = "\r")
                                     else:
-                                        print("error {}-{} trying to delete: {}".format(response.code, response.message, eval("itemstatus.{}".format(ObjectNameVar))))
+                                        print("error {}-{} trying to delete: {} - {}".format(response.code, response.message, eval("itemstatus.{}".format(C.fullpath, ObjectNameVar))))
                             else:
                                 print("{} is {}".format(eval("itemstatus.{}".format(ObjectNameVar)), itemstatus.lifecycle_state), end = "\r")
                             count = count + 1

@@ -13,7 +13,8 @@ def DeleteKMSvaults(config, Compartments, MovetoCompartmentID):
     object = oci.key_management.KmsVaultClient(config)
 
     print("Getting all KMS Vault objects")
-    for Compartment in Compartments:
+    for C in Compartments:
+        Compartment = C.details
         items = oci.pagination.list_call_get_all_results(object.list_vaults, compartment_id=Compartment.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data
         for item in items:
             if (item.lifecycle_state != "DELETED"):

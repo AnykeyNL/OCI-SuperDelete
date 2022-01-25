@@ -12,7 +12,8 @@ def DeleteDigitalAssistant(config, Compartments):
     object = oci.oda.OdaClient(config)
 
     print("Getting all Digital Assistant objects")
-    for Compartment in Compartments:
+    for C in Compartments:
+        Compartment = C.details
         items = oci.pagination.list_call_get_all_results(object.list_oda_instances, compartment_id=Compartment.id).data
         for item in items:
             if (item.lifecycle_state != "DELETED"):
