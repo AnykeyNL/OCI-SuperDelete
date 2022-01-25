@@ -207,9 +207,9 @@ if confirm == "yes":
         print_header("Deleting resources in region " + region, 0)
         config["region"] = region
 
-        print_header("Moving and Scheduling KMS Vaults for deletion at " + CurrentTimeString() + "@ " + region, 1)
-        print ("Moving to: ".format(DeleteCompartmentOCID))
-        DeleteKMSvaults(config, processCompartments, DeleteCompartmentOCID)
+        # print_header("Moving and Scheduling KMS Vaults for deletion at " + CurrentTimeString() + "@ " + region, 1)
+        # print ("Moving to: ".format(DeleteCompartmentOCID))
+        # DeleteKMSvaults(config, processCompartments, DeleteCompartmentOCID)
 
         print_header("Deleting DevOps Projects at " + CurrentTimeString() + "@ " + region, 1)
         elements = ["deploy_stage", "deploy_artifact", "deploy_environment", "deploy_pipeline", "build_pipeline"]
