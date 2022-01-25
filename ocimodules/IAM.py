@@ -216,7 +216,8 @@ def DeleteTagNameSpaces(config, compartments):
     object = oci.identity.IdentityClient(config)
 
     print("Getting all Tag Namespace objects")
-    for Compartment in compartments:
+    for C in compartments:
+        Compartment = C.details
         items = oci.pagination.list_call_get_all_results(object.list_tag_namespaces, compartment_id=Compartment.id).data
         if len(items) == 0:
             continue
@@ -282,20 +283,25 @@ def DeleteTagNameSpaces(config, compartments):
 def DeleteCompartments(config, compartments, startcomp):
 
     object = oci.identity.IdentityClient(config)
-    for Compartment in compartments:
-        if Compartment.id != startcomp:
-            retry = True
-            while retry:
-                retry = False
-                try:
-                    timestr = time.strftime("%H:%M:%S", time.localtime())
-                    object.delete_compartment(compartment_id=Compartment.id)
-                    print("{} Deleted compartment: {}".format(timestr, Compartment.name))
-                except Exception as e:
-                    if e.status == 429:
-                        print("{} Delaying.. api calls".format(timestr))
-                        time.sleep(10)
-                        retry = True
+
+    level = 7
+    while level > 0:
+        for C in compartments:
+            Compartment = C.details
+            if C.level = level:
+                retry = True
+                while retry:
+                    retry = False
+                    try:
+                        timestr = time.strftime("%H:%M:%S", time.localtime())
+                        object.delete_compartment(compartment_id=Compartment.id)
+                        print("{} Deleted compartment: {}".format(timestr, C.fullpath))
+                    except Exception as e:
+                        if e.status == 429:
+                            print("{} Delaying.. api calls".format(timestr))
+                            time.sleep(10)
+                            retry = True
+        level = level - 1
 
 
 #################################################

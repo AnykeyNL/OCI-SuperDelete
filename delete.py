@@ -365,12 +365,12 @@ if confirm == "yes":
         #     DeleteTagDefaults(config, processCompartments)
         #     DeleteTagNameSpaces(config, processCompartments)
 
-    # if not skip_delete_compartment:
-    #     print("Hopefully deleting compartments, if empty at " + CurrentTimeString() + "@ " + region, 1)
-    #     config["region"] = homeregion
-    #     DeleteCompartments(config, processCompartments, DeleteCompartmentOCID)
-    # else:
-    #     print("Skipping deletion of the compartments as specified at " + CurrentTimeString() + "@ " + region, 1)
+    if not skip_delete_compartment:
+        print("Hopefully deleting compartments, if empty at " + CurrentTimeString() + "@ " + region, 1)
+        config["region"] = homeregion
+        DeleteCompartments(config, processCompartments, DeleteCompartmentOCID)
+    else:
+        print("Skipping deletion of the compartments as specified at " + CurrentTimeString() + "@ " + region, 1)
 
 else:
     print("ok, doing nothing")
