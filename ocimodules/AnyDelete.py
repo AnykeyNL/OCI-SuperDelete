@@ -28,7 +28,7 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
     if PerAD:
         identity = oci.identity.IdentityClient(config)
 
-    print("Getting all {} objects".format(ServiceName))
+    print("Getting all {} objects ".format(ServiceName), end = "\r")
     for Compartment in Compartments:
         try:
             if PerAD:
@@ -43,7 +43,7 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
 
         except oci.exceptions.ServiceError as response:
             if response.code == 404:
-                print ("No items found")
+                print ("No items found", end = "\r")
                 items = []
             else:
                 items = []
@@ -57,7 +57,7 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
                     eval("object.{}({}=item.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)".format(DeleteCommand, ServiceID))
                 except oci.exceptions.ServiceError as response:
                     if response.code == 404:
-                        print("Object already deleted")
+                        print("Object already deleted", end = "\r")
                     else:
                         print("error {}-{} trying to delete: {}".format(response.code, response.message, eval("item.{}".format(ObjectNameVar))))
             # Add objects with lifecycle management to the queue
@@ -66,13 +66,13 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
                     if Filter == "protected": # Filter for is-protected items
                         if not item.is_protected:
                             AllItems.append(item)
-                            print("- {} - {}".format(eval("item.{}".format(ObjectNameVar)), item.lifecycle_state))
+                            print("- {} - {}".format(eval("item.{}".format(ObjectNameVar)), item.lifecycle_state), end = "\r")
                     if Filter == "":
                         AllItems.append(item)
-                        print("- {} - {}".format(eval("item.{}".format(ObjectNameVar)), item.lifecycle_state))
+                        print("- {} - {}".format(eval("item.{}".format(ObjectNameVar)), item.lifecycle_state), end = "\r")
 
     if DelState == "":
-        print("{} Objects deleted".format(ServiceName))
+        print("{} Objects deleted".format(ServiceName), end = "\r")
     else:
         # Process queue of objects with a lifecycle object
         if len (AllItems) > 0:
@@ -92,28 +92,28 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
                                     eval("object.{}({}=itemstatus.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)".format(DeleteCommand, ServiceID))
                                 except oci.exceptions.ServiceError as response:
                                     if response.code == 404:
-                                        print ("Object deleted")
+                                        print ("Object deleted", end = "\r")
                                     else:
                                         print("error {}-{} trying to delete: {}".format(response.code, response.message, eval("itemstatus.{}".format(ObjectNameVar))))
                             else:
-                                print("{} is {}".format(eval("itemstatus.{}".format(ObjectNameVar)), itemstatus.lifecycle_state))
+                                print("{} is {}".format(eval("itemstatus.{}".format(ObjectNameVar)), itemstatus.lifecycle_state), end = "\r")
                             count = count + 1
                     except oci.exceptions.ServiceError as response:
                         if response.code == 404:
-                            print("Object deleted")
+                            print("Object deleted", end = "\r")
                         else:
                             print("----------------->error {}-{} trying to delete: {} - {} ".format(response.code, response.message, eval("itemstatus.{}".format(ObjectNameVar)), item.lifecycle_state))
 
                 if count > 0:
-                    print("Waiting for all " + ServiceName + "Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+                    print("Waiting for all " + ServiceName + "Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end = "\r")
                     time.sleep(WaitRefresh)
                     iteration += 1
 
                     if iteration >= MaxIDeleteIteration:
-                        print("Some {} not deleted, skipping!".format(ServiceName))
+                        print("Some {} not deleted, skipping!".format(ServiceName), end = "\r")
                         return
                 else:
                     itemsPresent = False
-            print("All {} Objects deleted!".format(ServiceName))
+            print("All {} Objects deleted!".format(ServiceName), end = "\r")
         else:
-            print("No {} Objects found".format(ServiceName))
+            print("No {} Objects found".format(ServiceName), end = "\r")
