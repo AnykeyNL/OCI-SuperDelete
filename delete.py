@@ -207,9 +207,9 @@ if confirm == "yes":
         print_header("Deleting resources in region " + region, 0)
         config["region"] = region
 
-        # print_header("Moving and Scheduling KMS Vaults for deletion at " + CurrentTimeString() + "@ " + region, 1)
-        # print ("Moving to: ".format(DeleteCompartmentOCID))
-        # DeleteKMSvaults(config, processCompartments, DeleteCompartmentOCID)
+        print_header("Moving and Scheduling KMS Vaults for deletion at " + CurrentTimeString() + "@ " + region, 1)
+        print ("Moving to: ".format(DeleteCompartmentOCID))
+        DeleteKMSvaults(config, processCompartments, config['tenancy'])
 
         print_header("Deleting DevOps Projects at " + CurrentTimeString() + "@ " + region, 1)
         elements = ["deploy_stage", "deploy_artifact", "deploy_environment", "deploy_pipeline", "build_pipeline"]
@@ -273,6 +273,10 @@ if confirm == "yes":
         DeleteAny(config, processCompartments, "core.ComputeClient", "image")
         DeleteAny(config, processCompartments, "core.ComputeClient", "dedicated_vm_host")
 
+        print_header("Deleting Management Agents at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "management_agent.ManagementAgentClient", "management_agent")
+
+
         print_header("Deleting DataScience Components at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, processCompartments, "data_science.DataScienceClient", "notebook_session")
         DeleteAny(config, processCompartments, "data_science.DataScienceClient", "model_deployment")
@@ -289,11 +293,19 @@ if confirm == "yes":
         DeleteAny(config, processCompartments, "apigateway.ApiGatewayClient", "certificate")
 
         print_header("Deleting Datasafe services at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteAny(config, processCompartments, "data_safe.DataSafeClient", "user_assessment")
+        DeleteAny(config, processCompartments, "data_safe.DataSafeClient", "user_assessment", DelState="SUCCEEDED")
         DeleteAny(config, processCompartments, "data_safe.DataSafeClient", "security_assessment")
         DeleteAny(config, processCompartments, "data_safe.DataSafeClient", "target_database")
         DeleteAny(config, processCompartments, "data_safe.DataSafeClient", "on_prem_connector")
         DeleteAny(config, processCompartments, "data_safe.DataSafeClient", "data_safe_private_endpoint")
+
+        print_header("Deleting Data Catalog services at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "data_catalog.DataCatalogClient", "catalog")
+        DeleteAny(config, processCompartments, "data_catalog.DataCatalogClient", "catalog_private_endpoint")
+        DeleteAny(config, processCompartments, "data_catalog.DataCatalogClient", "metastore")
+
+        print_header("Deleting Data Integratation services at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "data_integration.DataIntegrationClient", "workspace")
 
         print_header("Deleting Oracle Databases at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, processCompartments, "database.DatabaseClient", "db_system", DeleteCommand="terminate_db_system", DelState="TERMINATED", DelingSate="TERMINATING")
@@ -346,31 +358,36 @@ if confirm == "yes":
 
         print_header("Deleting VCNs at " + CurrentTimeString() + "@ " + region, 1)
         DeleteVCN(config, processCompartments)
+        DeleteAny(config, processCompartments, "core.VirtualNetworkClient", "local_peering_gateway", DelState="TERMINATED", DelingSate="TERMINATING")
+        DeleteAny(config, processCompartments, "core.VirtualNetworkClient", "remote_peering_connection", DelState="TERMINATED", DelingSate="TERMINATING")
+        DeleteAny(config, processCompartments, "core.VirtualNetworkClient", "drg", DelState="TERMINATED", DelingSate="TERMINATING")
 
-        # print_header("Deleting Alarms at " + CurrentTimeString() + "@ " + region, 1)
-        # DeleteAlarms(config, processCompartments)
-        #
-        # print_header("Deleting Notifications at " + CurrentTimeString() + "@ " + region, 1)
-        # DeleteNotifications(config, processCompartments)
-        #
-        # print_header("Deleting Events at " + CurrentTimeString() + "@ " + region, 1)
-        # DeleteEvents(config, processCompartments)
+        print_header("Deleting Alarms at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "monitoring.MonitoringClient", "alarm")
 
-        # if region == homeregion:
-        #     print_header("Deleting Policies at " + CurrentTimeString() + "@ " + region, 1)
-        #     DeletePolicies(config, processCompartments)
-        #
-        # print_header("Deleting Log Groups at " + CurrentTimeString() + "@ " + region, 1)
-        # DeleteLogGroups(config, processCompartments)
-        #
-        # print_header("Deleting Application Performance Monitoring at " + CurrentTimeString() + "@ " + region, 1)
-        # DeleteAPM(config, processCompartments)
-        #
-        # # delete tags and namespace only if home region
-        # if region == homeregion:
-        #     print_header("Deleting Tag Namespaces at " + CurrentTimeString() + "@ " + region, 1)
-        #     DeleteTagDefaults(config, processCompartments)
-        #     DeleteTagNameSpaces(config, processCompartments)
+        print_header("Deleting Notifications at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "ons.NotificationControlPlaneClient", "topic")
+
+        print_header("Deleting Events at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "events.EventsClient", "rule")
+
+        if region == homeregion:
+            print_header("Deleting Policies at " + CurrentTimeString() + "@ " + region, 1)
+            DeleteAny(config, processCompartments, "identity.IdentityClient", "policy" )
+            DeleteAny(config, processCompartments, "identity.IdentityClient", "dynamic_group")
+
+
+        print_header("Deleting Log Groups at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteLogGroups(config, processCompartments)
+
+        print_header("Deleting Application Performance Monitoring at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAPM(config, processCompartments)
+
+        # delete tags and namespace only if home region
+        if region == homeregion:
+            print_header("Deleting Tag Namespaces at " + CurrentTimeString() + "@ " + region, 1)
+            DeleteTagDefaults(config, processCompartments)
+            DeleteTagNameSpaces(config, processCompartments)
 
     if not skip_delete_compartment:
         print("Hopefully deleting compartments, if empty at " + CurrentTimeString() + "@ " + region, 1)

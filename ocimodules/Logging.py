@@ -13,7 +13,8 @@ def DeleteLogGroups(config, Compartments):
     object = oci.logging.LoggingManagementClient(config)
 
     print("Getting all Log Group objects")
-    for Compartment in Compartments:
+    for C in Compartments:
+        Compartment = C.details
         items = oci.pagination.list_call_get_all_results(object.list_log_groups, compartment_id=Compartment.id).data
         for item in items:
             AllItems.append(item)

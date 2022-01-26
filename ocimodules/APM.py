@@ -11,7 +11,8 @@ def DeleteAPM(config, compartments):
     object = oci.apm_control_plane.ApmDomainClient(config)
 
     print("Getting all Application Performanance Monitoring objects")
-    for Compartment in compartments:
+    for C in compartments:
+        Compartment = C.details
         AllItems = []
 
         items = oci.pagination.list_call_get_all_results(object.list_apm_domains, compartment_id=Compartment.id).data

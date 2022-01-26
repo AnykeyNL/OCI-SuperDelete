@@ -11,6 +11,7 @@ WaitRefresh = 15
 def DeleteKMSvaults(config, Compartments, MovetoCompartmentID):
     AllItems = []
     object = oci.key_management.KmsVaultClient(config)
+    vaultClient = oci.vault.VaultsClient(config)
 
     print("Getting all KMS Vault objects")
     for C in Compartments:
@@ -20,23 +21,31 @@ def DeleteKMSvaults(config, Compartments, MovetoCompartmentID):
             if (item.lifecycle_state != "DELETED"):
                 AllItems.append(item)
 
+        secrets = vaultClient.list_secrets(compartment_id=Compartment.id).data
+        for secret in secrets:
+            secretchangedetails = oci.vault.models.ChangeSecretCompartmentDetails()
+            secretchangedetails.compartment_id = MovetoCompartmentID
+            print("Moving secret {} to main/trash compartment".format(key.display_name))
+            vaultClient.change_secret_compartment(secret_id=secret.id, change_secret_compartment_details=secretchangedetails, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)
+
     for item in AllItems:
         try:
             itemstatus = object.get_vault(vault_id=item.id).data
             if itemstatus.lifecycle_state != "DELETED":
                 try:
                     kmsmanagement = oci.key_management.KmsManagementClient(config, itemstatus.management_endpoint)
-                    keys = kmsmanagement.list_keys(compartment_id=item.compartment_id).data
+                    keys = kmsmanagement.list_keys(compartment_id=item.compartment_id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data
                     for key in keys:
                         keychangedetails = oci.key_management.models.ChangeKeyCompartmentDetails()
                         keychangedetails.compartment_id = MovetoCompartmentID
                         print("Moving key {} to main/trash compartment".format(key.display_name))
-                        kmsmanagement.change_key_compartment(key_id=key.id, change_key_compartment_details=keychangedetails).data
+                        kmsmanagement.change_key_compartment(key_id=key.id, change_key_compartment_details=keychangedetails, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data
+
 
                     print("Moving Vault to main/trash compartment: {}".format(itemstatus.display_name))
                     changedetails = oci.key_management.models.ChangeVaultCompartmentDetails()
                     changedetails.compartment_id = MovetoCompartmentID
-                    object.change_vault_compartment(vault_id=itemstatus.id, change_vault_compartment_details=changedetails)
+                    object.change_vault_compartment(vault_id=itemstatus.id, change_vault_compartment_details=changedetails, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)
 
                     itemstatus = object.get_vault(vault_id=item.id).data
                     while itemstatus.lifecycle_state == "UPDATING":
