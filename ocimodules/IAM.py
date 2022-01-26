@@ -313,7 +313,8 @@ def DeletePolicies(config, compartments):
     object = oci.identity.IdentityClient(config)
 
     print("Getting all Policy objects")
-    for Compartment in compartments:
+    for C in compartments:
+        Compartment = C.details
         items = oci.pagination.list_call_get_all_results(object.list_policies, compartment_id=Compartment.id).data
         for item in items:
             try:
@@ -333,7 +334,8 @@ def DeleteTagDefaults(config, compartments):
     object = oci.identity.IdentityClient(config)
 
     print("Getting all Policy objects")
-    for Compartment in compartments:
+    for C in compartments:
+        Compartment = C.details
         items = oci.pagination.list_call_get_all_results(object.list_tag_defaults, compartment_id=Compartment.id).data
         for item in items:
             print("- {}".format(item.tag_definition_name))
