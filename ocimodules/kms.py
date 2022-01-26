@@ -29,9 +29,12 @@ def DeleteKMSvaults(config, Compartments, MovetoCompartmentID):
             print("Error moving secret {} - {}".format(response.code, response.message))
 
         for secret in secrets:
-            secretchangedetails = oci.vault.models.ChangeSecretCompartmentDetails()
-            secretchangedetails.compartment_id = MovetoCompartmentID
-            print("Moving secret {} to main/trash compartment".format(secret.secret_name))
+            try:
+                secretchangedetails = oci.vault.models.ChangeSecretCompartmentDetails()
+                secretchangedetails.compartment_id = MovetoCompartmentID
+                print("Moving secret {} to main/trash compartment".format(secret.secret_name))
+            except oci.exceptions.ServiceError as response:
+                print("Error getting secret info {} - {}".format(response.code, response.message))
             try:
                 vaultClient.change_secret_compartment(secret_id=secret.id, change_secret_compartment_details=secretchangedetails, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)
             except oci.exceptions.ServiceError as response:
