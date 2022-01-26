@@ -393,7 +393,7 @@ if confirm == "yes":
             DeleteTagNameSpaces(config, processCompartments)
 
     if not skip_delete_compartment:
-        print("Hopefully deleting compartments, if empty at " + CurrentTimeString() + "@ " + region, 1)
+        print_header("Deleting Compartments at " + CurrentTimeString() + "@ " + region, 1)
         config["region"] = homeregion
         DeleteCompartments(config, processCompartments, DeleteCompartmentOCID)
     else:

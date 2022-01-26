@@ -10,14 +10,14 @@ WaitRefresh = 15
 ##############################################
 def DeleteKMSvaults(config, Compartments, MovetoCompartmentID):
     AllItems = []
-    object = oci.key_management.KmsVaultClient(config, circuit_breaker_strategy=oci.circuit_breaker.DEFAULT_CIRCUIT_BREAKER_STRATEGY)
-    vaultClient = oci.vault.VaultsClient(config, circuit_breaker_strategy=oci.circuit_breaker.DEFAULT_CIRCUIT_BREAKER_STRATEGY)
+    object = oci.key_management.KmsVaultClient(config)
+    vaultClient = oci.vault.VaultsClient(config)
 
     print("Getting all KMS Vault objects")
     for C in Compartments:
         Compartment = C.details
         print ("Getting vault items for compartment {}".format(C.fullpath), end="\r")
-        items = oci.pagination.list_call_get_all_results(object.list_vaults, compartment_id=Compartment.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data
+        items = oci.pagination.list_call_get_all_results(object.list_vaults, compartment_id=Compartment.id).data
         for item in items:
             if (item.lifecycle_state != "DELETED"):
                 AllItems.append(item)
