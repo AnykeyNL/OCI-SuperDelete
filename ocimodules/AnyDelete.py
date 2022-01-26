@@ -4,7 +4,7 @@ import time
 WaitRefresh = 15
 MaxIDeleteIteration = 20
 
-def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", ListCommand = "", GetCommand = "", DeleteCommand = "", ObjectNameVar = "display_name", DelState = "DELETED", DelingSate = "DELETING", Extra = "", Filter="", PerAD=False):
+def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", ReturnServiceID = "id", ListCommand = "", GetCommand = "", DeleteCommand = "", ObjectNameVar = "display_name", DelState = "DELETED", DelingSate = "DELETING", Extra = "", Filter="", PerAD=False):
     AllItems = []
     object = eval("oci.{}(config)".format(ServiceClient))
 
@@ -55,7 +55,7 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
             if DelState == "":
                 try:
                     print("Deleting {}: {}-{} @ {}".format(C.fullpath, ServiceName, eval("item.{}".format(ObjectNameVar)), config["region"]))
-                    eval("object.{}({}=item.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)".format(DeleteCommand, ServiceID))
+                    eval("object.{}({}=item.{}, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)".format(DeleteCommand, ServiceID, ReturnServiceID))
                 except oci.exceptions.ServiceError as response:
                     if response.code == 404:
                         print("Object already deleted", end = "\r")
@@ -85,12 +85,12 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
                     count = 0
                     for item in AllItems:
                         try:
-                            itemstatus = eval("object.{}({}=item.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data".format(GetCommand, ServiceID))
+                            itemstatus = eval("object.{}({}=item.{}, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data".format(GetCommand, ServiceID, ReturnServiceID))
                             if itemstatus.lifecycle_state != DelState:
                                 if itemstatus.lifecycle_state != DelingSate:
                                     try:
                                         print("Deleting {}: {}-{} @ {}".format(C.fullpath, ServiceName, eval("itemstatus.{}".format(ObjectNameVar)), config["region"]))
-                                        eval("object.{}({}=itemstatus.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)".format(DeleteCommand, ServiceID))
+                                        eval("object.{}({}=itemstatus.{}, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)".format(DeleteCommand, ServiceID, ReturnServiceID))
                                     except oci.exceptions.ServiceError as response:
                                         print ("ERROR: {}".format(response.code))
                                         print (" ")

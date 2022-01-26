@@ -366,7 +366,7 @@ if confirm == "yes":
         DeleteAny(config, processCompartments, "monitoring.MonitoringClient", "alarm")
 
         print_header("Deleting Notifications at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteAny(config, processCompartments, "ons.NotificationControlPlaneClient", "topic", ObjectNameVar="name")
+        DeleteAny(config, processCompartments, "ons.NotificationControlPlaneClient", "topic", ObjectNameVar="name", ServiceID="topic_id", ReturnServiceID="topic_id")
 
         print_header("Deleting Events at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, processCompartments, "events.EventsClient", "rule")
