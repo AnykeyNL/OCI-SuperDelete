@@ -288,6 +288,13 @@ if confirm == "yes":
         DeleteAny(config, processCompartments, "apigateway.ApiGatewayClient", "api")
         DeleteAny(config, processCompartments, "apigateway.ApiGatewayClient", "certificate")
 
+        print_header("Deleting Datasafe services at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "data_safe.DataSafeClient", "user_assessment")
+        DeleteAny(config, processCompartments, "data_safe.DataSafeClient", "security_assessment")
+        DeleteAny(config, processCompartments, "data_safe.DataSafeClient", "target_database")
+        DeleteAny(config, processCompartments, "data_safe.DataSafeClient", "on_prem_connector")
+        DeleteAny(config, processCompartments, "data_safe.DataSafeClient", "data_safe_private_endpoint")
+
         print_header("Deleting Oracle Databases at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, processCompartments, "database.DatabaseClient", "db_system", DeleteCommand="terminate_db_system", DelState="TERMINATED", DelingSate="TERMINATING")
         DeleteAny(config, processCompartments, "database.DatabaseClient", "backup")
