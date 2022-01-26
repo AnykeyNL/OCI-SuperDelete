@@ -140,33 +140,6 @@ def Login(config, startcomp):
     return c
 
 
-
-    # Add first level subcompartments
-    # compartments = []
-    #
-    #
-    # try:
-    #     compartments = oci.pagination.list_call_get_all_results(identity.list_compartments, compartment_id=startcomp).data
-    # except Exception as e:
-    #     if e.status == 404:
-    #         print("Compartment not found")
-    #         sys.exit(2)
-    #     else:
-    #         print("Error {}".format(e.status))
-    #         sys.exit(2)
-    #
-    # # Add 2nd level subcompartments
-    # for compartment in compartments:
-    #     subcompartments = oci.pagination.list_call_get_all_results(identity.list_compartments, compartment_id=compartment.id).data
-    #     for sub in subcompartments:
-    #         compartments.append(sub)
-    #
-    # # Add start compartment to list
-    # compartment = identity.get_compartment(compartment_id=startcomp).data
-    # compartments.append(compartment)
-    # return compartments
-
-
 #################################################
 #              SubscribedRegions
 #################################################
@@ -281,8 +254,8 @@ def DeleteTagNameSpaces(config, compartments):
 #              DeleteCompartments
 #################################################
 def DeleteCompartments(config, compartments, startcomp):
-
-    object = oci.identity.IdentityClient(config, circuit_breaker_strategy=oci.circuit_breaker.NoCircuitBreakerStrategy)
+    oci.circuit_breaker.NoCircuitBreakerStrategy()
+    object = oci.identity.IdentityClient(config)
 
     level = 7
     while level > 0:
