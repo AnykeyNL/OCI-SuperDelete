@@ -60,7 +60,7 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
                     if response.code == 404:
                         print("Object already deleted", end = "\r")
                     else:
-                        print("error {}-{} trying to delete: {} - {}".format(response.code, response.message, eval("item.{}".format(C.fullpath, ObjectNameVar))))
+                        print("error {}-{} trying to delete: {} - {}".format(response.code, response.message, C.fullpath, eval("item.{}".format(ObjectNameVar))))
             # Add objects with lifecycle management to the queue
             elif item.lifecycle_state != DelState:
                 if item.compartment_id is not None:
@@ -100,7 +100,7 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
                                             print ("Error invalid paratemer, likely can ignore         ", end = "\r")
                                             count = count - 1
                                         else:
-                                            print("error {}-{} trying to delete: {} - {}".format(response.code, response.message, eval("itemstatus.{}".format(C.fullpath, ObjectNameVar))))
+                                            print("error {}-{} trying to delete: {} - {}".format(response.code, response.message, C.fullpath, eval("itemstatus.{}".format( ObjectNameVar))))
                                 else:
                                     print("{} is {}".format(eval("itemstatus.{}".format(ObjectNameVar)), itemstatus.lifecycle_state), end = "\r")
                                 count = count + 1
