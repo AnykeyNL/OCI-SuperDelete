@@ -260,6 +260,11 @@ if confirm == "yes":
         print_header("Deleting Object Storage at " + CurrentTimeString() + "@ " + region, 1)
         DeleteBuckets(config, processCompartments)
 
+        print_header("Deleting Email Service at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "email.EmailClient", "sender", ObjectNameVar="email_address")
+        DeleteAny(config, processCompartments, "email.EmailClient", "suppression", ObjectNameVar="email_address", DelState="", DelingSate="")
+        DeleteAny(config, processCompartments, "email.EmailClient", "email_domain", ObjectNameVar="name")
+
         print_header("Deleting OKE Clusters at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, processCompartments, "container_engine.ContainerEngineClient", "cluster", ObjectNameVar="name")
 
