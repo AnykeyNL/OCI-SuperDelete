@@ -270,6 +270,11 @@ if confirm == "yes":
         print_header("Deleting Auto Scaling Configurations at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, processCompartments, "autoscaling.AutoScalingClient", "auto_scaling_configuration", DelState="", DelingSate="")
 
+        print_header("Deleting OS Management services at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "os_management.OsManagementClient", "managed_instance_group")
+        DeleteAny(config, processCompartments, "os_management.OsManagementClient", "scheduled_job")
+        DeleteAny(config, processCompartments, "os_management.OsManagementClient", "software_source")
+
         print_header("Deleting Compute Instances at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, processCompartments, "core.ComputeManagementClient", "instance_pool", DeleteCommand="terminate_instance_pool", DelState="TERMINATED", DelingSate="TERMINATING")
         DeleteAny(config, processCompartments, "core.ComputeManagementClient", "instance_configuration", DelState="", DelingSate="")
