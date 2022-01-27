@@ -49,7 +49,7 @@ def Login(config, startcomp):
     else:
         newcomp.level = 0
         newcomp.fullpath = compartment.name
-    c.append(newcomp)
+        c.append(newcomp)
 
     # Add first level subcompartments
     compartments = GetCompartments(identity, startcomp)
