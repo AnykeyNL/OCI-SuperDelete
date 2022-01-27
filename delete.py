@@ -347,6 +347,16 @@ if confirm == "yes":
         DeleteAny(config, processCompartments, "resource_manager.ResourceManagerClient", "stack")
         DeleteAny(config, processCompartments, "resource_manager.ResourceManagerClient", "configuration_source_provider")
 
+        print_header("Deleting Anomaly Detection Services at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "ai_anomaly_detection.AnomalyDetectionClient", "data_asset")
+        DeleteAny(config, processCompartments, "ai_anomaly_detection.AnomalyDetectionClient", "model")
+        DeleteAny(config, processCompartments, "ai_anomaly_detection.AnomalyDetectionClient", "project")
+
+        print_header("Deleting Data Flow Services at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "data_flow.DataFlowClient", "private_endpoint")
+        DeleteAny(config, processCompartments, "data_flow.DataFlowClient", "application")
+        DeleteAny(config, processCompartments, "data_flow.DataFlowClient", "run", DelState="SUCCEEDED")
+
         print_header("Deleting Block Volumes at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, processCompartments, "core.BlockstorageClient", "volume", DelState="TERMINATED", DelingSate="TERMINATING", PerAD=True)
         DeleteAny(config, processCompartments, "core.BlockstorageClient", "volume_backup", DelState="TERMINATED", DelingSate="TERMINATING")
@@ -377,8 +387,8 @@ if confirm == "yes":
 
         if region == homeregion:
             print_header("Deleting Policies at " + CurrentTimeString() + "@ " + region, 1)
-            DeleteAny(config, processCompartments, "identity.IdentityClient", "policy" )
-            DeleteAny(config, processCompartments, "identity.IdentityClient", "dynamic_group")
+            DeleteAny(config, processCompartments, "identity.IdentityClient", "policy", ObjectNameVar="name")
+            DeleteAny(config, processCompartments, "identity.IdentityClient", "dynamic_group", ObjectNameVar="name")
 
 
         print_header("Deleting Log Groups at " + CurrentTimeString() + "@ " + region, 1)
