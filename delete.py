@@ -239,6 +239,7 @@ if confirm == "yes":
         for element in elements:
             DeleteAny(config, processCompartments, "vulnerability_scanning.VulnerabilityScanningClient", element, DelState="", DelingSate="")
         DeleteAny(config, processCompartments, "vulnerability_scanning.VulnerabilityScanningClient", "host_scan_target")
+        DeleteAny(config, processCompartments, "vulnerability_scanning.VulnerabilityScanningClient", "container_scan_target")
         elements = ["host_scan_recipe", "container_scan_recipe"]
         for element in elements:
             DeleteAny(config, processCompartments, "vulnerability_scanning.VulnerabilityScanningClient", element, DelState="", DelingSate="")
