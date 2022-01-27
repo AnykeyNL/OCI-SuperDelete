@@ -56,7 +56,7 @@ from ocimodules.Events import *
 from ocimodules.AnyDelete import *
 
 #Disable OCI CircuitBreaker feature
-#oci.circuit_breaker.NoCircuitBreakerStrategy()
+oci.circuit_breaker.NoCircuitBreakerStrategy()
 
 #################################################
 #           Manual Configuration                #
