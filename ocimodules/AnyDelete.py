@@ -85,12 +85,12 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
                     count = 0
                     for item in AllItems:
                         try:
-                            itemstatus = eval("object.{}({}=item.{}, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data".format(GetCommand, ServiceID, ReturnServiceID))
+                            itemstatus = eval("object.{}({}=item.{}{}, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data".format(GetCommand, ServiceID, ReturnServiceID, Extra))
                             if itemstatus.lifecycle_state != DelState:
                                 if itemstatus.lifecycle_state != DelingSate:
                                     try:
                                         print("Deleting {}: {}-{} @ {}".format(C.fullpath, ServiceName, eval("itemstatus.{}".format(ObjectNameVar)), config["region"]))
-                                        eval("object.{}({}=itemstatus.{}, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)".format(DeleteCommand, ServiceID, ReturnServiceID))
+                                        eval("object.{}({}=itemstatus.{}{}, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)".format(DeleteCommand, ServiceID, ReturnServiceID, Extra))
                                     except oci.exceptions.ServiceError as response:
                                         print ("ERROR: {}".format(response.code))
                                         print (" ")

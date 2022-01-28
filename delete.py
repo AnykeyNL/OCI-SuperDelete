@@ -165,7 +165,7 @@ if len(regions) == 0:
     regions = SubscribedRegions(config)
 
 homeregion = GetHomeRegion(config)
-tenane_name = GetTenantName(config)
+tenant_name = GetTenantName(config)
 
 ######################################################
 # Header Print and Confirmation
@@ -182,7 +182,7 @@ print("Config File        : " + configfile)
 print("Config Profile     : " + configProfile)
 print("Log File           : " + logfile)
 print("")
-print("Tenant Name        : " + tenane_name)
+print("Tenant Name        : " + tenant_name)
 print("Tenant Id          : " + config['tenancy'])
 print("Home Region        : " + homeregion)
 print("Regions to Process : " + ','.join(x for x in regions))
@@ -313,6 +313,9 @@ if confirm == "yes":
         DeleteAny(config, processCompartments, "data_safe.DataSafeClient", "on_prem_connector")
         DeleteAny(config, processCompartments, "data_safe.DataSafeClient", "data_safe_private_endpoint")
 
+        print_header("Deleting Log Analytics services at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "log_analytics.LogAnalyticsClient", "log_analytics_entity", ObjectNameVar="name", Extra=", namespace_name=\"{}\"".format(tenant_name))
+
         print_header("Deleting Data Catalog services at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, processCompartments, "data_catalog.DataCatalogClient", "catalog")
         DeleteAny(config, processCompartments, "data_catalog.DataCatalogClient", "catalog_private_endpoint")
@@ -331,9 +334,6 @@ if confirm == "yes":
 
         print_header("Deleting Nosql tables at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, processCompartments, "nosql.NosqlClient", "table", ServiceID="table_name_or_id")
-
-        print_header("Deleting Data Catalogs at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteAny(config, processCompartments, "data_catalog.DataCatalogClient", "catalog")
 
         print_header("Deleting Digital Assistants at " + CurrentTimeString() + "@ " + region, 1)
 

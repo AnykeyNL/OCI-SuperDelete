@@ -845,7 +845,10 @@ def DeleteIPSecConnections(config, compartment):
     object = oci.core.VirtualNetworkClient(config)
 
     print("Getting all IPSEC Connection objects")
-    items = oci.pagination.list_call_get_all_results(object.list_ip_sec_connections, compartment_id=compartment.id).data
+    try:
+        items = oci.pagination.list_call_get_all_results(object.list_ip_sec_connections, compartment_id=compartment.id).data
+    except:
+        items = []
 
     for item in items:
         if (item.lifecycle_state != "TERMINATED"):
