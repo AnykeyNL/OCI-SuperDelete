@@ -270,12 +270,12 @@ def DeleteCompartments(config, compartments, startcomp):
                         timestr = time.strftime("%H:%M:%S", time.localtime())
                         object.delete_compartment(compartment_id=Compartment.id)
                         print("{} Deleted compartment: {}".format(timestr, C.fullpath))
-                    except Exception as e:
-                        if e.status == 429:
-                            print("{} Delaying - retry attempt {} .. api calls           ".format(timestr, retrycount), end = "\r")
-                            time.sleep(10)
-                            retrycount = retrycount + 1
-                            retry = True
+                    except:
+                        print("{} Delaying - retry attempt {} .. api calls           ".format(timestr, retrycount), end = "\r")
+                        time.sleep(10)
+                        retrycount = retrycount + 1
+                        retry = True
+
         level = level - 1
 
 
