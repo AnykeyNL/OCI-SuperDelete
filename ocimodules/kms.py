@@ -27,6 +27,10 @@ def DeleteKMSvaults(config, Compartments, MovetoCompartmentID):
             secrets = vaultClient.list_secrets(compartment_id=Compartment.id).data
         except oci.exceptions.ServiceError as response:
             print("Error moving secret {} - {}".format(response.code, response.message))
+            secrets = []
+        except:
+            print("error")
+            secrets = []
 
         for secret in secrets:
             try:
