@@ -695,7 +695,10 @@ def DeleteDRGs(config, compartment):
     object = oci.core.VirtualNetworkClient(config)
 
     print("Getting all DRG objects")
-    items = oci.pagination.list_call_get_all_results(object.list_drgs, compartment_id=compartment.id).data
+    try:
+        items = oci.pagination.list_call_get_all_results(object.list_drgs, compartment_id=compartment.id).data
+    except:
+        items = []
 
     for item in items:
         if (item.lifecycle_state != "TERMINATED"):
@@ -744,7 +747,11 @@ def DeleteDNSResolvers(config, compartment):
     object = oci.dns.DnsClient(config)
 
     print("Getting all DNS Resolvers objects")
-    items = oci.pagination.list_call_get_all_results(object.list_resolvers, compartment_id=compartment.id).data
+    try:
+        items = oci.pagination.list_call_get_all_results(object.list_resolvers, compartment_id=compartment.id).data
+    except:
+        items = []
+
     for item in items:
         if (item.lifecycle_state != "DELETED"):
             AllItems.append(item)
@@ -811,7 +818,10 @@ def DeleteCPEs(config, compartment):
 
     if itemsPresent:
         count = 0
-        items = oci.pagination.list_call_get_all_results(object.list_cpes, compartment_id=compartment.id).data
+        try:
+            items = oci.pagination.list_call_get_all_results(object.list_cpes, compartment_id=compartment.id).data
+        except:
+            items = []
 
         for item in items:
             count = count + 1
