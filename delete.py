@@ -260,6 +260,12 @@ if confirm == "yes":
         print_header("Deleting Object Storage at " + CurrentTimeString() + "@ " + region, 1)
         DeleteBuckets(config, processCompartments)
 
+        print_header("Deleting Cloud Guard Servcies at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "cloud_guard.CloudGuardClient", "detector_recipe")
+        DeleteAny(config, processCompartments, "cloud_guard.CloudGuardClient", "responder_recipe")
+        DeleteAny(config, processCompartments, "cloud_guard.CloudGuardClient", "target")
+        DeleteAny(config, processCompartments, "cloud_guard.CloudGuardClient", "managed_list")
+
         print_header("Deleting Email Service at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, processCompartments, "email.EmailClient", "sender", ObjectNameVar="email_address")
         DeleteAny(config, processCompartments, "email.EmailClient", "suppression", ObjectNameVar="email_address", DelState="", DelingSate="")
