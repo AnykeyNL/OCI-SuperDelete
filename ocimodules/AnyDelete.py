@@ -15,7 +15,7 @@ def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", 
         if ServiceName[-2:] == "ay":
             ListCommand = "list_" + ServiceName + "s"
         elif ServiceName[-2:] == "ey":
-            ListCommand = "list_" + ServiceName + "s"
+            ListCommand = "list_"+ ServiceName + "s"
         elif ServiceName[-1] == "y":
             ListCommand = "list_" + ServiceName[0:-1] + "ies"
         elif ServiceName[-2:] == "ss":
