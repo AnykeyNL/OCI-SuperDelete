@@ -261,9 +261,9 @@ if confirm == "yes":
         DeleteBuckets(config, processCompartments)
 
         print_header("Deleting Cloud Guard Servcies at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "cloud_guard.CloudGuardClient", "target")
         DeleteAny(config, processCompartments, "cloud_guard.CloudGuardClient", "detector_recipe")
         DeleteAny(config, processCompartments, "cloud_guard.CloudGuardClient", "responder_recipe")
-        DeleteAny(config, processCompartments, "cloud_guard.CloudGuardClient", "target")
         DeleteAny(config, processCompartments, "cloud_guard.CloudGuardClient", "managed_list")
 
         print_header("Deleting Email Service at " + CurrentTimeString() + "@ " + region, 1)
@@ -295,6 +295,7 @@ if confirm == "yes":
 
         print_header("Deleting Management Agents at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, processCompartments, "management_agent.ManagementAgentClient", "management_agent")
+        DeleteAny(config, processCompartments, "management_agent.ManagementAgentClient", "management_agent_install_key")
 
 
         print_header("Deleting DataScience Components at " + CurrentTimeString() + "@ " + region, 1)
