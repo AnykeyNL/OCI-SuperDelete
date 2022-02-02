@@ -43,15 +43,14 @@ def DeleteBuckets(config, Compartments):
 # Delete Retention Rules
 ###########################################
 def DeleteRetentionRules(config, bucket):
-    objectlimit = 20
     object = oci.object_storage.ObjectStorageClient(config)
     print("Deleting retention rules in bucket: {}".format(bucket.name))
     more = True
 
     iteration = 0
     while more:
-        result = object.list_retention_rules(namespace_name=bucket.namespace, bucket_name=bucket.name, limit=objectlimit)
-        items = result.data.objects
+        result = oci.pagination.list_call_get_all_results(object.list_retention_rules, namespace_name=bucket.namespace, bucket_name=bucket.name)
+        items = result.data.items
         if len(items) == 0:
             more = False
         else:
