@@ -50,7 +50,8 @@ def DeleteRetentionRules(config, bucket):
     iteration = 0
     while more:
         result = oci.pagination.list_call_get_all_results(object.list_retention_rules, namespace_name=bucket.namespace, bucket_name=bucket.name)
-        items = result.data.items
+
+        items = result.data
         if len(items) == 0:
             more = False
         else:
