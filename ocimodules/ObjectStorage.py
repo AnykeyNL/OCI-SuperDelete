@@ -22,6 +22,7 @@ def DeleteBuckets(config, Compartments):
 
     for buckets in AllBuckets:
         for bucket in buckets:
+            DeleteRetentionRules(config, bucket)
             AbortMultipartupload(config, bucket)
             DeleteReplication(config, bucket)
             DeletePreauthenticated(config, bucket)
@@ -37,6 +38,34 @@ def DeleteBuckets(config, Compartments):
                 print("error deleting bucket : {}".format(bucket.name) + " - " + str(er))
 
     print("All buckets deleted!")
+
+###########################################
+# Delete Retention Rules
+###########################################
+def DeleteRetentionRules(config, bucket):
+    objectlimit = 20
+    object = oci.object_storage.ObjectStorageClient(config)
+    print("Deleting retention rules in bucket: {}".format(bucket.name))
+    more = True
+
+    iteration = 0
+    while more:
+        result = object.list_retention_rules(namespace_name=bucket.namespace, bucket_name=bucket.name, limit=objectlimit)
+        items = result.data.objects
+        if len(items) == 0:
+            more = False
+        else:
+            for item in items:
+                print("Deleting {}:{}".format(bucket.name, item.display_name))
+                try:
+                    object.delete_retention_rule(namespace_name=bucket.namespace, bucket_name=bucket.name, retention_rule_id=item.id)
+                except Exception as e:
+                    print("error deleting retention rule : {} - {}".format(item.display_name, str(e)))
+                    iteration += 1
+                    if iteration >= MaxErrorIteration:
+                        print("Some retention rules not deleted, skipping!")
+                        return
+    print("All retention rules deleted!")
 
 
 ###########################################
