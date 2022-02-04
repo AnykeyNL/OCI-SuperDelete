@@ -22,37 +22,13 @@ import oci
 import platform
 import logging
 from ocimodules.functions import *
-#from ocimodules.EdgeServices import *
 from ocimodules.ObjectStorage import *
-from ocimodules.Instances import *
-from ocimodules.Database import *
 from ocimodules.IAM import *
 from ocimodules.VCN import *
-from ocimodules.BlockStorage import *
-from ocimodules.ResourceManager import *
-from ocimodules.FileStorage import *
-from ocimodules.Monitoring import *
-from ocimodules.Notifications import *
-#from ocimodules.Autoscaling import *
 from ocimodules.FunctionsService import *
-from ocimodules.DataScience import *
-#from ocimodules.OKE import *
 from ocimodules.kms import *
-from ocimodules.Nosql import *
-from ocimodules.datacatalog import *
-from ocimodules.DigitalAssistant import *
-from ocimodules.APIGateway import *
-from ocimodules.Analytics import *
-from ocimodules.MySQL import *
 from ocimodules.Logging import *
-from ocimodules.Integration import *
-from ocimodules.Blockchain import *
 from ocimodules.APM import *
-#from ocimodules.Artifacts import *
-from ocimodules.Events import *
-#from ocimodules.VulnerabilityScanning import *
-#from ocimodules.Bastion import *
-#from ocimodules.DatabaseMigrations import *
 from ocimodules.AnyDelete import *
 
 #Disable OCI CircuitBreaker feature
@@ -297,6 +273,8 @@ if confirm == "yes":
         DeleteAny(config, processCompartments, "management_agent.ManagementAgentClient", "management_agent")
         DeleteAny(config, processCompartments, "management_agent.ManagementAgentClient", "management_agent_install_key")
 
+        print_header("Deleting Visual Builder Components at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, processCompartments, "visual_builder.VbInstanceClient", "vb_instance")
 
         print_header("Deleting DataScience Components at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, processCompartments, "data_science.DataScienceClient", "notebook_session")
@@ -343,8 +321,6 @@ if confirm == "yes":
         DeleteAny(config, processCompartments, "nosql.NosqlClient", "table", ServiceID="table_name_or_id")
 
         print_header("Deleting Digital Assistants at " + CurrentTimeString() + "@ " + region, 1)
-
-        DeleteDigitalAssistant(config, processCompartments)
         DeleteAny(config, processCompartments, "oda.OdaClient", "oda_instance")
 
         print_header("Deleting Analytics at " + CurrentTimeString() + "@ " + region, 1)
