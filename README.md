@@ -17,8 +17,9 @@ usage: delete.py [-h] [-cf CONFIG_FILE] [-cp CONFIG_PROFILE] [-force] [-debug] [
 
 optional arguments:
   -h, --help                show this help message and exit
-  -cf CONFIG_FILE           OCI CLI Config file
   -cp CONFIG_PROFILE        Config Profile inside the config file
+  -ip                       Use Instance Principals for Authentication
+  -dt                       Use Instance Principals with delegation token for cloud shell
   -force                    force delete without confirmation
   -debug                    Enable debug
   -rg REGIONS               Regions to delete comma separated
