@@ -7,8 +7,8 @@ WaitRefresh = 15
 ##############################################
 # DeleteAPM
 ##############################################
-def DeleteAPM(config, compartments):
-    object = oci.apm_control_plane.ApmDomainClient(config)
+def DeleteAPM(config, signer, compartments):
+    object = oci.apm_control_plane.ApmDomainClient(config, signer=signer)
 
     print("Getting all Application Performanance Monitoring objects")
     for C in compartments:
@@ -43,9 +43,9 @@ def DeleteAPM(config, compartments):
 ##############################################
 # DeleteSyntheticMonitoring
 ##############################################
-def DeleteSyntheticMonitoring(config, compartment, apmDomain):
+def DeleteSyntheticMonitoring(config, signer, compartment, apmDomain):
     AllItems = []
-    object = oci.apm_synthetics.ApmSyntheticClient(config)
+    object = oci.apm_synthetics.ApmSyntheticClient(config, signer=signer)
 
     print("Getting APM Synthetic Monitoring for {}".format(apmDomain.display_name))
     items = oci.pagination.list_call_get_all_results(object.list_monitors, apm_domain_id=apmDomain.id).data
@@ -84,9 +84,9 @@ def DeleteSyntheticMonitoring(config, compartment, apmDomain):
 ##############################################
 # DeleteSyntheticScripts
 ##############################################
-def DeleteSyntheticScripts(config, compartment, apmDomain):
+def DeleteSyntheticScripts(config, signer, compartment, apmDomain):
     AllItems = []
-    object = oci.apm_synthetics.ApmSyntheticClient(config)
+    object = oci.apm_synthetics.ApmSyntheticClient(config, signer=signer)
 
     print("Getting APM Synthetic Scripts for {}".format(apmDomain.display_name))
     items = oci.pagination.list_call_get_all_results(object.list_scripts, apm_domain_id=apmDomain.id).data

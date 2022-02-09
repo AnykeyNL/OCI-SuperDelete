@@ -32,8 +32,8 @@ def GetCompartments(identity, rootID):
 #################################################
 #                 Login                 #
 #################################################
-def Login(config, startcomp):
-    identity = oci.identity.IdentityClient(config)
+def Login(config, signer, startcomp):
+    identity = oci.identity.IdentityClient(config, signer=signer)
     user = identity.get_user(config["user"]).data
     print("Logged in as: {} @ {}".format(user.description, config["region"]))
 
@@ -143,9 +143,9 @@ def Login(config, startcomp):
 #################################################
 #              SubscribedRegions
 #################################################
-def SubscribedRegions(config):
+def SubscribedRegions(config, signer):
     regions = []
-    identity = oci.identity.IdentityClient(config)
+    identity = oci.identity.IdentityClient(config, signer=signer)
     regionDetails = identity.list_region_subscriptions(tenancy_id=config["tenancy"]).data
 
     # Add subscribed regions to list
@@ -158,9 +158,9 @@ def SubscribedRegions(config):
 #################################################
 #              GetHomeRegion
 #################################################
-def GetHomeRegion(config):
+def GetHomeRegion(config, signer):
     home_region = ""
-    identity = oci.identity.IdentityClient(config)
+    identity = oci.identity.IdentityClient(config, signer=signer)
     regionDetails = identity.list_region_subscriptions(tenancy_id=config["tenancy"]).data
 
     # Set home region for connection
@@ -174,8 +174,8 @@ def GetHomeRegion(config):
 #################################################
 #              GetTenantName
 #################################################
-def GetTenantName(config):
-    identity = oci.identity.IdentityClient(config)
+def GetTenantName(config, signer):
+    identity = oci.identity.IdentityClient(config, signer=signer)
     tenancy = identity.get_tenancy(config['tenancy']).data
     return tenancy.name
 
@@ -183,10 +183,10 @@ def GetTenantName(config):
 #################################################
 #              DeleteTagNameSpaces
 #################################################
-def DeleteTagNameSpaces(config, compartments):
+def DeleteTagNameSpaces(config, signer, compartments):
 
     AllItems = []
-    object = oci.identity.IdentityClient(config)
+    object = oci.identity.IdentityClient(config, signer=signer)
 
     print("Getting all Tag Namespace objects")
     for C in compartments:
@@ -253,9 +253,9 @@ def DeleteTagNameSpaces(config, compartments):
 #################################################
 #              DeleteCompartments
 #################################################
-def DeleteCompartments(config, compartments, startcomp):
+def DeleteCompartments(config, signer, compartments, startcomp):
     oci.circuit_breaker.NoCircuitBreakerStrategy()
-    object = oci.identity.IdentityClient(config)
+    object = oci.identity.IdentityClient(config, signer=signer)
 
     level = 7
     while level > 0:
@@ -282,8 +282,8 @@ def DeleteCompartments(config, compartments, startcomp):
 #################################################
 #              DeletePolicies
 #################################################
-def DeletePolicies(config, compartments):
-    object = oci.identity.IdentityClient(config)
+def DeletePolicies(config, signer, compartments):
+    object = oci.identity.IdentityClient(config, signer=signer)
 
     print("Getting all Policy objects")
     for C in compartments:
@@ -302,9 +302,9 @@ def DeletePolicies(config, compartments):
 #################################################
 #              DeleteTagDefaults
 #################################################
-def DeleteTagDefaults(config, compartments):
+def DeleteTagDefaults(config, signer, compartments):
 
-    object = oci.identity.IdentityClient(config)
+    object = oci.identity.IdentityClient(config, signer=signer)
 
     print("Getting all Policy objects")
     for C in compartments:

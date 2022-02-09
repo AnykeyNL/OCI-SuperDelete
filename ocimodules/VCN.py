@@ -8,25 +8,25 @@ MaxIDeleteIteration = 5
 ##############################################
 # DeleteVCN
 ##############################################
-def DeleteVCN(config, Compartments):
-    object = oci.core.VirtualNetworkClient(config)
+def DeleteVCN(config, signer, Compartments):
+    object = oci.core.VirtualNetworkClient(config, signer=signer)
 
     print("Getting all VCN objects")
     for C in Compartments:
         Compartment = C.details
         AllItems = []
         print("---[ Deleting Load Balancers and Reserved IPs ]----")
-        DeleteLoadBalancers(config, Compartment)
-        DeleteReservedIPs(config, Compartment)
+        DeleteLoadBalancers(config, signer, Compartment)
+        DeleteReservedIPs(config, signer, Compartment)
         print("---[ Deleting DNS Resolvers ]----")
-        DeleteDNSResolvers(config, Compartment)
+        DeleteDNSResolvers(config, signer, Compartment)
         print("---[ Deleting IPSEC Connections ]----")
-        DeleteIPSecConnections(config, Compartment)
+        DeleteIPSecConnections(config, signer, Compartment)
         print("---[ Deleting CPEs ]----")
-        DeleteCPEs(config, Compartment)
+        DeleteCPEs(config, signer, Compartment)
         print("---[ Deleting DRG Components ]----")
-        DeleteDRGAttachments(config, Compartment)
-        DeleteDRGs(config, Compartment)
+        DeleteDRGAttachments(config, signer, Compartment)
+        DeleteDRGs(config, signer, Compartment)
 
         items = oci.pagination.list_call_get_all_results(object.list_vcns, compartment_id=Compartment.id).data
         for item in items:
@@ -36,15 +36,15 @@ def DeleteVCN(config, Compartments):
 
         for item in AllItems:
             print("----[ Deleting components of VCN: {} ]---".format(item.display_name))
-            DeleteSubnets(config, Compartments, item)
-            DeleteDHCPoptions(config, Compartments, item)
-            DeleteSecurityLists(config, Compartments, item)
-            DeleteSecurityGroups(config, Compartments, item)
-            DeleteRouteTables(config, Compartments, item)
-            DeleteInternetGateways(config, Compartments, item)
-            DeleteServiceGateways(config, Compartments, item)
-            DeleteNATGateways(config, Compartments, item)
-            DeleteLocalPeeringGateways(config, Compartments, item)
+            DeleteSubnets(config, signer, Compartments, item)
+            DeleteDHCPoptions(config, signer, Compartments, item)
+            DeleteSecurityLists(config, signer, Compartments, item)
+            DeleteSecurityGroups(config, signer, Compartments, item)
+            DeleteRouteTables(config, signer, Compartments, item)
+            DeleteInternetGateways(config, signer, Compartments, item)
+            DeleteServiceGateways(config, signer, Compartments, item)
+            DeleteNATGateways(config, signer, Compartments, item)
+            DeleteLocalPeeringGateways(config, signer, Compartments, item)
 
             print("---[ Deleting VCN ]----")
             deleted = False
@@ -61,9 +61,9 @@ def DeleteVCN(config, Compartments):
 ##############################################
 # DeleteSubnets
 ##############################################
-def DeleteSubnets(config, Compartments, vcn):
+def DeleteSubnets(config, signer, Compartments, vcn):
     AllItems = []
-    object = oci.core.VirtualNetworkClient(config)
+    object = oci.core.VirtualNetworkClient(config, signer=signer)
 
     print("Getting subnets for {}".format(vcn.display_name))
     for C in Compartments:
@@ -114,9 +114,9 @@ def DeleteSubnets(config, Compartments, vcn):
 ##############################################
 # DeleteDHCPoptions
 ##############################################
-def DeleteDHCPoptions(config, Compartments, vcn):
+def DeleteDHCPoptions(config, signer, Compartments, vcn):
     AllItems = []
-    object = oci.core.VirtualNetworkClient(config)
+    object = oci.core.VirtualNetworkClient(config, signer=signer)
 
     print("Getting DHCP options for {}".format(vcn.display_name))
     for C in Compartments:
@@ -168,9 +168,9 @@ def DeleteDHCPoptions(config, Compartments, vcn):
 ##############################################
 # DeleteSecurityLists
 ##############################################
-def DeleteSecurityLists(config, Compartments, vcn):
+def DeleteSecurityLists(config, signer, Compartments, vcn):
     AllItems = []
-    object = oci.core.VirtualNetworkClient(config)
+    object = oci.core.VirtualNetworkClient(config, signer=signer)
 
     print("Getting Security Lists for {}".format(vcn.display_name))
     for C in Compartments:
@@ -222,9 +222,9 @@ def DeleteSecurityLists(config, Compartments, vcn):
 ##############################################
 # DeleteSecurityGroups
 ##############################################
-def DeleteSecurityGroups(config, Compartments, vcn):
+def DeleteSecurityGroups(config, signer, Compartments, vcn):
     AllItems = []
-    object = oci.core.VirtualNetworkClient(config)
+    object = oci.core.VirtualNetworkClient(config, signer=signer)
 
     print("Getting Network Security Groups for {}".format(vcn.display_name))
     for C in Compartments:
@@ -276,9 +276,9 @@ def DeleteSecurityGroups(config, Compartments, vcn):
 ##############################################
 # DeleteRouteTables
 ##############################################
-def DeleteRouteTables(config, Compartments, vcn):
+def DeleteRouteTables(config, signer, Compartments, vcn):
     AllItems = []
-    object = oci.core.VirtualNetworkClient(config)
+    object = oci.core.VirtualNetworkClient(config, signer=signer)
 
     print("Getting Route Tables for {}".format(vcn.display_name))
     for C in Compartments:
@@ -336,9 +336,9 @@ def DeleteRouteTables(config, Compartments, vcn):
 ##############################################
 # DeleteDRGAttachments
 ##############################################
-def DeleteDRGAttachments(config, compartment):
+def DeleteDRGAttachments(config, signer, compartment):
     AllItems = []
-    object = oci.core.VirtualNetworkClient(config)
+    object = oci.core.VirtualNetworkClient(config, signer=signer)
 
     print("Getting DRG Attachmentss for {}".format(compartment.name))
     AllItems = oci.pagination.list_call_get_all_results(object.list_drg_attachments, compartment_id=compartment.id).data
@@ -378,9 +378,9 @@ def DeleteDRGAttachments(config, compartment):
 ##############################################
 # DeleteLoadBalancers
 ##############################################
-def DeleteLoadBalancers(config, compartment):
+def DeleteLoadBalancers(config, signer, compartment):
     AllItems = []
-    object = oci.load_balancer.LoadBalancerClient(config)
+    object = oci.load_balancer.LoadBalancerClient(config, signer=signer)
 
     print("Getting all Load Balancer objects")
     items = oci.pagination.list_call_get_all_results(object.list_load_balancers, compartment_id=compartment.id).data
@@ -425,9 +425,9 @@ def DeleteLoadBalancers(config, compartment):
 ##############################################
 # DeleteReservedIPs
 ##############################################
-def DeleteReservedIPs(config, compartment):
+def DeleteReservedIPs(config, signer, compartment):
     AllItems = []
-    object = oci.core.VirtualNetworkClient(config)
+    object = oci.core.VirtualNetworkClient(config, signer=signer)
 
     print("Getting all Reserved IP objects")
     items = oci.pagination.list_call_get_all_results(object.list_public_ips, scope="REGION", compartment_id=compartment.id, lifetime="RESERVED").data
@@ -474,9 +474,9 @@ def DeleteReservedIPs(config, compartment):
 ##############################################
 # DeleteInternetGateways
 ##############################################
-def DeleteInternetGateways(config, Compartments, vcn):
+def DeleteInternetGateways(config, signer, Compartments, vcn):
     AllItems = []
-    object = oci.core.VirtualNetworkClient(config)
+    object = oci.core.VirtualNetworkClient(config, signer=signer)
 
     print("Getting all Internet Gateway objects")
     for C in Compartments:
@@ -528,9 +528,9 @@ def DeleteInternetGateways(config, Compartments, vcn):
 ##############################################
 # DeleteServiceGateways
 ##############################################
-def DeleteServiceGateways(config, Compartments, vcn):
+def DeleteServiceGateways(config, signer, Compartments, vcn):
     AllItems = []
-    object = oci.core.VirtualNetworkClient(config)
+    object = oci.core.VirtualNetworkClient(config, signer=signer)
 
     print("Getting all Service Gateway objects")
     for C in Compartments:
@@ -582,9 +582,9 @@ def DeleteServiceGateways(config, Compartments, vcn):
 ##############################################
 # DeleteNATGateways
 ##############################################
-def DeleteNATGateways(config, Compartments, vcn):
+def DeleteNATGateways(config, signer, Compartments, vcn):
     AllItems = []
-    object = oci.core.VirtualNetworkClient(config)
+    object = oci.core.VirtualNetworkClient(config, signer=signer)
 
     print("Getting all NAT Gateway objects")
     for C in Compartments:
@@ -636,9 +636,9 @@ def DeleteNATGateways(config, Compartments, vcn):
 ##############################################
 # DeleteLocalPeeringGateways
 ##############################################
-def DeleteLocalPeeringGateways(config, Compartments, vcn):
+def DeleteLocalPeeringGateways(config, signer, Compartments, vcn):
     AllItems = []
-    object = oci.core.VirtualNetworkClient(config)
+    object = oci.core.VirtualNetworkClient(config, signer=signer)
 
     print("Getting all Local Peering Gateways objects")
     for C in Compartments:
@@ -690,9 +690,9 @@ def DeleteLocalPeeringGateways(config, Compartments, vcn):
 ##############################################
 # DeleteDRGs
 ##############################################
-def DeleteDRGs(config, compartment):
+def DeleteDRGs(config, signer, compartment):
     AllItems = []
-    object = oci.core.VirtualNetworkClient(config)
+    object = oci.core.VirtualNetworkClient(config, signer=signer)
 
     print("Getting all DRG objects")
     try:
@@ -742,9 +742,9 @@ def DeleteDRGs(config, compartment):
 ##############################################
 # DeleteDNSResolvers
 ##############################################
-def DeleteDNSResolvers(config, compartment):
+def DeleteDNSResolvers(config, signer, compartment):
     AllItems = []
-    object = oci.dns.DnsClient(config)
+    object = oci.dns.DnsClient(config, signer=signer)
 
     print("Getting all DNS Resolvers objects")
     try:
@@ -809,8 +809,8 @@ def DeleteDNSResolvers(config, compartment):
 ##############################################
 # DeleteCPEs
 ##############################################
-def DeleteCPEs(config, compartment):
-    object = oci.core.VirtualNetworkClient(config)
+def DeleteCPEs(config, signer, compartment):
+    object = oci.core.VirtualNetworkClient(config, signer=signer)
 
     print("Getting all CPE objects")
     itemsPresent = True
@@ -850,9 +850,9 @@ def DeleteCPEs(config, compartment):
 ##############################################
 # DeleteDRGs
 ##############################################
-def DeleteIPSecConnections(config, compartment):
+def DeleteIPSecConnections(config, signer, compartment):
     AllItems = []
-    object = oci.core.VirtualNetworkClient(config)
+    object = oci.core.VirtualNetworkClient(config, signer=signer)
 
     print("Getting all IPSEC Connection objects")
     try:

@@ -8,9 +8,9 @@ MaxIDeleteIteration = 20
 ##############################################
 # DeleteLogGroups
 ##############################################
-def DeleteLogGroups(config, Compartments):
+def DeleteLogGroups(config, signer, Compartments):
     AllItems = []
-    object = oci.logging.LoggingManagementClient(config)
+    object = oci.logging.LoggingManagementClient(config, signer=signer)
 
     print("Getting all Log Group objects")
     for C in Compartments:

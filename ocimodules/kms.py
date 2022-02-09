@@ -8,10 +8,10 @@ WaitRefresh = 15
 ##############################################
 # DeleteKMSvaults
 ##############################################
-def DeleteKMSvaults(config, Compartments, MovetoCompartmentID):
+def DeleteKMSvaults(config,signer, Compartments, MovetoCompartmentID):
     AllItems = []
-    object = oci.key_management.KmsVaultClient(config)
-    vaultClient = oci.vault.VaultsClient(config)
+    object = oci.key_management.KmsVaultClient(config, signer=signer)
+    vaultClient = oci.vault.VaultsClient(config, signer=signer)
 
     print("Getting all KMS Vault objects")
     for C in Compartments:

@@ -4,9 +4,9 @@ import time
 WaitRefresh = 15
 MaxIDeleteIteration = 20
 
-def DeleteAny(config, Compartments, ServiceClient, ServiceName, ServiceID = "", ReturnServiceID = "id", ListCommand = "", GetCommand = "", DeleteCommand = "", ObjectNameVar = "display_name", DelState = "DELETED", DelingSate = "DELETING", Extra = "", Filter="", PerAD=False):
+def DeleteAny(config, signer, Compartments, ServiceClient, ServiceName, ServiceID = "", ReturnServiceID = "id", ListCommand = "", GetCommand = "", DeleteCommand = "", ObjectNameVar = "display_name", DelState = "DELETED", DelingSate = "DELETING", Extra = "", Filter="", PerAD=False):
     AllItems = []
-    object = eval("oci.{}(config)".format(ServiceClient))
+    object = eval("oci.{}(config, signer=signer)".format(ServiceClient))
 
     if ServiceID == "":
         ServiceID = ServiceName + "_id"

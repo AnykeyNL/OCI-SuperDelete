@@ -5,8 +5,8 @@ import time
 ##############################################
 # DeleteDBBackups
 ##############################################
-def DeleteApplications(config, Compartments):
-    object = oci.functions.FunctionsManagementClient(config)
+def DeleteApplications(config, signer, Compartments):
+    object = oci.functions.FunctionsManagementClient(config, signer=signer)
 
     print("Deleting all Applications and Functions")
     for C in Compartments:
