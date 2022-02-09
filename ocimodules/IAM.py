@@ -34,10 +34,12 @@ def GetCompartments(identity, rootID):
 #################################################
 def Login(config, signer, startcomp):
     identity = oci.identity.IdentityClient(config, signer=signer)
-    print ("debug:")
-    print (config)
-    user = identity.get_user(config["user"]).data
-    print("Logged in as: {} @ {}".format(user.description, config["region"]))
+    if "user" in config:
+        user = identity.get_user(config["user"]).data
+        print("Logged in as: {} @ {}".format(user.description, config["region"]))
+    else:
+        print("Logged in as: {} @ {}".format("InstancePrinciple/DelegationToken", config["region"]))
+        user = "IP-DT"
 
     c = []
 
