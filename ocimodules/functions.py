@@ -118,9 +118,9 @@ def create_signer(config_profile, is_instance_principals, is_delegation_token):
                 pass_phrase=oci.config.get_config_value_or_default(config, "pass_phrase"),
                 private_key_content=config.get("key_content")
             )
-            except Exception:
-                print_header("Error obtaining authentication, did you configure config file? aborting")
-                raise SystemExit
+        except Exception:
+            print_header("Error obtaining authentication, did you configure config file? aborting")
+            raise SystemExit
 
         return config, signer
 
