@@ -105,18 +105,23 @@ def create_signer(config_profile, is_instance_principals, is_delegation_token):
     # config file authentication
     # -----------------------------
     else:
-        config = oci.config.from_file(
-            oci.config.DEFAULT_LOCATION,
-            (config_profile if config_profile else oci.config.DEFAULT_PROFILE)
-        )
-        signer = oci.signer.Signer(
-            tenancy=config["tenancy"],
-            user=config["user"],
-            fingerprint=config["fingerprint"],
-            private_key_file_location=config.get("key_file"),
-            pass_phrase=oci.config.get_config_value_or_default(config, "pass_phrase"),
-            private_key_content=config.get("key_content")
-        )
+        try:
+            config = oci.config.from_file(
+                oci.config.DEFAULT_LOCATION,
+                (config_profile if config_profile else oci.config.DEFAULT_PROFILE)
+            )
+            signer = oci.signer.Signer(
+                tenancy=config["tenancy"],
+                user=config["user"],
+                fingerprint=config["fingerprint"],
+                private_key_file_location=config.get("key_file"),
+                pass_phrase=oci.config.get_config_value_or_default(config, "pass_phrase"),
+                private_key_content=config.get("key_content")
+            )
+            except Exception:
+                print_header("Error obtaining authentication, did you configure config file? aborting")
+                raise SystemExit
+
         return config, signer
 
 
