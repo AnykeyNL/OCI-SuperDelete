@@ -120,7 +120,7 @@ def create_signer(config_profile, is_instance_principals, is_delegation_token):
                 private_key_content=config.get("key_content")
             )
         except:
-            MakeLog(("Error obtaining authentication, did you configure config file? aborting")
+            print("Error obtaining authentication, did you configure config file? aborting")
             sys.exit(-1)
 
         return config, signer
