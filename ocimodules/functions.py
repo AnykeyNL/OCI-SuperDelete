@@ -67,7 +67,7 @@ def create_signer(config_profile, is_instance_principals, is_delegation_token):
 
         except Exception:
             MakeLog(("Error obtaining instance principals certificate, aborting")
-            raise sys.exit(-1)
+            sys.exit(-1)
 
     # -----------------------------
     # Delegation Token
@@ -83,7 +83,7 @@ def create_signer(config_profile, is_instance_principals, is_delegation_token):
             if env_config_file is None or env_config_section is None:
                 MakeLog("*** OCI_CONFIG_FILE and OCI_CONFIG_PROFILE env variables not found, abort. ***")
                 MakeLog("")
-                raise sys.exit(-1)
+                sys.exit(-1)
 
             config = oci.config.from_file(env_config_file, env_config_section)
             delegation_token_location = config["delegation_token_file"]
@@ -97,7 +97,7 @@ def create_signer(config_profile, is_instance_principals, is_delegation_token):
 
         except KeyError:
             MakeLog("* Key Error obtaining delegation_token_file")
-            raise sys.exit(-1)
+            sys.exit(-1)
 
         except Exception:
             raise
@@ -121,7 +121,7 @@ def create_signer(config_profile, is_instance_principals, is_delegation_token):
             )
         except:
             MakeLog(("Error obtaining authentication, did you configure config file? aborting")
-            raise sys.exit(-1)
+            sys.exit(-1)
 
         return config, signer
 
