@@ -65,7 +65,7 @@ def create_signer(config_profile, is_instance_principals, is_delegation_token):
             return config, signer
 
         except Exception:
-            print_header("Error obtaining instance principals certificate, aborting")
+            MakeLog(("Error obtaining instance principals certificate, aborting")
             raise SystemExit
 
     # -----------------------------
@@ -119,7 +119,7 @@ def create_signer(config_profile, is_instance_principals, is_delegation_token):
                 private_key_content=config.get("key_content")
             )
         except:
-            print_header("Error obtaining authentication, did you configure config file? aborting")
+            MakeLog(("Error obtaining authentication, did you configure config file? aborting")
             raise SystemExit
 
         return config, signer
