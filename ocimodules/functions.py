@@ -1,7 +1,7 @@
 # import only system from os
-from os import system, name
 import argparse
 import oci
+import os
 
 
 ##########################################################################
