@@ -28,7 +28,7 @@ def DeleteAny(config, signer, Compartments, ServiceClient, ServiceName, ServiceI
         DeleteCommand = "delete_" + ServiceName
 
     if PerAD:
-        identity = oci.identity.IdentityClient(config)
+        identity = oci.identity.IdentityClient(config, signer=signer)
 
     print("Getting all {} objects                 ".format(ServiceName), end = "\r")
     for C in Compartments:
