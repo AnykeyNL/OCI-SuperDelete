@@ -296,7 +296,7 @@ if confirm == "yes":
         DeleteAny(config, signer, processCompartments, "apigateway.ApiGatewayClient", "certificate")
 
         print_header("Deleting Datasafe services at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteAny(config, signer, processCompartments, "data_safe.DataSafeClient", "user_assessment", DelState="SUCCEEDED")
+        DeleteAny(config, signer, processCompartments, "data_safe.DataSafeClient", "user_assessment", DelState="Succeeded")
         DeleteAny(config, signer, processCompartments, "data_safe.DataSafeClient", "security_assessment")
         DeleteAny(config, signer, processCompartments, "data_safe.DataSafeClient", "target_database")
         DeleteAny(config, signer, processCompartments, "data_safe.DataSafeClient", "on_prem_connector")

@@ -31,12 +31,12 @@ def DeleteAny(config, signer, Compartments, ServiceClient, ServiceName, ServiceI
         identity = oci.identity.IdentityClient(config, signer=signer)
 
     print("Getting all {} objects                 ".format(ServiceName), end = "\r")
+    items = []
     for C in Compartments:
         Compartment = C.details
         try:
             if PerAD:
                 ads = identity.list_availability_domains(compartment_id=Compartment.id).data
-                items = []
                 for ad in ads:
                     itemstemp  = eval("oci.pagination.list_call_get_all_results(object.{}, availability_domain=\"{}\", compartment_id=Compartment.id{}, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data".format(ListCommand, ad.name, Extra))
                     for item in itemstemp:
@@ -46,11 +46,10 @@ def DeleteAny(config, signer, Compartments, ServiceClient, ServiceName, ServiceI
 
         except oci.exceptions.ServiceError as response:
             if response.code == 404:
-                print ("No items found                             ", end = "\r")
-                items = []
+                print ("No items found in compartment {}   ".format(Compartment.name), end = "\r")
             else:
-                items = []
                 print("error {}-{} trying to delete: {}".format(response.code, response.message, ServiceName))
+
 
         for item in items:
             # Delete objects that do not have lifecycle management status
@@ -64,7 +63,7 @@ def DeleteAny(config, signer, Compartments, ServiceClient, ServiceName, ServiceI
                     else:
                         print("error {}-{} trying to delete: {} - {}".format(response.code, response.message, C.fullpath, eval("item.{}".format(ObjectNameVar))))
             # Add objects with lifecycle management to the queue
-            elif item.lifecycle_state != DelState:
+            elif item.lifecycle_state.lower() != DelState.lower():
                 if item.compartment_id is not None:
                     if Filter == "protected": # Filter for is-protected items
                         if not item.is_protected:
@@ -88,8 +87,8 @@ def DeleteAny(config, signer, Compartments, ServiceClient, ServiceName, ServiceI
                     for item in AllItems:
                         try:
                             itemstatus = eval("object.{}({}=item.{}{}, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data".format(GetCommand, ServiceID, ReturnServiceID, Extra))
-                            if itemstatus.lifecycle_state != DelState:
-                                if itemstatus.lifecycle_state != DelingSate:
+                            if itemstatus.lifecycle_state.lower() != DelState.lower():
+                                if itemstatus.lifecycle_state.lower() != DelingSate.lower():
                                     try:
                                         print("Deleting {}: {}-{} @ {}".format(C.fullpath, ServiceName, eval("itemstatus.{}".format(ObjectNameVar)), config["region"]))
                                         eval("object.{}({}=itemstatus.{}{}, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)".format(DeleteCommand, ServiceID, ReturnServiceID, Extra))
