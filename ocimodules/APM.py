@@ -36,7 +36,7 @@ def DeleteAPM(config, signer, compartments):
                     object.delete_apm_domain(apm_domain_id=item.id)
                     deleted = True
                 except Exception:
-                    print("error trying to delete: {}".format(items.display_name))
+                    print("error trying to delete: {}".format(item.display_name))
                     time.sleep(5)
 
 
