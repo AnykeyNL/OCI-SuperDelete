@@ -25,8 +25,8 @@ def DeleteAPM(config, signer, compartments):
 
             if not item.is_free_tier:
                 print("----[ Deleting components of APM Domain: {} ]---".format(item.display_name))
-                DeleteSyntheticMonitoring(config, Compartment, item)
-                DeleteSyntheticScripts(config, Compartment, item)
+                DeleteSyntheticMonitoring(config, signer, Compartment, item)
+                DeleteSyntheticScripts(config, signer, Compartment, item)
 
             print("---[ Deleting APM Domain ]----")
             deleted = False
