@@ -31,6 +31,7 @@ from ocimodules.kms import *
 from ocimodules.Logging import *
 from ocimodules.APM import *
 from ocimodules.AnyDelete import *
+from ocimodules.BlockVolumeReplication import *
 
 #Disable OCI CircuitBreaker feature
 oci.circuit_breaker.NoCircuitBreakerStrategy()
@@ -355,12 +356,13 @@ if confirm == "yes":
         DeleteAny(config, signer, processCompartments, "data_flow.DataFlowClient", "run", DelState="SUCCEEDED")
 
         print_header("Deleting Block Volumes at " + CurrentTimeString() + "@ " + region, 1)
+        RemoveReplication(config, signer, processCompartments)
+        DeleteAny(config, signer, processCompartments, "core.BlockstorageClient", "volume_group", DelState="TERMINATED", DelingSate="TERMINATING")
+        DeleteAny(config, signer, processCompartments, "core.BlockstorageClient", "volume_group_backup", DelState="TERMINATED", DelingSate="TERMINATING")
         DeleteAny(config, signer, processCompartments, "core.BlockstorageClient", "volume", DelState="TERMINATED", DelingSate="TERMINATING", PerAD=True)
         DeleteAny(config, signer, processCompartments, "core.BlockstorageClient", "volume_backup", DelState="TERMINATED", DelingSate="TERMINATING")
         DeleteAny(config, signer, processCompartments, "core.BlockstorageClient", "boot_volume", DelState="TERMINATED", DelingSate="TERMINATING", PerAD=True)
         DeleteAny(config, signer, processCompartments, "core.BlockstorageClient", "boot_volume_backup", DelState="TERMINATED", DelingSate="TERMINATING")
-        DeleteAny(config, signer, processCompartments, "core.BlockstorageClient", "volume_group", DelState="TERMINATED", DelingSate="TERMINATING")
-        DeleteAny(config, signer, processCompartments, "core.BlockstorageClient", "volume_group_backup", DelState="TERMINATED", DelingSate="TERMINATING")
         DeleteAny(config, signer, processCompartments, "core.BlockstorageClient", "volume_backup_policy", DelState="", ServiceID="policy_id")
 
         print_header("Deleting FileSystem and Mount Targets at " + CurrentTimeString() + "@ " + region, 1)
