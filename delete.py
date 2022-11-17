@@ -32,6 +32,7 @@ from ocimodules.Logging import *
 from ocimodules.APM import *
 from ocimodules.AnyDelete import *
 from ocimodules.BlockVolumeReplication import *
+from ocimodules.DatabaseManagement import *
 
 #Disable OCI CircuitBreaker feature
 oci.circuit_breaker.NoCircuitBreakerStrategy()
@@ -58,7 +59,7 @@ regions = []
 #################################################
 #           Application Configuration           #
 #################################################
-min_version_required = "2.56.0"
+min_version_required = "2.88.0"
 application_version = "22.02.09"
 debug = False
 
@@ -302,6 +303,11 @@ if confirm == "yes":
         DeleteAny(config, signer, processCompartments, "data_safe.DataSafeClient", "target_database")
         DeleteAny(config, signer, processCompartments, "data_safe.DataSafeClient", "on_prem_connector")
         DeleteAny(config, signer, processCompartments, "data_safe.DataSafeClient", "data_safe_private_endpoint")
+
+        print_header("Deleting Database Management services at " + CurrentTimeString() + "@ " + region, 1)
+        DisableDatabaseManagement(config, signer, processCompartments)
+        DeleteAny(config, signer, processCompartments, "database_management.DbManagementClient", "db_management_private_endpoint", ObjectNameVar="name")
+        DeleteAny(config, signer, processCompartments, "database_management.DbManagementClient", "managed_database_group", ObjectNameVar="name", DelState="", DelingSate="")
 
         print_header("Deleting Log Analytics services at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, signer, processCompartments, "log_analytics.LogAnalyticsClient", "log_analytics_entity", ObjectNameVar="name", Extra=", namespace_name=\"{}\"".format(tenant_name))
