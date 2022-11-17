@@ -60,7 +60,7 @@ regions = []
 #           Application Configuration           #
 #################################################
 min_version_required = "2.88.0"
-application_version = "22.02.09"
+application_version = "22.11.17"
 debug = False
 
 
