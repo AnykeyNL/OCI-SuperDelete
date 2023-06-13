@@ -44,6 +44,7 @@ def Login(config, signer, startcomp):
     c = []
 
     # Adding Start compartment
+    print ("StartComp: {}".format(startcomp))
     compartment = identity.get_compartment(compartment_id=startcomp, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data
     newcomp = OCICompartments()
     newcomp.details = compartment
