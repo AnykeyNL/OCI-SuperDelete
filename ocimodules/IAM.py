@@ -48,7 +48,7 @@ def Login(config, signer, startcomp):
     compartment = identity.get_compartment(compartment_id=startcomp, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data
     newcomp = OCICompartments()
     newcomp.details = compartment
-    if config['tenancy'] == compartment.id:
+    if ".tenancy." in startcomp:
         newcomp.fullpath = "/root"
         newcomp.level = 0
     else:
