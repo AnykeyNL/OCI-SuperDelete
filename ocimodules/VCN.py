@@ -80,11 +80,17 @@ def DeleteSubnets(config, signer, Compartments, vcn):
     #     except Exception:
     #         print("Error listing for compartment {}".format(compartment.name))
     #         continue
-
-    query = "query subnet resources where vcnId= '{}'".format(vcn.id)
-    items = ocimodules.Search.SearchResources(config, signer, query)
-    for item in items:
-        if (item.lifecycle_state != "TERMINATED"):
+    
+    for C in Compartments:
+        compartment = C.details
+        object = oci.core.VirtualNetworkClient(config, signer=signer)
+        items = oci.pagination.list_call_get_all_results(
+            object.list_subnets,
+            compartment_id=compartment.id,
+            vcn_id=vcn.id,
+            lifecycle_state=oci.core.models.Subnet.LIFECYCLE_STATE_AVAILABLE,
+        ).data
+        for item in items:
             AllItems.append(item)
 
     itemsPresent = True
