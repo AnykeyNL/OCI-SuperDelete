@@ -192,44 +192,45 @@ if confirm == "yes":
         print_header("Deleting resources in region " + region, 0)
         config["region"] = region
 
-        print_header("Moving and Scheduling KMS Vaults for deletion at " + CurrentTimeString() + "@ " + region, 1)
-        print ("Moving to: ".format(DeleteCompartmentOCID))
-        DeleteKMSvaults(config, signer, processCompartments, config['tenancy'])
+        # print_header("Moving and Scheduling KMS Vaults for deletion at " + CurrentTimeString() + "@ " + region, 1)
+        # print ("Moving to: ".format(DeleteCompartmentOCID))
+        # DeleteKMSvaults(config, signer, processCompartments, config['tenancy'])
 
-        print_header("Deleting DevOps Projects at " + CurrentTimeString() + "@ " + region, 1)
-        elements = ["deploy_stage", "deploy_artifact", "deploy_environment", "deploy_pipeline", "build_pipeline"]
-        for element in elements:
-            DeleteAny(config, signer, processCompartments, "devops.DevopsClient", element)
-        DeleteAny(config, signer, processCompartments, "devops.DevopsClient", "repository", ObjectNameVar="name")
-        DeleteAny(config, signer, processCompartments, "devops.DevopsClient", "project", ObjectNameVar= "name")
-
-        print_header("Deleting Oracle Cloud VMware solution at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteAny(config, signer, processCompartments, "ocvp.SddcClient", "sddc")
-
-        print_header("Deleting Database Migrations at " + CurrentTimeString() + "@ " + region, 1)
-        elements = ["migration", "connection"]
-        for element in elements:
-            DeleteAny(config, signer, processCompartments, "database_migration.DatabaseMigrationClient", element)
-
-        print_header("Deleting GoldenGate at " + CurrentTimeString() + "@ " + region, 1)
-        elements = ["database_registration", "deployment", "deployment_backup"]
-        for element in elements:
-            DeleteAny(config, signer, processCompartments, "golden_gate.GoldenGateClient", element)
-
-        print_header("Deleting Vulnerability Scanning Services at " + CurrentTimeString() + "@ " + region, 1)
-        elements = ["host_agent_scan_result", "host_port_scan_result", "host_cis_benchmark_scan_result", "container_scan_result"]
-        for element in elements:
-            DeleteAny(config, signer, processCompartments, "vulnerability_scanning.VulnerabilityScanningClient", element, DelState="", DelingSate="")
-        DeleteAny(config, signer, processCompartments, "vulnerability_scanning.VulnerabilityScanningClient", "host_scan_target")
-        DeleteAny(config, signer, processCompartments, "vulnerability_scanning.VulnerabilityScanningClient", "container_scan_target")
-        elements = ["host_scan_recipe", "container_scan_recipe"]
-        for element in elements:
-            DeleteAny(config, signer, processCompartments, "vulnerability_scanning.VulnerabilityScanningClient", element, DelState="", DelingSate="")
-
-        print_header("Deleting Bastion Services at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteAny(config, signer, processCompartments, "bastion.BastionClient", "bastion", ObjectNameVar= "name")
+        # print_header("Deleting DevOps Projects at " + CurrentTimeString() + "@ " + region, 1)
+        # elements = ["deploy_stage", "deploy_artifact", "deploy_environment", "deploy_pipeline", "build_pipeline"]
+        # for element in elements:
+        #     DeleteAny(config, signer, processCompartments, "devops.DevopsClient", element)
+        # DeleteAny(config, signer, processCompartments, "devops.DevopsClient", "repository", ObjectNameVar="name")
+        # DeleteAny(config, signer, processCompartments, "devops.DevopsClient", "project", ObjectNameVar= "name")
+        #
+        # print_header("Deleting Oracle Cloud VMware solution at " + CurrentTimeString() + "@ " + region, 1)
+        # DeleteAny(config, signer, processCompartments, "ocvp.SddcClient", "sddc")
+        #
+        # print_header("Deleting Database Migrations at " + CurrentTimeString() + "@ " + region, 1)
+        # elements = ["migration", "connection"]
+        # for element in elements:
+        #     DeleteAny(config, signer, processCompartments, "database_migration.DatabaseMigrationClient", element)
+        #
+        # print_header("Deleting GoldenGate at " + CurrentTimeString() + "@ " + region, 1)
+        # elements = ["database_registration", "deployment", "deployment_backup"]
+        # for element in elements:
+        #     DeleteAny(config, signer, processCompartments, "golden_gate.GoldenGateClient", element)
+        #
+        # print_header("Deleting Vulnerability Scanning Services at " + CurrentTimeString() + "@ " + region, 1)
+        # elements = ["host_agent_scan_result", "host_port_scan_result", "host_cis_benchmark_scan_result", "container_scan_result"]
+        # for element in elements:
+        #     DeleteAny(config, signer, processCompartments, "vulnerability_scanning.VulnerabilityScanningClient", element, DelState="", DelingSate="")
+        # DeleteAny(config, signer, processCompartments, "vulnerability_scanning.VulnerabilityScanningClient", "host_scan_target")
+        # DeleteAny(config, signer, processCompartments, "vulnerability_scanning.VulnerabilityScanningClient", "container_scan_target")
+        # elements = ["host_scan_recipe", "container_scan_recipe"]
+        # for element in elements:
+        #     DeleteAny(config, signer, processCompartments, "vulnerability_scanning.VulnerabilityScanningClient", element, DelState="", DelingSate="")
+        #
+        # print_header("Deleting Bastion Services at " + CurrentTimeString() + "@ " + region, 1)
+        # DeleteAny(config, signer, processCompartments, "bastion.BastionClient", "bastion", ObjectNameVar= "name")
 
         print_header("Deleting Web Application Firewall at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, signer, processCompartments, "waf.WafClient", "web_app_firewall")
         DeleteAny(config, signer, processCompartments, "waf.WafClient", "web_app_firewall_policy")
 
         if region == homeregion:
