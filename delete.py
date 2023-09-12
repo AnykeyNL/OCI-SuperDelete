@@ -229,6 +229,9 @@ if confirm == "yes":
         print_header("Deleting Bastion Services at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, signer, processCompartments, "bastion.BastionClient", "bastion", ObjectNameVar= "name")
 
+        print_header("Deleting Web Application Firewall at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, signer, processCompartments, "waf.WafClient", "web_app_firewall_policy")
+
         if region == homeregion:
             print_header("Deleting Edge Services at " + CurrentTimeString() + "@ " + region, 1)
             DeleteAny(config, signer, processCompartments, "waas.WaasClient", "waas_policy")
