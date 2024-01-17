@@ -110,7 +110,7 @@ def Login(config, signer, startcomp):
                                     for sub4 in subcompartments4:
                                         if sub4.lifecycle_state == "ACTIVE":
                                             newcomp = OCICompartments()
-                                            newcomp.details = sub
+                                            newcomp.details = sub4
                                             newcomp.fullpath = "{}{}/{}/{}/{}/{}".format(fullpath, subpath1, subpath2,
                                                                                          subpath3, subpath4, sub4.name)
                                             newcomp.level = 5
