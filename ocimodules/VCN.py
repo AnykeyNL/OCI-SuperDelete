@@ -81,30 +81,35 @@ def DeleteSubnets(config, signer, Compartments, vcn):
     #         print("Error listing for compartment {}".format(compartment.name))
     #         continue
 
-    query = "query subnet resources where vcnId= '{}'".format(vcn.id)
-    items = ocimodules.Search.SearchResources(config, signer, query)
-    for item in items:
-        if (item.lifecycle_state != "TERMINATED"):
+    for C in Compartments:
+        compartment = C.details
+        # query = "query subnet resources where vcnId= '{}'".format(vcn.id)
+        # items = ocimodules.Search.SearchResources(config, signer, query)
+        object = oci.core.VirtualNetworkClient(config, signer=signer)
+        items = oci.pagination.list_call_get_all_results(
+            object.list_subnets,
+            compartment_id=compartment.id,
+            vcn_id=vcn.id,
+            lifecycle_state=oci.core.models.Subnet.LIFECYCLE_STATE_AVAILABLE,
+        ).data
+        for item in items:
+            # if (item.lifecycle_state != "TERMINATED"):
             AllItems.append(item)
 
     itemsPresent = True
     iteration = 0
-
+    
     while itemsPresent:
         count = 0
         for item in AllItems:
             try:
-                itemstatus = object.get_subnet(subnet_id=item.identifier).data
-                if itemstatus.lifecycle_state != "TERMINATED":
-                    if itemstatus.lifecycle_state != "TERMINATING":
-                        try:
-                            print("Deleting: {}".format(itemstatus.display_name))
-                            object.delete_subnet(subnet_id=itemstatus.id)
-                        except Exception:
-                            print("error trying to delete: {}".format(itemstatus.display_name))
-                    else:
-                        printd("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
-                    count = count + 1
+                itemstatus = object.get_subnet(subnet_id=item.id).data
+                try:
+                    print("Deleting: {}".format(itemstatus.display_name))
+                    object.delete_subnet(subnet_id=itemstatus.id)
+                except Exception:
+                    print("error trying to delete: {}".format(itemstatus.display_name))
+                count = count + 1
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
