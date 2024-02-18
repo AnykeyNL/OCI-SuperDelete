@@ -44,7 +44,7 @@ def Login(config, signer, startcomp):
     c = []
 
     # Adding Start compartment
-    if "user" in config and not ".tenancy." in startcomp:
+    if "user" in config or ".tenancy." not in startcomp:
         compartment = identity.get_compartment(compartment_id=startcomp, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data
     else:
         # Bug fix - for working on root compartment using instance principle.
