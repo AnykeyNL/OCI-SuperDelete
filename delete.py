@@ -211,6 +211,17 @@ if confirm == "yes":
         for element in elements:
             DeleteAny(config, signer, processCompartments, "database_migration.DatabaseMigrationClient", element)
 
+        print_header("Deleting Migrations at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, signer, processCompartments, "cloud_migrations.MigrationClient", "migration_plan")
+        DeleteAny(config, signer, processCompartments, "cloud_migrations.MigrationClient", "migration")
+        DeleteAny(config, signer, processCompartments, "cloud_migrations.MigrationClient", "replication_schedule")
+        DeleteAny(config, signer, processCompartments, "cloud_bridge.OcbAgentSvcClient", "environment")
+        DeleteAny(config, signer, processCompartments, "cloud_bridge.OcbAgentSvcClient", "agent_dependency")
+        DeleteAny(config, signer, processCompartments, "cloud_bridge.DiscoveryClient", "asset_source")
+        DeleteAny(config, signer, processCompartments, "cloud_bridge.DiscoveryClient", "discovery_schedule")
+        DeleteAny(config, signer, processCompartments, "cloud_bridge.InventoryClient", "asset")
+        DeleteAny(config, signer, processCompartments, "cloud_bridge.InventoryClient", "inventory")
+
         print_header("Deleting GoldenGate at " + CurrentTimeString() + "@ " + region, 1)
         elements = ["database_registration", "deployment", "deployment_backup"]
         for element in elements:
@@ -240,7 +251,7 @@ if confirm == "yes":
             DeleteAny(config, signer, processCompartments, "healthchecks.HealthChecksClient", "ping_monitor", ServiceID="monitor_id", DelState="", DelingSate="")
             DeleteAny(config, signer, processCompartments, "dns.DnsClient", "steering_policy_attachment")
             DeleteAny(config, signer, processCompartments, "dns.DnsClient", "steering_policy")
-            DeleteAny(config, signer, processCompartments, "dns.DnsClient", "zone", ObjectNameVar="name", ServiceID="zone_name_or_id")
+            DeleteAny(config, signer, processCompartments, "dns.DnsClient", "zone", ObjectNameVar="name", ServiceID="zone_name_or_id", Extra=", scope=\"PRIVATE\"")
             DeleteAny(config, signer, processCompartments, "dns.DnsClient", "view", Extra=", scope=\"PRIVATE\"", Filter="protected")
 
         print_header("Deleting Object Storage at " + CurrentTimeString() + "@ " + region, 1)
