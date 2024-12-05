@@ -43,8 +43,6 @@ The purpose of this script is to remove all resources from a compartment, includ
 
 This script will hunt for all resources in a compartment and delete/terminate/retire them.
 
-## TODO
-Currently this script only support authentication via config file. Plan is to add instance principle support and cloud shell authentication support.
 
 ## Disclaimer
 This is a personal repository. Any code, views or opinions represented here are personal and belong solely to me and do not represent those of people, institutions or organizations that I may or may not be associated with in professional or personal capacity, unless explicitly stated.
