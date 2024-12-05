@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-###########################################################
-# OCI-SuperDelete                                         #
-#                                                         #
-# Use with PYTHON3!                                       #
-###########################################################
+##########################################################################################
+# OCI-SuperDelete                                                                        #
+#                                                                                        #
+# Use with PYTHON3!                                                                      #
+##########################################################################################
 # Application Command line parameters
 #
 #   -cp profile    - profile inside the config file
@@ -15,26 +15,38 @@
 #   -debug         - enable debug
 #   -skip_delete_compartment - skip delete the compartment at end of the process
 #
-###########################################################
+##########################################################################################
+# If you contribute changes, please run flake8 before pushing to Git.
+##########################################################################################
+# To Do
+# Database Tools - Private Endpoints
+# Certificates Certificates - move to upper and schedule deletion
+# Certificates CA Bundles
+# Network Firewall Policies
+# Console Dashboard Groups
+##########################################################################################
+
 
 import sys
 import time
 import oci
 import platform
 import logging
-from ocimodules.functions import *
-from ocimodules.ObjectStorage import *
-from ocimodules.IAM import *
-from ocimodules.VCN import *
-from ocimodules.FunctionsService import *
-from ocimodules.kms import *
-from ocimodules.Logging import *
-from ocimodules.APM import *
-from ocimodules.AnyDelete import *
-from ocimodules.BlockVolumeReplication import *
-from ocimodules.DatabaseManagement import *
 
-#Disable OCI CircuitBreaker feature
+# import ocimodules
+from ocimodules.functions import print_header, input_command_line, create_signer, check_oci_version
+from ocimodules.IAM import Login, SubscribedRegions, GetHomeRegion, GetTenantName, DeleteTagNameSpaces, DeleteCompartments, DeleteTagDefaults
+from ocimodules.VCN import DeleteVCN
+from ocimodules.ObjectStorage import DeleteBuckets
+from ocimodules.FunctionsService import DeleteApplications
+from ocimodules.kms import DeleteKMSvaults
+from ocimodules.Logging import DeleteLogGroups
+from ocimodules.APM import DeleteAPM
+from ocimodules.AnyDelete import DeleteAny
+from ocimodules.BlockVolumeReplication import RemoveReplication
+from ocimodules.DatabaseManagement import DisableDatabaseManagement
+
+# Disable OCI CircuitBreaker feature
 oci.circuit_breaker.NoCircuitBreakerStrategy()
 
 #################################################
@@ -60,7 +72,7 @@ regions = []
 #           Application Configuration           #
 #################################################
 min_version_required = "2.88.0"
-application_version = "22.11.17"
+application_version = "24.12.01"
 debug = False
 
 
@@ -88,8 +100,10 @@ class MyWriter:
         self.logfile.close()
         self.logfile = open(self.filename, "a", encoding="utf-8")
 
+
 def CurrentTimeString():
     return time.strftime("%D %H:%M:%S", time.localtime())
+
 
 ##########################################################################
 # Main Program
@@ -104,7 +118,7 @@ logfile = cmd.log_file
 writer = MyWriter(sys.stdout, logfile)
 sys.stdout = writer
 
-#configfile = cmd.config_file if cmd.config_file else configfile
+# configfile = cmd.config_file if cmd.config_file else configfile
 configProfile = cmd.config_profile if cmd.config_profile else configProfile
 
 
@@ -122,8 +136,8 @@ if DeleteCompartmentOCID == "":
 ######################################################
 # oci config and debug handle
 ######################################################
-#config = oci.config.from_file(configfile, configProfile)
 config, signer = create_signer(cmd.config_profile, cmd.is_instance_principals, cmd.is_delegation_token)
+tenant_id = config['tenancy']
 
 if debug:
     config['log_requests'] = True
@@ -134,13 +148,17 @@ if debug:
 # Loading Compartments
 # Add all active compartments,
 # exclude the ManagementCompartmentForPaas (as this is locked compartment)
+# Add root compartment to processRootCompartment if specified for root compartment objects
 ######################################################
 print("\nLogin check and loading compartments...\n")
 compartments = Login(config, signer, DeleteCompartmentOCID)
 processCompartments = []
+processRootCompartment = []
 for compartment in compartments:
     if compartment.details.lifecycle_state == "ACTIVE" and compartment.details.name != "ManagedCompartmentForPaaS":
         processCompartments.append(compartment)
+    if compartment.details.id == tenant_id:
+        processRootCompartment.append(compartment)
 
 # Check if regions specified if not getting all subscribed regions.
 if len(regions) == 0:
@@ -193,7 +211,7 @@ if confirm == "yes":
         config["region"] = region
 
         print_header("Moving and Scheduling KMS Vaults for deletion at " + CurrentTimeString() + "@ " + region, 1)
-        print ("Moving to: ".format(DeleteCompartmentOCID))
+        print("Moving to {}: ".format(DeleteCompartmentOCID))
         DeleteKMSvaults(config, signer, processCompartments, config['tenancy'])
 
         print_header("Deleting DevOps Projects at " + CurrentTimeString() + "@ " + region, 1)
@@ -201,7 +219,7 @@ if confirm == "yes":
         for element in elements:
             DeleteAny(config, signer, processCompartments, "devops.DevopsClient", element)
         DeleteAny(config, signer, processCompartments, "devops.DevopsClient", "repository", ObjectNameVar="name")
-        DeleteAny(config, signer, processCompartments, "devops.DevopsClient", "project", ObjectNameVar= "name")
+        DeleteAny(config, signer, processCompartments, "devops.DevopsClient", "project", ObjectNameVar="name")
 
         print_header("Deleting Oracle Cloud VMware solution at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, signer, processCompartments, "ocvp.SddcClient", "sddc")
@@ -238,7 +256,7 @@ if confirm == "yes":
             DeleteAny(config, signer, processCompartments, "vulnerability_scanning.VulnerabilityScanningClient", element, DelState="", DelingSate="")
 
         print_header("Deleting Bastion Services at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteAny(config, signer, processCompartments, "bastion.BastionClient", "bastion", ObjectNameVar= "name")
+        DeleteAny(config, signer, processCompartments, "bastion.BastionClient", "bastion", ObjectNameVar="name")
 
         print_header("Deleting Web Application Firewall at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, signer, processCompartments, "waf.WafClient", "web_app_firewall")
@@ -265,7 +283,8 @@ if confirm == "yes":
 
         print_header("Deleting Email Service at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, signer, processCompartments, "email.EmailClient", "sender", ObjectNameVar="email_address")
-        DeleteAny(config, signer, processCompartments, "email.EmailClient", "suppression", ObjectNameVar="email_address", DelState="", DelingSate="")
+        if processRootCompartment:
+            DeleteAny(config, signer, processRootCompartment, "email.EmailClient", "suppression", ObjectNameVar="email_address", DelState="", DelingSate="")
         DeleteAny(config, signer, processCompartments, "email.EmailClient", "email_domain", ObjectNameVar="name")
 
         print_header("Deleting OKE Clusters at " + CurrentTimeString() + "@ " + region, 1)
@@ -387,7 +406,7 @@ if confirm == "yes":
         DeleteAny(config, signer, processCompartments, "core.BlockstorageClient", "volume_backup_policy", DelState="", ServiceID="policy_id")
 
         print_header("Deleting FileSystem and Mount Targets at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteAny(config, signer, processCompartments, "file_storage.FileStorageClient" , "mount_target", PerAD=True)
+        DeleteAny(config, signer, processCompartments, "file_storage.FileStorageClient", "mount_target", PerAD=True)
         DeleteAny(config, signer, processCompartments, "file_storage.FileStorageClient", "file_system", PerAD=True)
 
         print_header("Deleting VCNs at " + CurrentTimeString() + "@ " + region, 1)
@@ -409,7 +428,6 @@ if confirm == "yes":
             print_header("Deleting Policies at " + CurrentTimeString() + "@ " + region, 1)
             DeleteAny(config, signer, processCompartments, "identity.IdentityClient", "policy", ObjectNameVar="name")
             DeleteAny(config, signer, processCompartments, "identity.IdentityClient", "dynamic_group", ObjectNameVar="name")
-
 
         print_header("Deleting Log Groups at " + CurrentTimeString() + "@ " + region, 1)
         DeleteLogGroups(config, signer, processCompartments)

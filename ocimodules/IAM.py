@@ -1,9 +1,9 @@
 import oci
 import time
-import sys
 
 WaitRefresh = 10
 MaxIDeleteTagIteration = 5
+
 
 class OCICompartments:
     fullpath = ""
@@ -16,16 +16,16 @@ def GetCompartments(identity, rootID):
     while retry:
         retry = False
         try:
-            #print ("Getting compartments for {}".format(rootID))
+            # print("Getting compartments for {}".format(rootID))
             compartments = oci.pagination.list_call_get_all_results(identity.list_compartments, compartment_id=rootID, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data
             return compartments
         except oci.exceptions.ServiceError as e:
             if e.status == 429:
-                print ("API busy.. retry", end = "\r")
+                print("API busy.. retry", end="\r")
                 retry = True
                 time.sleep(WaitRefresh)
             else:
-                print ("bad error!: " + e.message)
+                print("bad error!: " + e.message)
     return []
 
 
@@ -122,13 +122,7 @@ def Login(config, signer, startcomp):
                                                 if sub5.lifecycle_state == "ACTIVE":
                                                     newcomp = OCICompartments()
                                                     newcomp.details = sub5
-                                                    newcomp.fullpath = "{}{}/{}/{}/{}/{}/{}".format(fullpath,
-                                                                                                         subpath1,
-                                                                                                         subpath2,
-                                                                                                         subpath3,
-                                                                                                         subpath4,
-                                                                                                         subpath5,
-                                                                                                         sub5.name)
+                                                    newcomp.fullpath = "{}{}/{}/{}/{}/{}/{}".format(fullpath, subpath1, subpath2, subpath3, subpath4, subpath5, sub5.name)
                                                     newcomp.level = 6
                                                     c.append(newcomp)
 
@@ -282,8 +276,8 @@ def DeleteCompartments(config, signer, compartments, startcomp):
                         timestr = time.strftime("%H:%M:%S", time.localtime())
                         object.delete_compartment(compartment_id=Compartment.id)
                         print("{} Deleted compartment: {}".format(timestr, C.fullpath))
-                    except:
-                        print("{} Delaying - retry attempt {} .. api calls           ".format(timestr, retrycount), end = "\r")
+                    except Exception:
+                        print("{} Delaying - retry attempt {} .. api calls           ".format(timestr, retrycount), end="\r")
                         time.sleep(10)
                         retrycount = retrycount + 1
                         retry = True

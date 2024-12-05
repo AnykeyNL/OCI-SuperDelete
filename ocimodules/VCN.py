@@ -1,6 +1,6 @@
 import oci
-import ocimodules.Search
 import time
+
 
 WaitRefresh = 10
 MaxIDeleteIteration = 5
@@ -10,53 +10,53 @@ MaxIDeleteIteration = 5
 # DeleteVCN
 ##############################################
 def DeleteVCN(config, signer, Compartments):
-    object = oci.core.VirtualNetworkClient(config, signer=signer)
+    try:
+        object = oci.core.VirtualNetworkClient(config, signer=signer)
 
-    print("Getting all VCN objects")
-    for C in Compartments:
-        Compartment = C.details
-        AllItems = []
-        print("---[ Deleting Load Balancers and Reserved IPs ]----")
-        DeleteLoadBalancers(config, signer, Compartment)
-        DeleteReservedIPs(config, signer, Compartment)
-        print("---[ Deleting DNS Resolvers ]----")
-        DeleteDNSResolvers(config, signer, Compartment)
-        print("---[ Deleting IPSEC Connections ]----")
-        DeleteIPSecConnections(config, signer, Compartment)
-        print("---[ Deleting CPEs ]----")
-        DeleteCPEs(config, signer, Compartment)
-        print("---[ Deleting DRG Components ]----")
-        DeleteDRGAttachments(config, signer, Compartment)
-        DeleteDRGs(config, signer, Compartment)
+        for C in Compartments:
+            Compartment = C.details
+            AllItems = []
+            print("---------------------------------------------------------------------------------------")
+            print("--- Deleting VCN, LBs and DRG Componenets for '" + Compartment.name + "'---")
+            print("---------------------------------------------------------------------------------------")
+            DeleteLoadBalancers(config, signer, Compartment)
+            DeleteReservedIPs(config, signer, Compartment)
+            DeleteDNSResolvers(config, signer, Compartment)
+            DeleteIPSecConnections(config, signer, Compartment)
+            DeleteCPEs(config, signer, Compartment)
+            DeleteDRGAttachments(config, signer, Compartment)
+            DeleteDRGs(config, signer, Compartment)
 
-        items = oci.pagination.list_call_get_all_results(object.list_vcns, compartment_id=Compartment.id).data
-        for item in items:
-            if item.lifecycle_state != "TERMINATED":
-                AllItems.append(item)
-                print("- {} - {}".format(item.display_name, item.lifecycle_state))
+            items = oci.pagination.list_call_get_all_results(object.list_vcns, compartment_id=Compartment.id).data
+            for item in items:
+                if item.lifecycle_state != "TERMINATED":
+                    AllItems.append(item)
+                    print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
-        for item in AllItems:
-            print("----[ Deleting components of VCN: {} ]---".format(item.display_name))
-            DeleteSubnets(config, signer, Compartments, item)
-            DeleteDHCPoptions(config, signer, Compartments, item)
-            DeleteSecurityLists(config, signer, Compartments, item)
-            DeleteSecurityGroups(config, signer, Compartments, item)
-            DeleteRouteTables(config, signer, Compartments, item)
-            DeleteInternetGateways(config, signer, Compartments, item)
-            DeleteServiceGateways(config, signer, Compartments, item)
-            DeleteNATGateways(config, signer, Compartments, item)
-            DeleteLocalPeeringGateways(config, signer, Compartments, item)
+            for item in AllItems:
+                DeleteSubnets(config, signer, Compartments, item)
+                DeleteDHCPoptions(config, signer, Compartments, item)
+                DeleteSecurityLists(config, signer, Compartments, item)
+                DeleteSecurityGroups(config, signer, Compartments, item)
+                DeleteRouteTables(config, signer, Compartments, item)
+                DeleteInternetGateways(config, signer, Compartments, item)
+                DeleteServiceGateways(config, signer, Compartments, item)
+                DeleteNATGateways(config, signer, Compartments, item)
+                DeleteLocalPeeringGateways(config, signer, Compartments, item)
 
-            print("---[ Deleting VCN ]----")
-            deleted = False
-            if not deleted:
-                try:
-                    object.delete_vcn(vcn_id=item.id)
-                    print("VNC has been deleted")
-                    deleted = True
-                except oci.exceptions.ServiceError as response:
-                    print("Error deleting VCN : {} - {}".format(response.status, response.message))
-                    time.sleep(5)
+                deleted = False
+                if not deleted:
+                    try:
+                        object.delete_vcn(vcn_id=item.id)
+                        print("VCN has been deleted")
+                        deleted = True
+                    except oci.exceptions.ServiceError as response:
+                        print("Error deleting VCN : {} - {}".format(response.status, response.message))
+                        time.sleep(5)
+
+    # Catch Exception if Error
+    except Exception as e:
+        print(f'\nError in DeleteVCN: {str(e)}')
 
 
 ##############################################
@@ -66,7 +66,7 @@ def DeleteSubnets(config, signer, Compartments, vcn):
     AllItems = []
     object = oci.core.VirtualNetworkClient(config, signer=signer)
 
-    print("Getting subnets for {}".format(vcn.display_name))
+    print("Getting subnets for {}".format(vcn.display_name), end="\r")
 
     # Switching to Search function to find underlaying VCN resources
     # for C in Compartments:
@@ -98,22 +98,22 @@ def DeleteSubnets(config, signer, Compartments, vcn):
 
     itemsPresent = True
     iteration = 0
-    
+
     while itemsPresent:
         count = 0
         for item in AllItems:
             try:
                 itemstatus = object.get_subnet(subnet_id=item.id).data
                 try:
-                    print("Deleting: {}".format(itemstatus.display_name))
+                    print("Deleting: {}".format(itemstatus.display_name), end="\r")
                     object.delete_subnet(subnet_id=itemstatus.id)
                 except Exception:
-                    print("error trying to delete: {}".format(itemstatus.display_name))
+                    print("----------> error trying to delete: {}".format(itemstatus.display_name))
                 count = count + 1
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
             time.sleep(WaitRefresh)
             iteration += 1
 
@@ -132,7 +132,7 @@ def DeleteDHCPoptions(config, signer, Compartments, vcn):
     AllItems = []
     object = oci.core.VirtualNetworkClient(config, signer=signer)
 
-    print("Getting DHCP options for {}".format(vcn.display_name))
+    print("Getting DHCP options for {}".format(vcn.display_name), end="\r")
     for C in Compartments:
         compartment = C.details
         try:
@@ -160,14 +160,14 @@ def DeleteDHCPoptions(config, signer, Compartments, vcn):
                             object.delete_dhcp_options(dhcp_id=itemstatus.id)
                             count = count + 1
                         except Exception:
-                            print("error trying to delete: {}".format(itemstatus.display_name))
+                            print("----------> error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                         count = count + 1
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
             time.sleep(WaitRefresh)
             iteration += 1
 
@@ -186,7 +186,7 @@ def DeleteSecurityLists(config, signer, Compartments, vcn):
     AllItems = []
     object = oci.core.VirtualNetworkClient(config, signer=signer)
 
-    print("Getting Security Lists for {}".format(vcn.display_name))
+    print("Getting Security Lists for {}".format(vcn.display_name), end="\r")
     for C in Compartments:
         compartment = C.details
         try:
@@ -214,14 +214,14 @@ def DeleteSecurityLists(config, signer, Compartments, vcn):
                             object.delete_security_list(security_list_id=itemstatus.id)
                             count = count + 1
                         except Exception:
-                            print("error trying to delete: {}".format(itemstatus.display_name))
+                            print("----------> error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                         count = count + 1
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
             time.sleep(WaitRefresh)
             iteration += 1
 
@@ -240,7 +240,7 @@ def DeleteSecurityGroups(config, signer, Compartments, vcn):
     AllItems = []
     object = oci.core.VirtualNetworkClient(config, signer=signer)
 
-    print("Getting Network Security Groups for {}".format(vcn.display_name))
+    print("Getting Network Security Groups for {}".format(vcn.display_name), end="\r")
     for C in Compartments:
         compartment = C.details
         try:
@@ -268,14 +268,14 @@ def DeleteSecurityGroups(config, signer, Compartments, vcn):
                             object.delete_network_security_group(network_security_group_id=itemstatus.id)
                             count = count + 1
                         except Exception:
-                            print("error trying to delete: {}".format(itemstatus.display_name))
+                            print("----------> error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                         count = count + 1
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
             time.sleep(WaitRefresh)
             iteration += 1
 
@@ -294,7 +294,7 @@ def DeleteRouteTables(config, signer, Compartments, vcn):
     AllItems = []
     object = oci.core.VirtualNetworkClient(config, signer=signer)
 
-    print("Getting Route Tables for {}".format(vcn.display_name))
+    print("Getting Route Tables for {}".format(vcn.display_name), end="\r")
     for C in Compartments:
         compartment = C.details
         try:
@@ -328,14 +328,14 @@ def DeleteRouteTables(config, signer, Compartments, vcn):
                             object.delete_route_table(rt_id=itemstatus.id)
                             count = count + 1
                         except Exception:
-                            print("error trying to delete: {}".format(itemstatus.display_name))
+                            print("----------> error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                         count = count + 1
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
             time.sleep(WaitRefresh)
             iteration += 1
 
@@ -354,7 +354,7 @@ def DeleteDRGAttachments(config, signer, compartment):
     AllItems = []
     object = oci.core.VirtualNetworkClient(config, signer=signer)
 
-    print("Getting DRG Attachmentss for {}".format(compartment.name))
+    print("Getting DRG Attachmentss for {}".format(compartment.name), end="\r")
     AllItems = oci.pagination.list_call_get_all_results(object.list_drg_attachments, compartment_id=compartment.id).data
 
     itemsPresent = True
@@ -370,14 +370,14 @@ def DeleteDRGAttachments(config, signer, compartment):
                         print("Deleting: {}".format(itemstatus.display_name))
                         object.delete_drg_attachment(drg_attachment_id=itemstatus.id)
                     except Exception:
-                        print("error trying to delete: {}".format(itemstatus.display_name))
+                        print("----------> error trying to delete: {}".format(itemstatus.display_name))
                 else:
                     print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                 count = count + 1
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
             time.sleep(WaitRefresh)
             iteration += 1
 
@@ -396,7 +396,7 @@ def DeleteLoadBalancers(config, signer, compartment):
     AllItems = []
     object = oci.load_balancer.LoadBalancerClient(config, signer=signer)
 
-    print("Getting all Load Balancer objects")
+    print("Getting all Load Balancer objects", end="\r")
     items = oci.pagination.list_call_get_all_results(object.list_load_balancers, compartment_id=compartment.id).data
     for item in items:
         if (item.lifecycle_state != "DELETED"):
@@ -417,14 +417,14 @@ def DeleteLoadBalancers(config, signer, compartment):
                             print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_load_balancer(load_balancer_id=itemstatus.id)
                         except Exception:
-                            print("error trying to delete: {}".format(itemstatus.display_name))
+                            print("----------> error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
             time.sleep(WaitRefresh)
             iteration += 1
 
@@ -443,7 +443,7 @@ def DeleteReservedIPs(config, signer, compartment):
     AllItems = []
     object = oci.core.VirtualNetworkClient(config, signer=signer)
 
-    print("Getting all Reserved IP objects")
+    print("Getting all Reserved IP objects", end="\r")
     items = oci.pagination.list_call_get_all_results(object.list_public_ips, scope="REGION", compartment_id=compartment.id, lifetime="RESERVED").data
 
     for item in items:
@@ -465,14 +465,14 @@ def DeleteReservedIPs(config, signer, compartment):
                             print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_public_ip(public_ip_id=itemstatus.id)
                         except Exception:
-                            print("error trying to delete: {}".format(itemstatus.display_name))
+                            print("----------> error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
             time.sleep(WaitRefresh)
             iteration += 1
 
@@ -492,7 +492,7 @@ def DeleteInternetGateways(config, signer, Compartments, vcn):
     AllItems = []
     object = oci.core.VirtualNetworkClient(config, signer=signer)
 
-    print("Getting all Internet Gateway objects")
+    print("Getting all Internet Gateway objects", end="\r")
     for C in Compartments:
         compartment = C.details
         try:
@@ -519,14 +519,14 @@ def DeleteInternetGateways(config, signer, Compartments, vcn):
                             print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_internet_gateway(ig_id=itemstatus.id)
                         except Exception:
-                            print("error trying to delete: {}".format(itemstatus.display_name))
+                            print("----------> error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
             time.sleep(WaitRefresh)
             iteration += 1
 
@@ -546,7 +546,7 @@ def DeleteServiceGateways(config, signer, Compartments, vcn):
     AllItems = []
     object = oci.core.VirtualNetworkClient(config, signer=signer)
 
-    print("Getting all Service Gateway objects")
+    print("Getting all Service Gateway objects", end="\r")
     for C in Compartments:
         compartment = C.details
         try:
@@ -573,14 +573,14 @@ def DeleteServiceGateways(config, signer, Compartments, vcn):
                             print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_service_gateway(service_gateway_id=itemstatus.id)
                         except Exception:
-                            print("error trying to delete: {}".format(itemstatus.display_name))
+                            print("----------> error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
             time.sleep(WaitRefresh)
             iteration += 1
 
@@ -600,7 +600,7 @@ def DeleteNATGateways(config, signer, Compartments, vcn):
     AllItems = []
     object = oci.core.VirtualNetworkClient(config, signer=signer)
 
-    print("Getting all NAT Gateway objects")
+    print("Getting all NAT Gateway objects", end="\r")
     for C in Compartments:
         compartment = C.details
         try:
@@ -627,14 +627,14 @@ def DeleteNATGateways(config, signer, Compartments, vcn):
                             print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_nat_gateway(nat_gateway_id=itemstatus.id)
                         except Exception:
-                            print("error trying to delete: {}".format(itemstatus.display_name))
+                            print("----------> error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
             time.sleep(WaitRefresh)
             iteration += 1
 
@@ -654,7 +654,7 @@ def DeleteLocalPeeringGateways(config, signer, Compartments, vcn):
     AllItems = []
     object = oci.core.VirtualNetworkClient(config, signer=signer)
 
-    print("Getting all Local Peering Gateways objects")
+    print("Getting all Local Peering Gateways objects", end="\r")
     for C in Compartments:
         compartment = C.details
         try:
@@ -681,14 +681,14 @@ def DeleteLocalPeeringGateways(config, signer, Compartments, vcn):
                             print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_local_peering_gateway(local_peering_gateway_id=itemstatus.id)
                         except Exception:
-                            print("error trying to delete: {}".format(itemstatus.display_name))
+                            print("----------> error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
             time.sleep(WaitRefresh)
             iteration += 1
 
@@ -708,10 +708,10 @@ def DeleteDRGs(config, signer, compartment):
     AllItems = []
     object = oci.core.VirtualNetworkClient(config, signer=signer)
 
-    print("Getting all DRG objects")
+    print("Getting all DRG objects", end="\r")
     try:
         items = oci.pagination.list_call_get_all_results(object.list_drgs, compartment_id=compartment.id).data
-    except:
+    except Exception:
         items = []
 
     for item in items:
@@ -733,14 +733,14 @@ def DeleteDRGs(config, signer, compartment):
                             print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_drg(drg_id=itemstatus.id)
                         except Exception:
-                            print("error trying to delete: {}".format(itemstatus.display_name))
+                            print("----------> error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
             time.sleep(WaitRefresh)
             iteration += 1
 
@@ -760,10 +760,10 @@ def DeleteDNSResolvers(config, signer, compartment):
     AllItems = []
     object = oci.dns.DnsClient(config, signer=signer)
 
-    print("Getting all DNS Resolvers objects")
+    print("Getting all DNS Resolvers objects", end="\r")
     try:
         items = oci.pagination.list_call_get_all_results(object.list_resolvers, compartment_id=compartment.id).data
-    except:
+    except Exception:
         items = []
 
     for item in items:
@@ -808,7 +808,7 @@ def DeleteDNSResolvers(config, signer, compartment):
             except Exception:
                 print("error deleting {}, probably already deleted".format(item.display_name))
         if count > 0:
-            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
             time.sleep(WaitRefresh)
             iteration += 1
 
@@ -826,7 +826,7 @@ def DeleteDNSResolvers(config, signer, compartment):
 def DeleteCPEs(config, signer, compartment):
     object = oci.core.VirtualNetworkClient(config, signer=signer)
 
-    print("Getting all CPE objects")
+    print("Getting all CPE objects", end="\r")
     itemsPresent = True
     iteration = 0
 
@@ -834,7 +834,7 @@ def DeleteCPEs(config, signer, compartment):
         count = 0
         try:
             items = oci.pagination.list_call_get_all_results(object.list_cpes, compartment_id=compartment.id).data
-        except:
+        except Exception:
             items = []
 
         for item in items:
@@ -845,10 +845,10 @@ def DeleteCPEs(config, signer, compartment):
                 print("Deleting: {}".format(item.display_name))
                 object.delete_cpe(cpe_id=item.id)
             except Exception:
-                print("error trying to delete: {}".format(item.display_name))
+                print("----------> error trying to delete: {}".format(item.display_name))
 
         if count > 0:
-            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
             time.sleep(WaitRefresh)
             iteration += 1
 
@@ -868,10 +868,10 @@ def DeleteIPSecConnections(config, signer, compartment):
     AllItems = []
     object = oci.core.VirtualNetworkClient(config, signer=signer)
 
-    print("Getting all IPSEC Connection objects")
+    print("Getting all IPSEC Connection objects", end="\r")
     try:
         items = oci.pagination.list_call_get_all_results(object.list_ip_sec_connections, compartment_id=compartment.id).data
-    except:
+    except Exception:
         items = []
 
     for item in items:
@@ -893,14 +893,14 @@ def DeleteIPSecConnections(config, signer, compartment):
                             print("Deleting: {}".format(itemstatus.display_name))
                             object.delete_ip_sec_connection(ipsc_id=itemstatus.id)
                         except Exception:
-                            print("error trying to delete: {}".format(itemstatus.display_name))
+                            print("----------> error trying to delete: {}".format(itemstatus.display_name))
                     else:
                         print("{} = {}".format(itemstatus.display_name, itemstatus.lifecycle_state))
                     count = count + 1
             except Exception as e:
                 print("error deleting {}, {}".format(item.display_name, str(e)))
         if count > 0:
-            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""))
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
             time.sleep(WaitRefresh)
             iteration += 1
 
