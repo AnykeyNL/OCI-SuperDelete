@@ -1,5 +1,6 @@
 import oci
 
+
 def SearchResources(config, signer, query):
     search = oci.resource_search.ResourceSearchClient(config, signer=signer)
 
@@ -14,4 +15,3 @@ def SearchResources(config, signer, query):
         result.items = []
 
     return result.items
-

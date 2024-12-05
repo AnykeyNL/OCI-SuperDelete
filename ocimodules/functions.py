@@ -11,12 +11,12 @@ import sys
 def clear():
 
     # for windows
-    if name == 'nt':
-        _ = system('cls')
+    if os.name == 'nt':
+        _ = os.system('cls')
 
     # for mac and linux(here, os.name is 'posix')
     else:
-        _ = system('clear')
+        _ = os.system('clear')
 
 
 ##########################################################################
@@ -50,6 +50,7 @@ def input_command_line(help=False):
         parser.print_help()
 
     return cmd
+
 
 ##########################################################################
 # Create signer for Authentication
@@ -119,12 +120,11 @@ def create_signer(config_profile, is_instance_principals, is_delegation_token):
                 pass_phrase=oci.config.get_config_value_or_default(config, "pass_phrase"),
                 private_key_content=config.get("key_content")
             )
-        except:
+        except Exception:
             print("Error obtaining authentication, did you configure config file? aborting")
             sys.exit(-1)
 
         return config, signer
-
 
 
 ##########################################################################
@@ -147,5 +147,3 @@ def check_oci_version(min_oci_version_required):
         print("Min SDK required: {}".format(min_oci_version_required))
         print("pip install --upgrade oci")
         quit()
-
-

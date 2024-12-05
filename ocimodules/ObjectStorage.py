@@ -7,37 +7,43 @@ MaxErrorIteration = 20
 # DeleteBuckets
 ###########################################
 def DeleteBuckets(config, signer, Compartments):
-    AllBuckets = []
-    object = oci.object_storage.ObjectStorageClient(config, signer=signer)
+    try:
+        AllBuckets = []
+        object = oci.object_storage.ObjectStorageClient(config, signer=signer)
 
-    ns = object.get_namespace().data
+        ns = object.get_namespace().data
 
-    print("Getting all buckets for: {}".format(ns))
+        print("Getting all buckets for: {}".format(ns))
 
-    for C in Compartments:
-        Compartment = C.details
-        items = object.list_buckets(namespace_name=ns, compartment_id=Compartment.id).data
-        if len(items) > 0:
-            AllBuckets.append(items)
+        for C in Compartments:
+            Compartment = C.details
+            items = object.list_buckets(namespace_name=ns, compartment_id=Compartment.id).data
+            if len(items) > 0:
+                AllBuckets.append(items)
 
-    for buckets in AllBuckets:
-        for bucket in buckets:
-            DeleteRetentionRules(config, signer, bucket)
-            AbortMultipartupload(config, signer, bucket)
-            DeleteReplication(config, signer, bucket)
-            DeletePreauthenticated(config, signer, bucket)
-            DeleteObjects(config, signer, bucket)
-            DeleteObjectVersions(config, signer, bucket)
+        for buckets in AllBuckets:
+            for bucket in buckets:
+                DeleteRetentionRules(config, signer, bucket)
+                AbortMultipartupload(config, signer, bucket)
+                DeleteReplication(config, signer, bucket)
+                DeletePreauthenticated(config, signer, bucket)
+                DeleteObjects(config, signer, bucket)
+                DeleteObjectVersions(config, signer, bucket)
 
-    for buckets in AllBuckets:
-        for bucket in buckets:
-            print("Delete bucket: {}".format(bucket.name))
-            try:
-                object.delete_bucket(namespace_name=bucket.namespace, bucket_name=bucket.name)
-            except Exception as er:
-                print("error deleting bucket : {}".format(bucket.name) + " - " + str(er))
+        for buckets in AllBuckets:
+            for bucket in buckets:
+                print("Delete bucket: {}".format(bucket.name))
+                try:
+                    object.delete_bucket(namespace_name=bucket.namespace, bucket_name=bucket.name)
+                except Exception as er:
+                    print("error deleting bucket : {}".format(bucket.name) + " - " + str(er))
 
-    print("All buckets deleted!")
+        print("All buckets deleted!")
+
+    # Catch Exception if Error
+    except Exception as e:
+        print(f'\nError in DeleteBuckets: {str(e)}')
+
 
 ###########################################
 # Delete Retention Rules
