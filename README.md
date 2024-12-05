@@ -13,18 +13,20 @@ Initial development by Richard Garsthagen - www.oc-blog.com
 how to run:
 
 ```
-usage: delete.py [-h] [-cf CONFIG_FILE] [-cp CONFIG_PROFILE] [-force] [-debug] [-rg REGIONS] [-c COMPARTMENT]
+usage: delete.py [-h] [-cp CONFIG_PROFILE] [-ip] [-dt] [-log LOG_FILE] [-force] [-debug] [-skip_delete_compartment] [-rg REGIONS]
+                 [-c COMPARTMENT]
 
 optional arguments:
   -h, --help                show this help message and exit
   -cp CONFIG_PROFILE        Config Profile inside the config file
   -ip                       Use Instance Principals for Authentication
-  -dt                       Use Instance Principals with delegation token for cloud shell
+  -dt                       Use Delegation Token for Authentication
+  -log LOG_FILE             output log file
   -force                    force delete without confirmation
   -debug                    Enable debug
+  -skip_delete_compartment  Skip Deleting the compartment at the end
   -rg REGIONS               Regions to delete comma separated
   -c COMPARTMENT            top level compartment id to delete
-  -skip_delete_compartment  Skip Deleting the compartments at end of the process
 
 python3 delete.py -c <CompartmentID>
 ```
