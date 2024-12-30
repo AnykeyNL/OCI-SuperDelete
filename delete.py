@@ -269,7 +269,7 @@ if confirm == "yes":
             DeleteAny(config, signer, processCompartments, "healthchecks.HealthChecksClient", "ping_monitor", ServiceID="monitor_id", DelState="", DelingSate="")
             DeleteAny(config, signer, processCompartments, "dns.DnsClient", "steering_policy_attachment")
             DeleteAny(config, signer, processCompartments, "dns.DnsClient", "steering_policy")
-            DeleteAny(config, signer, processCompartments, "dns.DnsClient", "zone", ObjectNameVar="name", ServiceID="zone_name_or_id", Extra=", scope=\"PRIVATE\"")
+            DeleteAny(config, signer, processCompartments, "dns.DnsClient", "zone", ObjectNameVar="name", ServiceID="zone_name_or_id", Extra=", scope=\"PRIVATE\"", Filter="protected")
             DeleteAny(config, signer, processCompartments, "dns.DnsClient", "view", Extra=", scope=\"PRIVATE\"", Filter="protected")
 
         print_header("Deleting Object Storage at " + CurrentTimeString() + "@ " + region, 1)

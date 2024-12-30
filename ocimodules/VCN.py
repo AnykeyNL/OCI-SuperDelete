@@ -767,7 +767,7 @@ def DeleteDNSResolvers(config, signer, compartment):
         items = []
 
     for item in items:
-        if (item.lifecycle_state != "DELETED") and (not item.is_protected):
+        if (item.lifecycle_state != "DELETED"):
             AllItems.append(item)
             print("- {} - {}".format(item.display_name, item.lifecycle_state))
 
@@ -798,6 +798,7 @@ def DeleteDNSResolvers(config, signer, compartment):
 
                         for ep in itemstatus.endpoints:
                             try:
+                                print (ep)
                                 print("Deleting: {} - {}".format(itemstatus.display_name, ep.name))
                                 object.delete_resolver_endpoint(resolver_id=itemstatus.id, resolver_endpoint_name=ep.name)
                             except Exception as e:
