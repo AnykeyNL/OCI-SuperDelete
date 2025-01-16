@@ -362,6 +362,13 @@ if confirm == "yes":
         print_header("Deleting MySQL Database Instances at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, signer, processCompartments, "mysql.DbSystemClient", "db_system")
 
+
+        print_header("Deleting PostgreSQL Database Instances at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, signer, processCompartments, "psql.PostgresqlClient", "db_system")
+        print_header("Deleting PostgreSQL Database Backups at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, signer, processCompartments, "psql.PostgresqlClient", "backup")
+
+
         print_header("Deleting Nosql tables at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, signer, processCompartments, "nosql.NosqlClient", "table", ServiceID="table_name_or_id")
 
