@@ -431,6 +431,28 @@ if confirm == "yes":
         print_header("Deleting Events at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, signer, processCompartments, "events.EventsClient", "rule")
 
+        print_header("Deleting OpenSearch Backups at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, signer, processCompartments, "opensearch.OpensearchClusterBackupClient", "opensearch_cluster_backup")  
+             
+        print_header("Deleting OpenSearch Cluster at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, signer, processCompartments, "opensearch.OpensearchClusterClient", "opensearch_cluster")
+
+        print_header("Deleting OCI Cache(Redis)  at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, signer, processCompartments, "redis.RedisClusterClient", "redis_cluster")
+
+        #TO DO : Delete Gen AI Endpoints and Custom Models
+        print_header("Deleting Generative AI Dedicated Cluster at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, signer, processCompartments, "generative_ai.GenerativeAiClient", "dedicated_ai_cluster")
+
+        print_header("Deleting AI Language Endpoints at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, signer, processCompartments, "ai_language.AIServiceLanguageClient", "endpoint")
+
+        print_header("Deleting AI Language Models at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, signer, processCompartments, "ai_language.AIServiceLanguageClient", "model")
+
+        print_header("Deleting AI Language Projects at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, signer, processCompartments, "ai_language.AIServiceLanguageClient", "project")
+
         if region == homeregion:
             print_header("Deleting Policies at " + CurrentTimeString() + "@ " + region, 1)
             DeleteAny(config, signer, processCompartments, "identity.IdentityClient", "policy", ObjectNameVar="name")
