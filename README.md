@@ -86,48 +86,55 @@ Let's say that you have to clean a very big tenancy (+1000 compartments, ~30 reg
   
 
 Go to Cost Analysis and build a filter:
-Tenant:Your tenancy name (because you could have child accounts)
-Grouping:Compartment
-Take note of biggest compartments
-Grouping: Regions
 
-  
+Tenant:Your tenancy name (because you could have child accounts)
+
+Grouping:Compartment
+
+Take note of biggest compartments
+
+Grouping: Regions
 
 Now you know what is your biggest region and compartment and you can run the delete.py passing the compartment and region as parameter
   
 
 If you would like to use oci cli you can run:
+ 
 
-  
-
+```
     export OCIPROFILE=your-oci-cli-config-profile
     export TENANCYOCID=your-tenancy-ocid
     export HOMEREGION=your-home-region
     export LEVEL=6
     export STARTDATE=`date --date 'today - 7 days' "+%Y-%m-%d"`
     export ENDDATE=`date --date 'today' "+%Y-%m-%d"`
+```
 
 ### Get Cost by Region
 
-    oci usage-api usage-summary request-summarized-usages --granularity DAILY --tenant-id ${TENANCYOCID} --group-by '[ "region"]' --compartment-depth ${LEVEL} --time-usage-started "${STARTDATE}T00:00:00Z" --time-usage-ended "${ENDDATE}T00:00:00Z" --region ${HOMEREGION} --profile ${OCIPROFILE} --query "data.items[*].{Region:\"region\",Start:\"time-usage-started\",End:\"time-usage-ended\",Cost:\"computed-amount\" } | sort_by([], &Cost)[-20:]" --output table
+```
+oci usage-api usage-summary request-summarized-usages --granularity DAILY --tenant-id ${TENANCYOCID} --group-by '[ "region"]' --compartment-depth ${LEVEL} --time-usage-started "${STARTDATE}T00:00:00Z" --time-usage-ended "${ENDDATE}T00:00:00Z" --region ${HOMEREGION} --profile ${OCIPROFILE} --query "data.items[*].{Region:\"region\",Start:\"time-usage-started\",End:\"time-usage-ended\",Cost:\"computed-amount\" } | sort_by([], &Cost)[-20:]" --output table
 
   
 
 ### Get Cost by compartments
 
-    oci usage-api usage-summary request-summarized-usages --granularity DAILY --tenant-id ${TENANCYOCID} --group-by '[ "compartmentId"]' --compartment-depth ${LEVEL} --time-usage-started "${STARTDATE}T00:00:00Z" --time-usage-ended "${ENDDATE}T00:00:00Z" --region ${HOMEREGION} --profile ${OCIPROFILE} --query "data.items[*].{CompartmentID:\"compartment-id\",Start:\"time-usage-started\",End:\"time-usage-ended\",Cost:\"computed-amount\" } | sort_by([], &Cost)[-20:]" --output table
 
+```
+oci usage-api usage-summary request-summarized-usages --granularity DAILY --tenant-id ${TENANCYOCID} --group-by '[ "compartmentId"]' --compartment-depth ${LEVEL} --time-usage-started "${STARTDATE}T00:00:00Z" --time-usage-ended "${ENDDATE}T00:00:00Z" --region ${HOMEREGION} --profile ${OCIPROFILE} --query "data.items[*].{CompartmentID:\"compartment-id\",Start:\"time-usage-started\",End:\"time-usage-ended\",Cost:\"computed-amount\" } | sort_by([], &Cost)[-20:]" --output table
+```
   
 
 ### All in one command
 
-    oci usage-api usage-summary request-summarized-usages --granularity DAILY --tenant-id ${TENANCYOCID} --group-by '[ "compartmentId","region"]' --compartment-depth ${LEVEL} --time-usage-started "${STARTDATE}T00:00:00Z" --time-usage-ended "${ENDDATE}T00:00:00Z" --region ${HOMEREGION} --profile ${OCIPROFILE} --query "data.items[*].{CompartmentID: join('',['python3 delete.py -c ',\"compartment-id\",' -rg ',\"region\", ' -cp ' ,'$OCIPROFILE',' -skip_delete_compartment -force & ']),Cost:\"computed-amount\" } | sort_by([], &Cost)[-20:]" --output table
-
-  
+```
+oci usage-api usage-summary request-summarized-usages --granularity DAILY --tenant-id ${TENANCYOCID} --group-by '[ "compartmentId","region"]' --compartment-depth ${LEVEL} --time-usage-started "${STARTDATE}T00:00:00Z" --time-usage-ended "${ENDDATE}T00:00:00Z" --region ${HOMEREGION} --profile ${OCIPROFILE} --query "data.items[*].{CompartmentID: join('',['python3 delete.py -c ',\"compartment-id\",' -rg ',\"region\", ' -cp ' ,'$OCIPROFILE',' -skip_delete_compartment -force & ']),Cost:\"computed-amount\" } | sort_by([], &Cost)[-20:]" --output table
+```
 
 The output should look like this:
 
-        +----------------------------------------------------------------------------------------------------------------------+-----------------+
+```
+    +----------------------------------------------------------------------------------------------------------------------+-----------------+
     | CompartmentID                                                                                    		                 | Cost          |
     +----------------------------------------------------------------------------------------------------------------------+-----------------+
     | python3 delete.py -c ocid1.compartment.oc1..a...ta -rg us-ashburn-1 -cp ladcsteam -skip_delete_compartment -force &  | 33.504388600351 |
@@ -151,18 +158,22 @@ The output should look like this:
     | python3 delete.py -c ocid1.compartment.oc1..a...ka -rg us-chicago-1 -cp ladcsteam -skip_delete_compartment -force &  | 85.642241928985 |
     | python3 delete.py -c ocid1.compartment.oc1..a...ka -rg us-chicago-1 -cp ladcsteam -skip_delete_compartment -force &  | 85.642241928986 |
     +----------------------------------------------------------------------------------------------------------------------+-----------------+
+```
 
 And if you want unique values:
 
-    oci usage-api usage-summary request-summarized-usages --granularity DAILY --tenant-id ${TENANCYOCID}  --group-by  '[ "compartmentId","region"]'  --compartment-depth ${LEVEL}  --time-usage-started "${STARTDATE}T00:00:00Z"  --time-usage-ended "${ENDDATE}T00:00:00Z"  --region ${HOMEREGION}  --profile ${OCIPROFILE}  --query "data.items[*].{CompartmentID: join('',['python3 delete.py -c ',\"compartment-id\",' -rg ',\"region\", ' -cp ' ,'$OCIPROFILE',' -skip_delete_compartment -force & ']),Cost:\"computed-amount\" } | sort_by([], &Cost)[-20:]"  | jq -r 'map(.CompartmentID) | unique '
+```
+oci usage-api usage-summary request-summarized-usages --granularity DAILY --tenant-id ${TENANCYOCID}  --group-by  '[ "compartmentId","region"]'  --compartment-depth ${LEVEL}  --time-usage-started "${STARTDATE}T00:00:00Z"  --time-usage-ended "${ENDDATE}T00:00:00Z"  --region ${HOMEREGION}  --profile ${OCIPROFILE}  --query "data.items[*].{CompartmentID: join('',['python3 delete.py -c ',\"compartment-id\",' -rg ',\"region\", ' -cp ' ,'$OCIPROFILE',' -skip_delete_compartment -force & ']),Cost:\"computed-amount\" } | sort_by([], &Cost)[-20:]"  | jq -r 'map(.CompartmentID) | unique '
 
 The output:
 
+```
     [
       "python3 delete.py -c ocid1.compartment.oc1..aaaaaaaaawmvdxlp55ypfnncxixq6lj2bv2nu2rmennaiivasfdfrlcphqka -rg us-ashburn-1 -cp ladcsteam -skip_delete_compartment -force & ",
       "python3 delete.py -c ocid1.compartment.oc1..aaaaaaaaawmvdxlp55ypfnncxixq6lj2bv2nu2rmennaiivasfdfrlcphqka -rg us-chicago-1 -cp ladcsteam -skip_delete_compartment -force & ",
       "python3 delete.py -c ocid1.compartment.oc1..aaaaaaaacmwidphc6xpgwvade2r546fsc2pa5jwerdm5i7kzmwyux2ghodia -rg us-ashburn-1 -cp ladcsteam -skip_delete_compartment -force & ",
       "python3 delete.py -c ocid1.compartment.oc1..aaaaaaaah7qcmvoke266qi3pqf6tdlz7w5ea3tk4bjt63is6qe34thvzu3ta -rg us-ashburn-1 -cp ladcsteam -skip_delete_compartment -force & "
     ]
+```
 
 And you can lower the MaxIDeleteIteration value inside AnyDelete.py to control how many retries per resource.
