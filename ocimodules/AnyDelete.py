@@ -1,9 +1,20 @@
 import oci
 import time
+import requests
 
 WaitRefresh = 15
 MaxIDeleteIteration = 20
 
+###################################################################################################
+# Check URL
+# Adding to check endpoint, to prevent lockup on services not available in region
+###################################################################################################
+def is_url_resolvable(url):
+    try:
+        response = requests.head(url, allow_redirects=True, timeout=5)
+        return True
+    except requests.RequestException:
+        return False
 
 ###################################################################################################
 # DeleteAny
@@ -13,6 +24,13 @@ def DeleteAny(config, signer, Compartments, ServiceClient, ServiceName, ServiceI
     try:
         AllItems = []
         object = eval("oci.{}(config, signer=signer)".format(ServiceClient))
+
+        if is_url_resolvable(object.base_client._endpoint):
+            pass
+        else:
+            print(f'Service {object.base_client._endpoint} does not seem available in this region, skipping')
+            return
+
         if not object:
             print(f'Object not defined for {ServiceName}')
 
