@@ -1,2 +1,2 @@
-oci>=2.88.0
-requests>=2.31.0 
+oci>=2.149.0
+requests>=2.32.3
