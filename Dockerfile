@@ -1,5 +1,5 @@
-# Use Python 3.11 as base image
-FROM python:3.13-slim
+# Use Python 3.11 as base image with multi-arch support
+FROM --platform=$BUILDPLATFORM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
@@ -12,15 +12,22 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY delete.py .
 COPY ocimodules/ ./ocimodules/
 
-# Create directory for OCI config
-RUN mkdir -p /root/.oci
+# Create non-root user and group & create directory for OCI config with proper permissions
+RUN groupadd -r oci && \
+  useradd -r -g oci oci && \
+  mkdir -p /home/oci/.oci && \
+  chown -R oci:oci /home/oci/.oci && \
+  chown -R oci:oci /app
 
 # Set environment variables
-ENV OCI_CONFIG_FILE=/root/.oci/config
+ENV OCI_CONFIG_FILE=/home/oci/.oci/config
 ENV OCI_CONFIG_PROFILE=DEFAULT
 
 # Create volume mount point for OCI config
-VOLUME ["/root/.oci"]
+VOLUME ["/home/oci/.oci"]
+
+# Switch to non-root user
+USER oci
 
 # Set the entrypoint
 ENTRYPOINT ["python", "delete.py"] 
