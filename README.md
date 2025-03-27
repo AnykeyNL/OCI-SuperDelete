@@ -42,7 +42,7 @@ optional arguments:
 python3 delete.py -c <CompartmentID>
 ```
 
-### Using GitHub Container Registry (Recommended)
+### Using GitHub Container Registry
 
 The script is available as a pre-built container from GitHub Container Registry with support for both amd64 and arm64 architectures:
 
