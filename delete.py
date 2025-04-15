@@ -432,8 +432,8 @@ if confirm == "yes":
         DeleteAny(config, signer, processCompartments, "events.EventsClient", "rule")
 
         print_header("Deleting OpenSearch Backups at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteAny(config, signer, processCompartments, "opensearch.OpensearchClusterBackupClient", "opensearch_cluster_backup")  
-             
+        DeleteAny(config, signer, processCompartments, "opensearch.OpensearchClusterBackupClient", "opensearch_cluster_backup")
+
         print_header("Deleting OpenSearch Cluster at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, signer, processCompartments, "opensearch.OpensearchClusterClient", "opensearch_cluster")
 
@@ -473,7 +473,7 @@ if confirm == "yes":
     if not skip_delete_compartment:
         print_header("Deleting Compartments at " + CurrentTimeString() + "@ " + region, 1)
         config["region"] = homeregion
-        DeleteCompartments(config, signer, processCompartments, DeleteCompartmentOCID)
+        DeleteCompartments(config, signer, processCompartments, DeleteCompartmentOCID, cmd.delete_self)
     else:
         print("Skipping deletion of the compartments as specified at " + CurrentTimeString() + "@ " + region, 1)
 
