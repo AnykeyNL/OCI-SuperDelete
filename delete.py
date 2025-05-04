@@ -297,10 +297,11 @@ if confirm == "yes":
         print_header("Deleting Auto Scaling Configurations at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, signer, processCompartments, "autoscaling.AutoScalingClient", "auto_scaling_configuration", DelState="", DelingSate="")
 
-        print_header("Deleting OS Management services at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteAny(config, signer, processCompartments, "os_management.OsManagementClient", "managed_instance_group")
-        DeleteAny(config, signer, processCompartments, "os_management.OsManagementClient", "scheduled_job")
-        DeleteAny(config, signer, processCompartments, "os_management.OsManagementClient", "software_source")
+        # DISABLED as service is EOF (https://docs.oracle.com/en-us/iaas/os-management/home.htm)
+        # print_header("Deleting OS Management services at " + CurrentTimeString() + "@ " + region, 1)
+        # DeleteAny(config, signer, processCompartments, "os_management.OsManagementClient", "managed_instance_group")
+        # DeleteAny(config, signer, processCompartments, "os_management.OsManagementClient", "scheduled_job")
+        # DeleteAny(config, signer, processCompartments, "os_management.OsManagementClient", "software_source")
 
         print_header("Deleting Compute Instances at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, signer, processCompartments, "core.ComputeManagementClient", "instance_pool", DeleteCommand="terminate_instance_pool", DelState="TERMINATED", DelingSate="TERMINATING")
