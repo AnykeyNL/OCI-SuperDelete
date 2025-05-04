@@ -346,6 +346,8 @@ if confirm == "yes":
 
         print_header("Deleting Log Analytics services at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, signer, processCompartments, "log_analytics.LogAnalyticsClient", "log_analytics_entity", ObjectNameVar="name", Extra=", namespace_name=\"{}\"".format(tenant_name))
+        DeleteAny(config, signer, processCompartments, "log_analytics.LogAnalyticsClient", "log_analytics_log_group", Extra=", namespace_name=\"{}\"".format(tenant_name), DelState="", DelingSate="")
+        DeleteAny(config, signer, processCompartments, "log_analytics.LogAnalyticsClient", "log_analytics_em_bridge", Extra=", namespace_name=\"{}\"".format(tenant_name))
 
         print_header("Deleting Data Catalog services at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, signer, processCompartments, "data_catalog.DataCatalogClient", "catalog")

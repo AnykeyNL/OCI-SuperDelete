@@ -81,7 +81,7 @@ def DeleteAny(config, signer, Compartments, ServiceClient, ServiceName, ServiceI
                 if DelState == "":
                     try:
                         print("Deleting {}: {}-{} @ {}".format(C.fullpath, ServiceName, eval("item.{}".format(ObjectNameVar)), config["region"]))
-                        eval("object.{}({}=item.{}, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)".format(DeleteCommand, ServiceID, ReturnServiceID))
+                        eval("object.{}({}=item.{}{}, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY)".format(DeleteCommand, ServiceID, ReturnServiceID, Extra))
                     except oci.exceptions.ServiceError as response:
                         if response.code == 404:
                             print("Object already deleted", end="\r")
