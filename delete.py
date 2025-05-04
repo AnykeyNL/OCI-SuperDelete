@@ -309,6 +309,7 @@ if confirm == "yes":
         DeleteAny(config, signer, processCompartments, "core.ComputeClient", "instance", DeleteCommand="terminate_instance", DelState="TERMINATED", DelingSate="TERMINATING")
         DeleteAny(config, signer, processCompartments, "core.ComputeClient", "image")
         DeleteAny(config, signer, processCompartments, "core.ComputeClient", "dedicated_vm_host")
+        DeleteAny(config, signer, processCompartments, "core.ComputeClient", "console_history", ServiceID="instance_console_history_id", DelState="", DelingSate="")
 
         print_header("Deleting Management Agents at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, signer, processCompartments, "management_agent.ManagementAgentClient", "management_agent")
