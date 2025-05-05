@@ -259,12 +259,14 @@ def DeleteTagNameSpaces(config, signer, compartments):
 #################################################
 #              DeleteCompartments
 #################################################
-def DeleteCompartments(config, signer, compartments, startcomp):
+def DeleteCompartments(config, signer, compartments, startcomp, delete_self=False):
     oci.circuit_breaker.NoCircuitBreakerStrategy()
     object = oci.identity.IdentityClient(config, signer=signer)
 
+    # Start with level 7 and work down to either 1 or 0 depending on delete_self
     level = 7
-    while level > 0:
+    min_level = 0 if delete_self else 1
+    while level >= min_level:
         for C in compartments:
             Compartment = C.details
             if C.level == level:
@@ -283,7 +285,6 @@ def DeleteCompartments(config, signer, compartments, startcomp):
                         retry = True
 
         level = level - 1
-
 
 #################################################
 #              DeletePolicies
