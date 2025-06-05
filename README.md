@@ -36,6 +36,7 @@ optional arguments:
   -force                    force delete without confirmation
   -debug                    Enable debug
   -skip_delete_compartment  Skip Deleting the compartment at the end
+  -delete_self              Delete the target compartment after cleaning up its contents
   -rg REGIONS               Regions to delete comma separated
   -c COMPARTMENT            top level compartment id to delete
 
