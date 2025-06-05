@@ -43,6 +43,7 @@ def input_command_line(help=False):
     parser.add_argument('-force', action='store_true', default=False, dest='force', help='force delete without confirmation')
     parser.add_argument('-debug', action='store_true', default=False, dest='debug', help='Enable debug')
     parser.add_argument('-skip_delete_compartment', action='store_true', default=False, dest='skip_delete_compartment', help='Skip Deleting the compartment at the end')
+    parser.add_argument('-delete_self', action='store_true', default=False, dest='delete_self', help='Delete the target compartment after cleaning up its contents')
     parser.add_argument("-rg", default="", dest='regions', help="Regions to delete comma separated")
     parser.add_argument("-c", default="", dest='compartment', help="top level compartment id to delete")
     cmd = parser.parse_args()
