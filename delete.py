@@ -233,6 +233,7 @@ if confirm == "yes":
         DeleteAny(config, signer, processCompartments, "cloud_migrations.MigrationClient", "migration_plan")
         DeleteAny(config, signer, processCompartments, "cloud_migrations.MigrationClient", "migration")
         DeleteAny(config, signer, processCompartments, "cloud_migrations.MigrationClient", "replication_schedule")
+        DeleteAny(config, signer, processCompartments, "cloud_bridge.OcbAgentSvcClient", "agent")
         DeleteAny(config, signer, processCompartments, "cloud_bridge.OcbAgentSvcClient", "environment")
         DeleteAny(config, signer, processCompartments, "cloud_bridge.OcbAgentSvcClient", "agent_dependency")
         DeleteAny(config, signer, processCompartments, "cloud_bridge.DiscoveryClient", "asset_source")
