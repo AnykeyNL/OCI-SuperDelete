@@ -13,6 +13,7 @@
 #   -rg            - Regions to delete comma separated
 #   -c compartment - top level compartment to delete
 #   -debug         - enable debug
+#   -sso_user      - bypass failure when user not found
 #   -skip_delete_compartment - skip delete the compartment at end of the process
 #
 ##########################################################################################
@@ -151,7 +152,7 @@ if debug:
 # Add root compartment to processRootCompartment if specified for root compartment objects
 ######################################################
 print("\nLogin check and loading compartments...\n")
-compartments = Login(config, signer, DeleteCompartmentOCID)
+compartments = Login(config, signer, DeleteCompartmentOCID, cmd.sso_user)
 processCompartments = []
 processRootCompartment = []
 for compartment in compartments:

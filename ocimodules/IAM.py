@@ -32,11 +32,18 @@ def GetCompartments(identity, rootID):
 #################################################
 #                 Login                 #
 #################################################
-def Login(config, signer, startcomp):
+def Login(config, signer, startcomp, sso_user=False):
     identity = oci.identity.IdentityClient(config, signer=signer)
     if "user" in config:
-        user = identity.get_user(config["user"]).data
-        print("Logged in as: {} @ {}".format(user.description, config["region"]))
+        try:
+            user = identity.get_user(config["user"]).data
+            print("Logged in as: {} @ {}".format(user.description, config["region"]))
+        except oci.exceptions.ServiceError as e:
+            if e.status == 404 and sso_user:
+                print("Warning: user not found — assuming SSO")
+                user = "IP-DT"
+            else:
+                raise e
     else:
         print("Logged in as: {} @ {}".format("InstancePrinciple/DelegationToken", config["region"]))
         user = "IP-DT"
