@@ -155,7 +155,7 @@ compartments = Login(config, signer, DeleteCompartmentOCID)
 processCompartments = []
 processRootCompartment = []
 for compartment in compartments:
-    if compartment.details.lifecycle_state == "ACTIVE" and compartment.details.name != "ManagedCompartmentForPaaS":
+    if (compartment.details.lifecycle_state == "ACTIVE" or compartment.details.lifecycle_state == "DELETING") and compartment.details.name != "ManagedCompartmentForPaaS":
         processCompartments.append(compartment)
     if compartment.details.id == tenant_id:
         processRootCompartment.append(compartment)
