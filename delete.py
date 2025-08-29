@@ -46,6 +46,7 @@ from ocimodules.APM import DeleteAPM
 from ocimodules.AnyDelete import DeleteAny
 from ocimodules.BlockVolumeReplication import RemoveReplication
 from ocimodules.DatabaseManagement import DisableDatabaseManagement
+from ocimodules.Marketplace import DeleteMarketplacePublications
 
 # Disable OCI CircuitBreaker feature
 oci.circuit_breaker.NoCircuitBreakerStrategy()
@@ -274,6 +275,9 @@ if confirm == "yes":
             DeleteAny(config, signer, processCompartments, "dns.DnsClient", "zone", ObjectNameVar="name", ServiceID="zone_name_or_id", Extra=", scope=\"PRIVATE\"", Filter="protected")
             DeleteAny(config, signer, processCompartments, "dns.DnsClient", "view", Extra=", scope=\"PRIVATE\"", Filter="protected")
 
+        print_header("Deleting Marketplace Publications at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteMarketplacePublications(config, signer, processCompartments)
+        
         print_header("Deleting Object Storage at " + CurrentTimeString() + "@ " + region, 1)
         DeleteBuckets(config, signer, processCompartments)
 
