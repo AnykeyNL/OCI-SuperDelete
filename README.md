@@ -43,7 +43,7 @@ optional arguments:
 python3 delete.py -c <CompartmentID>
 ```
 
-### Running for cloud shell
+### Running from cloud shell
 
 Probably the easiest place to run this script is from the Cloud Shell. Only keep in mind that running the script might take some time and you need to ensure your cloud session stays active during this time.
 
