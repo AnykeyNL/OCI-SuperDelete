@@ -43,6 +43,16 @@ optional arguments:
 python3 delete.py -c <CompartmentID>
 ```
 
+### Running for cloud shell
+
+Probably the easiest place to run this script is from the Cloud Shell. Only keep in mind that running the script might take some time and you need to ensure your cloud session stays active during this time.
+
+from cloud shell run
+```git clone https://github.com/AnykeyNL/OCI-SuperDelete.git
+cd OCI-SuperDelete
+python delete.py -dt -c [compartment_OCID]
+```
+
 ### Using GitHub Container Registry
 
 The script is available as a pre-built container from GitHub Container Registry with support for both amd64 and arm64 architectures:
