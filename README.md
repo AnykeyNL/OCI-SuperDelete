@@ -48,7 +48,8 @@ python3 delete.py -c <CompartmentID>
 Probably the easiest place to run this script is from the Cloud Shell. Only keep in mind that running the script might take some time and you need to ensure your cloud session stays active during this time.
 
 from cloud shell run
-```git clone https://github.com/AnykeyNL/OCI-SuperDelete.git
+```bash
+git clone https://github.com/AnykeyNL/OCI-SuperDelete.git
 cd OCI-SuperDelete
 python delete.py -dt -c [compartment_OCID]
 ```
