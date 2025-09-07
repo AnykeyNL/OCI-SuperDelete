@@ -4,8 +4,6 @@ Delete all OCI resources in a compartment.
 
 Initial development by Richard Garsthagen - <www.oc-blog.com>
 
-[[TOC]]
-
 ## Running the script
 
 ### Installation Steps
@@ -38,9 +36,9 @@ optional arguments:
   -skip_delete_compartment  Skip Deleting the compartment at the end
   -delete_self              Delete the target compartment after cleaning up its contents
   -rg REGIONS               Regions to delete comma separated
-  -c COMPARTMENT            top level compartment id to delete
+  -c COMPARTMENT_OCID       top level compartment id to delete, specify the OCID of the compartment
 
-python3 delete.py -c <CompartmentID>
+python3 delete.py -c <CompartmentID_OCID>
 ```
 
 ### Running from cloud shell
