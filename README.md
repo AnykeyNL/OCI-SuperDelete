@@ -269,6 +269,6 @@ docker run -v ~/.oci:/root/.oci oci-superdelete -c ocid1.compartment.oc1..xxxxx 
 
 - Alexey Dolganov (https://github.com/aorcl)
 
-- T-Srikanth (https://github.com/T-Srikanth)
+- Srikanth (https://github.com/Srikanth0824)
 
 - Adi Zohar (https://github.com/adizohar)
