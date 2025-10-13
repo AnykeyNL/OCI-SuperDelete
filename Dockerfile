@@ -1,5 +1,5 @@
 # Use Python 3.11 as base image with multi-arch support
-FROM --platform=$BUILDPLATFORM python:3.13-slim
+FROM --platform=$BUILDPLATFORM python:3.14-slim
 
 # Set working directory
 WORKDIR /app
