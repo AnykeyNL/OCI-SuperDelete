@@ -263,6 +263,11 @@ docker run -v ~/.oci:/root/.oci oci-superdelete -c ocid1.compartment.oc1..xxxxx 
 - The container mounts your local OCI config directory to `/root/.oci` inside the container
 - All command-line arguments supported by the script can be used with the Docker container
 
+### Alternatives
+You can also try out OCI-Smart Delete created by Tim. If works thru a local browser app. 
+
+https://github.com/timmcfadden/OCI-SmartDelete 
+
 ## Contributors (Thank you!!!)
 
 - Allen Kubai Wangu (https://github.com/allenkubai)
