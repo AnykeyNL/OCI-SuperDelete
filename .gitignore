@@ -7,3 +7,4 @@ pyvenv.cfg
 .venv/
 .vscode/
 .zed/
+log.txt

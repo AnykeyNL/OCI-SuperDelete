@@ -106,7 +106,7 @@ echo $GITHUB_TOKEN | docker login ghcr.io -u USERNAME --password-stdin
 
 This script is continuously being maintained based on newly released services. If you are noticing this script is missing a particulair service, please let us know, so we can add this.
 
-This script has being massive overhauled in January/February 2022. Instead of having a complete python module for each service, most services are now being deleted via the AnyDelete method included in this script.
+Recenlty OCI returns what resources are still present that prevents an compartment from deletion. The script now reports these resources in the end. This will help you identity what is still remaining.
 
 The KMS Vaults and Keys can not instantly be deleted, but require a minimal 7 day grace period. The script will move all keys and vaults to the root compartment and will schedule the deletion with 7 days grace period. This will allow all sub compartments to be instantly deleted, while the top compartment will only be able to be deleted after the grace period.
 

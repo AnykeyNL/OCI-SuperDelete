@@ -12,6 +12,7 @@
 #   -force         - force delete without confirmation
 #   -rg            - Regions to delete comma separated
 #   -c compartment - top level compartment to delete
+#   -delete_self   - delete the target compartment after cleaning up its contents
 #   -debug         - enable debug
 #   -sso_user      - bypass failure when user not found
 #   -skip_delete_compartment - skip delete the compartment at end of the process
@@ -107,6 +108,70 @@ def CurrentTimeString():
     return time.strftime("%D %H:%M:%S", time.localtime())
 
 
+def WaitForWorkRequest(config, signer, work_request_ocids, poll_interval_seconds=10, max_wait_iterations=999):
+    """
+    Polls OCI Work Requests until all are SUCCEEDED/FAILED or we hit max_wait_iterations.
+    Also show reason why compartment could not be deleted, included the specific objects that are preventing deletion.
+    """
+    if not work_request_ocids:
+        return
+
+    # JSON uses "percent-complete"; Python SDK model uses percent_complete (snake_case).
+    identity_client = oci.identity.IdentityClient(config, signer=signer)
+    not_done = True
+    leftovers = []
+    print ("")
+    linecount = 0
+    while not_done:
+        note_done = False
+        if linecount > 0: # move back to top of list, to refresh the workrequest list
+            print(f"\x1b[{linecount}F", end="")
+        linecount = 0
+        for work_request_ocid in work_request_ocids:
+            try:
+                wr = identity_client.get_work_request(work_request_id=work_request_ocid).data
+                if wr.status in ("SUCCEEDED", "CANCELLED"):
+                    print ("Work Request [{}] state: {}".format(wr.id, wr.status))
+                    pass
+                elif wr.status == "FAILED":
+                    linecount = 0
+                    errors = getattr(wr, "errors", None) or []
+                    for error in errors:
+                        if error.code == "CompartmentNotEmpty":
+                            objects = (error.message or "").split(",")
+                            for obj in objects:
+                                leftovers.append(obj)
+                        else:
+                            print("\n\n Error removing: {}".format(error.message))
+                else:
+                    # IN_PROGRESS, ACCEPTED, etc.
+                    note_done = True
+                    pct = getattr(wr, "percent_complete", None)
+                    p = "{}%".format(pct) if pct is not None else "n/a"
+                    log_msg = ""
+                    logs = getattr(wr, "logs", None) or []
+                    if logs:
+                        log_msg = getattr(logs[0], "message", "") or ""
+                    print("Work Request [{}] state: {} - {} - {}".format(wr.id, wr.status, p, log_msg))
+                    linecount += 1
+            except oci.exceptions.ServiceError as response:
+                linecount = 0
+                print("Unable to get work request; skipping wait. Error: {}".format(response.message))
+
+        if not note_done:
+            not_done = False
+        else:
+            time.sleep(poll_interval_seconds)
+            max_wait_iterations -= 1
+            if max_wait_iterations <= 0:
+                print("Max wait iterations reached, skipping wait.")
+                return
+
+    if leftovers:
+        print("\n\nCompartmen(s) not empty:")
+        for obj in leftovers:
+            print("- {}".format(obj))
+
 ##########################################################################
 # Main Program
 ##########################################################################
@@ -169,6 +234,10 @@ if len(regions) == 0:
 homeregion = GetHomeRegion(config, signer)
 tenant_name = GetTenantName(config, signer)
 
+os_client = oci.object_storage.ObjectStorageClient(config, signer=signer)
+tenant_namespace = os_client.get_namespace().data
+
+
 ######################################################
 # Header Print and Confirmation
 ######################################################
@@ -186,6 +255,7 @@ print("Log File           : " + logfile)
 print("")
 print("Tenant Name        : " + tenant_name)
 print("Tenant Id          : " + config['tenancy'])
+print("Namespace          : " + tenant_namespace)
 print("Home Region        : " + homeregion)
 print("Regions to Process : " + ','.join(x for x in regions))
 print("\nCompartments to Process : \n")
@@ -352,9 +422,9 @@ if confirm == "yes":
         DeleteAny(config, signer, processCompartments, "database_management.DbManagementClient", "managed_database_group", ObjectNameVar="name", DelState="", DelingSate="")
 
         print_header("Deleting Log Analytics services at " + CurrentTimeString() + "@ " + region, 1)
-        DeleteAny(config, signer, processCompartments, "log_analytics.LogAnalyticsClient", "log_analytics_entity", ObjectNameVar="name", Extra=", namespace_name=\"{}\"".format(tenant_name))
-        DeleteAny(config, signer, processCompartments, "log_analytics.LogAnalyticsClient", "log_analytics_log_group", Extra=", namespace_name=\"{}\"".format(tenant_name), DelState="", DelingSate="")
-        DeleteAny(config, signer, processCompartments, "log_analytics.LogAnalyticsClient", "log_analytics_em_bridge", Extra=", namespace_name=\"{}\"".format(tenant_name))
+        DeleteAny(config, signer, processCompartments, "log_analytics.LogAnalyticsClient", "log_analytics_entity", ObjectNameVar="name", Extra=", namespace_name=\"{}\"".format(tenant_namespace))
+        DeleteAny(config, signer, processCompartments, "log_analytics.LogAnalyticsClient", "log_analytics_log_group", Extra=", namespace_name=\"{}\"".format(tenant_namespace), DelState="", DelingSate="")
+        DeleteAny(config, signer, processCompartments, "log_analytics.LogAnalyticsClient", "log_analytics_em_bridge", Extra=", namespace_name=\"{}\"".format(tenant_namespace))
 
         print_header("Deleting Data Catalog services at " + CurrentTimeString() + "@ " + region, 1)
         DeleteAny(config, signer, processCompartments, "data_catalog.DataCatalogClient", "catalog")
@@ -426,6 +496,9 @@ if confirm == "yes":
         DeleteAny(config, signer, processCompartments, "file_storage.FileStorageClient", "mount_target", PerAD=True)
         DeleteAny(config, signer, processCompartments, "file_storage.FileStorageClient", "file_system", PerAD=True)
 
+        print_header("Deleting Network Load Balancers at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, signer, processCompartments, "network_load_balancer.NetworkLoadBalancerClient", "network_load_balancer")
+
         print_header("Deleting VCNs at " + CurrentTimeString() + "@ " + region, 1)
         DeleteVCN(config, signer, processCompartments)
         DeleteAny(config, signer, processCompartments, "core.VirtualNetworkClient", "local_peering_gateway", DelState="TERMINATED", DelingSate="TERMINATING")
@@ -483,9 +556,16 @@ if confirm == "yes":
     if not skip_delete_compartment:
         print_header("Deleting Compartments at " + CurrentTimeString() + "@ " + region, 1)
         config["region"] = homeregion
-        DeleteCompartments(config, signer, processCompartments, DeleteCompartmentOCID, cmd.delete_self)
+        work_request_ocids = DeleteCompartments(config, signer, processCompartments, DeleteCompartmentOCID, cmd.delete_self)
+        
+        if work_request_ocids:
+            print_header("Waiting for Compartments to be deleted at " + CurrentTimeString() + "@ " + region, 1)
+            WaitForWorkRequest(config, signer, work_request_ocids)
     else:
         print("Skipping deletion of the compartments as specified at " + CurrentTimeString() + "@ " + region, 1)
 
+
+
 else:
     print("ok, doing nothing")
+

@@ -269,6 +269,7 @@ def DeleteTagNameSpaces(config, signer, compartments):
 def DeleteCompartments(config, signer, compartments, startcomp, delete_self=False):
     oci.circuit_breaker.NoCircuitBreakerStrategy()
     object = oci.identity.IdentityClient(config, signer=signer)
+    work_request_ocids = []
 
     # Start with level 7 and work down to either 1 or 0 depending on delete_self
     level = 7
@@ -283,8 +284,26 @@ def DeleteCompartments(config, signer, compartments, startcomp, delete_self=Fals
                     retry = False
                     try:
                         timestr = time.strftime("%H:%M:%S", time.localtime())
-                        object.delete_compartment(compartment_id=Compartment.id)
-                        print("{} Deleted compartment: {}".format(timestr, C.fullpath))
+                        resp = object.delete_compartment(compartment_id=Compartment.id)
+
+                        # OCI async deletes return the work request OCID in the response headers.
+                        # Depending on SDK version, the SDK may expose it via `resp.headers`
+                        # or `resp.data`, so we try both.
+                        work_request_ocid = None
+                        headers = getattr(resp, "headers", None)
+                        if headers and hasattr(headers, "get"):
+                            work_request_ocid = headers.get("opc-work-request-id")
+
+                        if work_request_ocid is None:
+                            data = getattr(resp, "data", None)
+                            if data is not None:
+                                work_request_ocid = getattr(data, "opc_work_request_id", None)
+
+                        if work_request_ocid:
+                            work_request_ocids.append(work_request_ocid)
+                            print("{} Deleted compartment: {} (workRequest: {})".format(timestr, C.fullpath, work_request_ocid))
+                        else:
+                            print("{} Deleted compartment: {}".format(timestr, C.fullpath))
                     except Exception:
                         print("{} Delaying - retry attempt {} .. api calls           ".format(timestr, retrycount), end="\r")
                         time.sleep(10)
@@ -292,6 +311,8 @@ def DeleteCompartments(config, signer, compartments, startcomp, delete_self=Fals
                         retry = True
 
         level = level - 1
+
+    return work_request_ocids
 
 #################################################
 #              DeletePolicies
