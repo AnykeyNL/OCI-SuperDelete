@@ -41,6 +41,12 @@ optional arguments:
 python3 delete.py -c <CompartmentID_OCID>
 ```
 
+### **NEW** - Report of left-over resources that prevent deletion
+
+OCI now reports on a failed compartment deletion attempt what resources are preventing it from delition. This is now reported at the end of the run of this script, so you can idenitify what is still left behind and attempt manual deletion.
+
+Also the script now show that progress of the delete compartment requets. This can take a long time, so be patient :-)
+
 ### Running from cloud shell
 
 Probably the easiest place to run this script is from the Cloud Shell. Only keep in mind that running the script might take some time and you need to ensure your cloud session stays active during this time.
