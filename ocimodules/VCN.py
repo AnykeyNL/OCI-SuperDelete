@@ -35,6 +35,7 @@ def DeleteVCN(config, signer, Compartments):
 
             for item in AllItems:
                 DeleteSubnets(config, signer, Compartments, item)
+                DeleteVLANs(config, signer, Compartments, item)
                 DeleteDHCPoptions(config, signer, Compartments, item)
                 DeleteSecurityLists(config, signer, Compartments, item)
                 DeleteSecurityGroups(config, signer, Compartments, item)
@@ -67,19 +68,6 @@ def DeleteSubnets(config, signer, Compartments, vcn):
     object = oci.core.VirtualNetworkClient(config, signer=signer)
 
     print("Getting subnets for {}".format(vcn.display_name), end="\r")
-
-    # Switching to Search function to find underlaying VCN resources
-    # for C in Compartments:
-    #     compartment = C.details
-    #     try:
-    #         items = oci.pagination.list_call_get_all_results(object.list_subnets, compartment_id=compartment.id, vcn_id=vcn.id, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data
-    #         for item in items:
-    #             if (item.lifecycle_state != "TERMINATED"):
-    #                 AllItems.append(item)
-    #             print("- {} - {}".format(item.display_name, item.lifecycle_state))
-    #     except Exception:
-    #         print("Error listing for compartment {}".format(compartment.name))
-    #         continue
 
     for C in Compartments:
         compartment = C.details
@@ -123,6 +111,62 @@ def DeleteSubnets(config, signer, Compartments, vcn):
         else:
             itemsPresent = False
     print("All Subnets Objects deleted!")
+
+##############################################
+# DeleteVLANs
+##############################################
+def DeleteVLANs(config, signer, Compartments, vcn):
+    AllItems = []
+    object = oci.core.VirtualNetworkClient(config, signer=signer)
+
+    print("Getting VLANs for {}".format(vcn.display_name), end="\r")
+
+    for C in Compartments:
+        compartment = C.details
+        object = oci.core.VirtualNetworkClient(config, signer=signer)
+        items = oci.pagination.list_call_get_all_results(
+            object.list_vlans,
+            compartment_id=compartment.id,
+            vcn_id=vcn.id,
+            lifecycle_state=oci.core.models.Subnet.LIFECYCLE_STATE_AVAILABLE,
+        ).data
+        for item in items:
+            AllItems.append(item)
+
+    itemsPresent = True
+    iteration = 0
+
+    while itemsPresent:
+        count = 0
+        for item in AllItems:
+            try:
+                itemstatus = object.get_vlan(vlan_id=item.id).data
+                try:
+                    print("Getting VLAN External Addresses for VLAN {}".format(itemstatus.display_name), end="\r")
+                    external_addresses = object.list_private_ips(vlan_id=itemstatus.id).data
+                    if external_addresses:
+                        for address in external_addresses:
+                            print ("Deleting external address {}".format(address.display_name))
+                            object.delete_private_ip(private_ip_id=address.id)
+                    print("Deleting: {}".format(itemstatus.display_name), end="\r")
+                    object.delete_vlan(vlan_id=itemstatus.id)
+                except Exception:
+                    print("----------> error trying to delete: {}".format(itemstatus.display_name))
+                count = count + 1
+            except Exception:
+                print("error deleting {}, probably already deleted".format(item.display_name))
+        if count > 0:
+            print("Waiting for all Objects to be deleted..." + (" Iteration " + str(iteration) + " of " + str(MaxIDeleteIteration) if iteration > 0 else ""), end="\r")
+            time.sleep(WaitRefresh)
+            iteration += 1
+
+            if iteration >= MaxIDeleteIteration:
+                print("Some VLANs not deleted, skipping!")
+                return
+        else:
+            itemsPresent = False
+    print("All VLANs Objects deleted!")
+
 
 
 ##############################################
