@@ -286,6 +286,15 @@ if confirm == "yes":
         print("Moving to {}: ".format(DeleteCompartmentOCID))
         DeleteKMSvaults(config, signer, processCompartments, config['tenancy'])
 
+        print_header("Delete GEN AI at " + CurrentTimeString() + "@ " + region, 1)
+        DeleteAny(config, signer, processCompartments, "generative_ai_agent.GenerativeAiAgentClient", "knowledge_base")
+        DeleteAny(config, signer, processCompartments, "generative_ai_agent.GenerativeAiAgentClient", "data_source")
+        DeleteAny(config, signer, processCompartments, "generative_ai_agent.GenerativeAiAgentClient", "data_ingestion_job")
+        DeleteAny(config, signer, processCompartments, "generative_ai_agent.GenerativeAiAgentClient", "provisioned_capacity")
+        DeleteAny(config, signer, processCompartments, "generative_ai_agent.GenerativeAiAgentClient", "agent_endpoint")
+        DeleteAny(config, signer, processCompartments, "generative_ai_agent.GenerativeAiAgentClient", "agent")
+
+
         print_header("Deleting DevOps Projects at " + CurrentTimeString() + "@ " + region, 1)
         elements = ["deploy_stage", "deploy_artifact", "deploy_environment", "deploy_pipeline", "build_pipeline"]
         for element in elements:
