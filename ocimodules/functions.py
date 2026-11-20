@@ -264,6 +264,13 @@ def create_signer(config_profile, is_instance_principals, is_delegation_token, i
             signer = oci.auth.signers.SecurityTokenSigner(token, private_key)
             return config, signer
 
+        except (oci.exceptions.ConfigFileNotFound, oci.exceptions.ProfileNotFound, FileNotFoundError):
+            command = "oci session authenticate"
+            if config_profile and config_profile != oci.config.DEFAULT_PROFILE:
+                command += " --profile-name {}".format(config_profile)
+            print("No session token found. Please run '{}' to get a session token".format(command))
+            sys.exit(-1)
+
         except KeyError as e:
             print("Profile '{}' is missing key {} - is this a session profile created with 'oci session authenticate'? aborting".format(config_profile, e))
             sys.exit(-1)
