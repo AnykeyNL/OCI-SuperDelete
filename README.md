@@ -22,7 +22,7 @@ python3 -m pip install -r requirements.txt
 To run the script directly with Python:
 
 ```bash
-usage: delete.py [-h] [-cp CONFIG_PROFILE] [-ip] [-dt] [-log LOG_FILE] [-force] [-debug] [-skip_delete_compartment] [-rg REGIONS]
+usage: delete.py [-h] [-cp CONFIG_PROFILE] [-ip] [-dt] [-st] [-i [PROFILE]] [-log LOG_FILE] [-force] [-debug] [-skip_delete_compartment] [-rg REGIONS]
                  [-c COMPARTMENT]
 
 optional arguments:
@@ -30,6 +30,10 @@ optional arguments:
   -cp CONFIG_PROFILE        Config Profile inside the config file
   -ip                       Use Instance Principals for Authentication
   -dt                       Use Delegation Token for Authentication
+  -st                       Use Session (Security Token) Authentication, created with "oci session authenticate"
+  -i, --interactive [PROFILE]
+                            Interactive browser login: create or reuse a session token via the OCI CLI
+                            (default profile: SESSION)
   -log LOG_FILE             output log file
   -force                    force delete without confirmation
   -debug                    Enable debug

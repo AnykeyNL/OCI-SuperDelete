@@ -9,6 +9,8 @@
 #   -cp profile    - profile inside the config file
 #   -ip            - Use Instance Principals for Authentication
 #   -dt            - Use Instance Principals with delegation token for cloud shell
+#   -st            - Use Session (Security Token) Authentication (oci session authenticate)
+#   -i [profile]   - Interactive browser login, creates/refreshes a session token (default profile SESSION)
 #   -force         - force delete without confirmation
 #   -rg            - Regions to delete comma separated
 #   -c compartment - top level compartment to delete
@@ -203,7 +205,14 @@ if DeleteCompartmentOCID == "":
 ######################################################
 # oci config and debug handle
 ######################################################
-config, signer = create_signer(cmd.config_profile, cmd.is_instance_principals, cmd.is_delegation_token)
+config, signer = create_signer(
+    cmd.config_profile,
+    cmd.is_instance_principals,
+    cmd.is_delegation_token,
+    cmd.is_security_token,
+    interactive=bool(cmd.interactive_profile),
+    region=regions[0] if regions else "",
+)
 tenant_id = config['tenancy']
 
 if debug:
@@ -251,6 +260,14 @@ print("OCI SDK Version    : " + oci.version.__version__)
 print("Python Version     : " + platform.python_version())
 print("Config File        : " + configfile)
 print("Config Profile     : " + configProfile)
+if cmd.is_instance_principals:
+    print("Authentication     : Instance Principals")
+elif cmd.is_delegation_token:
+    print("Authentication     : Delegation Token")
+elif cmd.is_security_token:
+    print("Authentication     : Session Token")
+else:
+    print("Authentication     : API Key")
 print("Log File           : " + logfile)
 print("")
 print("Tenant Name        : " + tenant_name)
