@@ -1,7 +1,9 @@
 import oci
+import sys
 import time
 
 WaitRefresh = 10
+MaxRetries = 10
 MaxIDeleteTagIteration = 5
 
 
@@ -11,22 +13,102 @@ class OCICompartments:
     details = oci.identity.models.Compartment()
 
 
-def GetCompartments(identity, rootID):
-    retry = True
-    while retry:
-        retry = False
+#################################################
+# List compartments of rootID
+# subtree=True is only valid when rootID is the tenancy OCID and
+# returns the whole compartment hierarchy in a single (paginated) call.
+# raise_errors=True re-raises non-429 errors instead of returning []
+#################################################
+def GetCompartments(identity, rootID, subtree=False, raise_errors=False):
+    for attempt in range(MaxRetries):
         try:
-            # print("Getting compartments for {}".format(rootID))
-            compartments = oci.pagination.list_call_get_all_results(identity.list_compartments, compartment_id=rootID, retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY).data
-            return compartments
+            return oci.pagination.list_call_get_all_results(
+                identity.list_compartments,
+                compartment_id=rootID,
+                compartment_id_in_subtree=subtree,
+                access_level="ANY",
+                retry_strategy=oci.retry.DEFAULT_RETRY_STRATEGY
+            ).data
         except oci.exceptions.ServiceError as e:
             if e.status == 429:
-                print("API busy.. retry", end="\r")
-                retry = True
+                print("API busy.. retry {}/{}".format(attempt + 1, MaxRetries), end="\r")
                 time.sleep(WaitRefresh)
+            elif raise_errors:
+                raise
             else:
-                print("bad error!: " + e.message)
+                print("Warning: could not list sub-compartments of {}, they will be skipped: {}".format(rootID, e.message))
+                return []
+    message = "Giving up listing compartments for {} after {} retries".format(rootID, MaxRetries)
+    if raise_errors:
+        raise RuntimeError(message)
+    print("Warning: " + message)
     return []
+
+
+#################################################
+# Add all ACTIVE descendants of parent to result (depth first)
+# children_of(compartment_id) returns the direct child compartments
+#################################################
+def AddSubCompartments(result, parent, children_of):
+    for compartment in sorted(children_of(parent.details.id), key=lambda c: c.name.lower()):
+        if compartment.lifecycle_state != "ACTIVE":
+            continue
+        newcomp = OCICompartments()
+        newcomp.details = compartment
+        newcomp.fullpath = "{}/{}".format(parent.fullpath, compartment.name)
+        newcomp.level = parent.level + 1
+        result.append(newcomp)
+        AddSubCompartments(result, newcomp, children_of)
+
+
+#################################################
+# Resolve -c value (OCID, full path or name) to a compartment OCID
+# Full path: /root/teamA/dev ("/root" is the tenancy)
+# Name: only accepted when exactly one ACTIVE compartment has that name
+# Exits when the value cannot be resolved to exactly one compartment
+#################################################
+def ResolveCompartment(config, signer, value):
+    if value.startswith("ocid1."):
+        return value
+
+    identity = oci.identity.IdentityClient(config, signer=signer)
+    tenancy_id = config["tenancy"]
+    try:
+        all_compartments = GetCompartments(identity, tenancy_id, subtree=True, raise_errors=True)
+    except (oci.exceptions.ServiceError, RuntimeError) as e:
+        print("Could not load the compartments of the tenancy to look up '{}': {}".format(value, getattr(e, "message", e)))
+        print("Please specify the compartment OCID with -c instead")
+        sys.exit(-1)
+
+    active = {c.id: c for c in all_compartments if c.lifecycle_state == "ACTIVE"}
+    paths = {tenancy_id: "/root"}
+
+    def path_of(compartment_id):
+        if compartment_id not in paths:
+            compartment = active.get(compartment_id)
+            parent = path_of(compartment.compartment_id) if compartment else None
+            paths[compartment_id] = "{}/{}".format(parent, compartment.name) if parent else None
+        return paths[compartment_id]
+
+    # Compartment names are unique (case-insensitive) within a parent, so a full path matches at most one
+    if value.startswith("/"):
+        wanted = value.rstrip("/").lower()
+        matches = [cid for cid in list(active) + [tenancy_id] if (path_of(cid) or "").lower() == wanted]
+    else:
+        matches = [cid for cid, c in active.items() if c.name.lower() == value.lower() and path_of(cid)]
+
+    if not matches:
+        print("No active compartment found matching '{}'".format(value))
+        sys.exit(-1)
+
+    if len(matches) > 1:
+        print("Multiple compartments are named '{}', please specify the full path or OCID with -c:".format(value))
+        for cid in sorted(matches, key=lambda m: path_of(m).lower()):
+            print("  {}  ({})".format(path_of(cid), cid))
+        sys.exit(-1)
+
+    print("Compartment '{}' resolved to {} ({})".format(value, path_of(matches[0]), matches[0]))
+    return matches[0]
 
 
 #################################################
@@ -70,86 +152,19 @@ def Login(config, signer, startcomp, sso_user=False):
         newcomp.fullpath = compartment.name
     c.append(newcomp)
 
-    # Add first level subcompartments
-    compartments = GetCompartments(identity, startcomp)
+    # Fast path: load the whole tenancy hierarchy in one call (needs inspect compartments on the tenancy)
+    try:
+        all_compartments = GetCompartments(identity, config["tenancy"], subtree=True, raise_errors=True)
+        children = {}
+        for compartment in all_compartments:
+            children.setdefault(compartment.compartment_id, []).append(compartment)
+        AddSubCompartments(c, newcomp, lambda compartment_id: children.get(compartment_id, []))
+        return c
+    except (oci.exceptions.ServiceError, RuntimeError) as e:
+        print("Could not load all compartments of the tenancy in one call ({}), loading them one by one..".format(getattr(e, "message", e)))
 
-    # Add 2nd level subcompartments
-    fullpath = newcomp.fullpath + "/"
-    for compartment in compartments:
-        if compartment.lifecycle_state == "ACTIVE":
-            newcomp = OCICompartments()
-            newcomp.details = compartment
-            newcomp.fullpath = "{}{}".format(fullpath, compartment.name)
-            newcomp.level = 1
-            c.append(newcomp)
-            subcompartments = GetCompartments(identity, compartment.id)
-            subpath1 = compartment.name
-            for sub1 in subcompartments:
-                if sub1.lifecycle_state == "ACTIVE":
-                    newcomp = OCICompartments()
-                    newcomp.details = sub1
-                    newcomp.fullpath = "{}{}/{}".format(fullpath, subpath1, sub1.name)
-                    newcomp.level = 2
-                    c.append(newcomp)
-
-                    subcompartments2 = GetCompartments(identity, sub1.id)
-                    subpath2 = sub1.name
-                    for sub2 in subcompartments2:
-                        if sub2.lifecycle_state == "ACTIVE":
-                            newcomp = OCICompartments()
-                            newcomp.details = sub2
-                            newcomp.fullpath = "{}{}/{}/{}".format(fullpath, subpath1, subpath2, sub2.name)
-                            newcomp.level = 3
-                            c.append(newcomp)
-
-                            subcompartments3 = GetCompartments(identity, sub2.id)
-                            subpath3 = sub2.name
-                            for sub3 in subcompartments3:
-                                if sub3.lifecycle_state == "ACTIVE":
-                                    newcomp = OCICompartments()
-                                    newcomp.details = sub3
-                                    newcomp.fullpath = "{}{}/{}/{}/{}".format(fullpath, subpath1, subpath2, subpath3, sub3.name)
-                                    newcomp.level = 4
-                                    c.append(newcomp)
-
-                                    subcompartments4 = GetCompartments(identity, sub3.id)
-                                    subpath4 = sub3.name
-                                    for sub4 in subcompartments4:
-                                        if sub4.lifecycle_state == "ACTIVE":
-                                            newcomp = OCICompartments()
-                                            newcomp.details = sub4
-                                            newcomp.fullpath = "{}{}/{}/{}/{}/{}".format(fullpath, subpath1, subpath2,
-                                                                                         subpath3, subpath4, sub4.name)
-                                            newcomp.level = 5
-                                            c.append(newcomp)
-
-                                            subcompartments5 = GetCompartments(identity, sub4.id)
-                                            subpath5 = sub4.name
-                                            for sub5 in subcompartments5:
-                                                if sub5.lifecycle_state == "ACTIVE":
-                                                    newcomp = OCICompartments()
-                                                    newcomp.details = sub5
-                                                    newcomp.fullpath = "{}{}/{}/{}/{}/{}/{}".format(fullpath, subpath1, subpath2, subpath3, subpath4, subpath5, sub5.name)
-                                                    newcomp.level = 6
-                                                    c.append(newcomp)
-
-                                                    subcompartments6 = GetCompartments(identity, sub5.id)
-                                                    subpath6 = sub5.name
-                                                    for sub6 in subcompartments6:
-                                                        if sub6.lifecycle_state == "ACTIVE":
-                                                            newcomp = OCICompartments()
-                                                            newcomp.details = sub6
-                                                            newcomp.fullpath = "{}{}/{}/{}/{}/{}/{}/{}".format(
-                                                                fullpath,
-                                                                subpath1,
-                                                                subpath2,
-                                                                subpath3,
-                                                                subpath4,
-                                                                subpath5, subpath6,
-                                                                sub6.name)
-                                                            newcomp.level = 7
-                                                            c.append(newcomp)
-
+    # Fallback: list the sub-compartments of each compartment separately
+    AddSubCompartments(c, newcomp, lambda compartment_id: GetCompartments(identity, compartment_id))
     return c
 
 
@@ -271,8 +286,8 @@ def DeleteCompartments(config, signer, compartments, startcomp, delete_self=Fals
     object = oci.identity.IdentityClient(config, signer=signer)
     work_request_ocids = []
 
-    # Start with level 7 and work down to either 1 or 0 depending on delete_self
-    level = 7
+    # Start with the deepest level and work down to either 1 or 0 depending on delete_self
+    level = max((C.level for C in compartments), default=0)
     min_level = 0 if delete_self else 1
     while level >= min_level:
         for C in compartments:

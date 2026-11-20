@@ -56,7 +56,7 @@ def input_command_line(help=False):
     parser.add_argument('-delete_self', action='store_true', default=False, dest='delete_self', help='Delete the target compartment after cleaning up its contents')
     parser.add_argument('-sso_user', action='store_true', default=False, dest='sso_user', help='Bypass failure when user not found')
     parser.add_argument("-rg", default="", dest='regions', help="Regions to delete comma separated")
-    parser.add_argument("-c", default="", dest='compartment', help="top level compartment id to delete")
+    parser.add_argument("-c", default="", dest='compartment', help="top level compartment to delete: OCID, full path (e.g. /root/prod) or unique name")
     cmd = parser.parse_args()
     # If the user requested help, print help and exit
     if help:
@@ -64,8 +64,16 @@ def input_command_line(help=False):
         # It's good practice to exit after printing help
         sys.exit(0)
 
+    # If running in Cloud Shell (OCI_CLI_CLOUD_SHELL=true), default to Delegation Token
+    if os.environ.get("OCI_CLI_CLOUD_SHELL", "").lower() == "true":
+        print("Running in Cloud Shell, using Delegation Token authentication..")
+        cmd.is_delegation_token = True
+        cmd.is_instance_principals = False
+        cmd.is_security_token = False
+        cmd.interactive_profile = ""
+
     # Interactive browser login: session token authentication using the chosen session profile
-    if cmd.interactive_profile:
+    elif cmd.interactive_profile:
         cmd.is_security_token = True
         cmd.is_instance_principals = False
         cmd.is_delegation_token = False
@@ -191,8 +199,8 @@ def create_signer(config_profile, is_instance_principals, is_delegation_token, i
             config = {'region': signer.region, 'tenancy': signer.tenancy_id}
             return config, signer
 
-        except Exception:
-            print("Error obtaining instance principals certificate, aborting")
+        except Exception as e:
+            print("Error obtaining instance principals certificate, aborting: {}".format(e))
             sys.exit(-1)
 
     # -----------------------------
@@ -222,11 +230,12 @@ def create_signer(config_profile, is_instance_principals, is_delegation_token, i
                 return config, signer
 
         except KeyError:
-            print("* Key Error obtaining delegation_token_file")
+            print("* Key Error obtaining delegation_token_file from config profile, aborting")
             sys.exit(-1)
 
-        except Exception:
-            raise
+        except Exception as e:
+            print("Error obtaining delegation token authentication, aborting: {}".format(e))
+            sys.exit(-1)
 
     # -----------------------------
     # Session / Security Token authentication
@@ -288,6 +297,7 @@ def create_signer(config_profile, is_instance_principals, is_delegation_token, i
                 oci.config.DEFAULT_LOCATION,
                 (config_profile if config_profile else oci.config.DEFAULT_PROFILE)
             )
+            oci.config.validate_config(config)
             signer = oci.signer.Signer(
                 tenancy=config["tenancy"],
                 user=config["user"],
@@ -296,8 +306,12 @@ def create_signer(config_profile, is_instance_principals, is_delegation_token, i
                 pass_phrase=oci.config.get_config_value_or_default(config, "pass_phrase"),
                 private_key_content=config.get("key_content")
             )
-        except Exception:
-            print("Error obtaining authentication, did you configure config file? aborting")
+        except oci.exceptions.ConfigFileNotFound:
+            print("No config file found at {}. Please run 'oci setup config', or use -i for a browser login".format(oci.config.DEFAULT_LOCATION))
+            sys.exit(-1)
+
+        except Exception as e:
+            print("Error obtaining authentication, did you configure config file? aborting: {}".format(e))
             sys.exit(-1)
 
         return config, signer

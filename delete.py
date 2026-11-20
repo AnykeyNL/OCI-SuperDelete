@@ -13,7 +13,7 @@
 #   -i [profile]   - Interactive browser login, creates/refreshes a session token (default profile SESSION)
 #   -force         - force delete without confirmation
 #   -rg            - Regions to delete comma separated
-#   -c compartment - top level compartment to delete
+#   -c compartment - top level compartment to delete (OCID, full path like /root/prod, or unique name)
 #   -delete_self   - delete the target compartment after cleaning up its contents
 #   -debug         - enable debug
 #   -sso_user      - bypass failure when user not found
@@ -39,7 +39,7 @@ import logging
 
 # import ocimodules
 from ocimodules.functions import print_header, input_command_line, create_signer, check_oci_version
-from ocimodules.IAM import Login, SubscribedRegions, GetHomeRegion, GetTenantName, DeleteTagNameSpaces, DeleteCompartments, DeleteTagDefaults
+from ocimodules.IAM import Login, ResolveCompartment, SubscribedRegions, GetHomeRegion, GetTenantName, DeleteTagNameSpaces, DeleteCompartments, DeleteTagDefaults
 from ocimodules.VCN import DeleteVCN
 from ocimodules.ObjectStorage import DeleteBuckets
 from ocimodules.FunctionsService import DeleteApplications
@@ -85,8 +85,10 @@ debug = False
 # MyWriter to redirect output
 #############################################
 class MyWriter:
-
-    filename = "log.txt"
+    """
+    Tee-style writer: everything written to it goes to the original stdout
+    and is appended to a log file. Install with `sys.stdout = MyWriter(sys.stdout, "log.txt")`.
+    """
 
     def __init__(self, stdout, filename):
         self.stdout = stdout
@@ -97,13 +99,21 @@ class MyWriter:
         self.stdout.write(text)
         self.logfile.write(text)
 
+    def flush(self):
+        self.stdout.flush()
+        self.logfile.flush()
+
     def close(self):
-        self.stdout.close()
+        # Only close the log file - never the real stdout
+        self.flush()
         self.logfile.close()
 
-    def flush(self):
-        self.logfile.close()
-        self.logfile = open(self.filename, "a", encoding="utf-8")
+    def isatty(self):
+        return self.stdout.isatty()
+
+    def __getattr__(self, name):
+        # Delegate anything else (encoding, fileno, ...) to the real stdout
+        return getattr(self.stdout, name)
 
 
 def CurrentTimeString():
@@ -227,6 +237,7 @@ if debug:
 # Add root compartment to processRootCompartment if specified for root compartment objects
 ######################################################
 print("\nLogin check and loading compartments...\n")
+DeleteCompartmentOCID = ResolveCompartment(config, signer, DeleteCompartmentOCID)
 compartments = Login(config, signer, DeleteCompartmentOCID, cmd.sso_user)
 processCompartments = []
 processRootCompartment = []
@@ -275,6 +286,7 @@ print("Tenant Id          : " + config['tenancy'])
 print("Namespace          : " + tenant_namespace)
 print("Home Region        : " + homeregion)
 print("Regions to Process : " + ','.join(x for x in regions))
+print("Target Compartment : " + compartments[0].fullpath + " (" + DeleteCompartmentOCID + ")")
 print("\nCompartments to Process : \n")
 for c in processCompartments:
     print("  " + c.fullpath)

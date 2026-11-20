@@ -40,7 +40,10 @@ optional arguments:
   -skip_delete_compartment  Skip Deleting the compartment at the end
   -delete_self              Delete the target compartment after cleaning up its contents
   -rg REGIONS               Regions to delete comma separated
-  -c COMPARTMENT_OCID       top level compartment id to delete, specify the OCID of the compartment
+  -c COMPARTMENT            top level compartment to delete: the OCID, the full path (e.g. /root/prod/app)
+                            or the compartment name. A name is only accepted when it is unique in the
+                            tenancy; otherwise the matching paths are listed. Path and name lookups need
+                            permission to inspect compartments at the tenancy level.
 
 python3 delete.py -c <CompartmentID_OCID>
 ```
